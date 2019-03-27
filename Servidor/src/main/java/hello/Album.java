@@ -2,8 +2,11 @@ package hello;
 
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Album {
 	private String name;
+	@JsonIgnore
 	private ArrayList<String> clients;
 	private ArrayList<String> links;
 	
