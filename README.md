@@ -14,3 +14,10 @@
     - (saber q links estao no album test, devolve json igual a {"name":"test","links":["https://..."]})
 - **/addClient2Album?name=pedro&token=ObVNGg==&album=test&client2Add=joao**
     - (adiciona outro client ao album test)
+    
+#### maven + spring 
+Como compilar e correr:
+```
+mvn clean compile
+mvn spring-boot:run
+```
