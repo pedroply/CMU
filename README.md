@@ -15,6 +15,8 @@
     - (saber q links estao no album test, devolve json igual a {"name":"test","links":["https://..."]})
 - **/addClient2Album?name=pedro&token=ObVNGg==&album=test&client2Add=joao**
     - (adiciona outro client ao album test)
+- **/retriveAllAlbuns?name=qwe&token=BZUGZg==**
+    - (saber todos os albuns partilhados com sigo, devolve json igual a ["album1","album2", etc])
     
 #### maven + spring 
 Como compilar e correr:
