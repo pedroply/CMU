@@ -47,11 +47,16 @@ public class ClientController {
     @RequestMapping("/createAlbum")
     public String createAlbum(@RequestParam String token, @RequestParam String name, @RequestParam String album) {
     	System.out.println(Application.clients.get(name).getToken() + " == " + token);
-    	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token) && !Application.albums.containsKey(album)) {
-    		Application.albums.put(album, new Album(album));
-    		Application.albums.get(album).addClient(name);
-    		Application.clients.get(name).addAlbum(album);
-    		return "{\"response\":\"OK\"}";
+    	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token)) {
+    		if(!Application.albums.containsKey(album)) {
+	    		Application.albums.put(album, new Album(album));
+	    		Application.albums.get(album).addClient(name);
+	    		Application.clients.get(name).addAlbum(album);
+	    		return "{\"response\":\"OK\"}";
+    		}
+    		else {
+    			return "{\"response\":\"Album Already Registered\"}";
+    		}
     	}
         return "{\"response\":\"ERR\"}";
     }
@@ -90,12 +95,20 @@ public class ClientController {
         return "{\"response\":\"ERR\"}";
     }
     
-    @RequestMapping("/retrive")
+    @RequestMapping("/retriveAlbum")
     public Album getAlbum(@RequestParam String token, @RequestParam String name, @RequestParam String album) {
     	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token)) {
     		return Application.albums.get(album);
     	}
         return new Album("null");
+    }
+    
+    @RequestMapping("/retriveAllAlbuns")
+    public ArrayList<String> getAlbuns(@RequestParam String token, @RequestParam String name) {
+    	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token)) {
+    		return Application.clients.get(name).getAlbums();
+    	}
+        return new ArrayList<>();
     }
     
     private String randomTokenNotSecure() {
