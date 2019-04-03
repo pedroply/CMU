@@ -4,7 +4,12 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -61,8 +66,20 @@ public class ClientController {
         return "{\"response\":\"ERR\"}";
     }
     
-    @RequestMapping("/postLink")
+    /*@RequestMapping("/postLink")
     public String postLink(@RequestParam String token, @RequestParam String name, @RequestParam String link, @RequestParam String album) {
+    	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token) && Application.clients.get(name).belongsToAlbum(album)) {
+    		System.out.println("Posting linnk: " + link);
+        	System.out.println("To Album: " + album);
+    		Application.clients.get(name).addLink(link);
+    		Application.albums.get(album).addLink(link);
+    		return "{\"response\":\"OK\"}";
+    	}
+        return "{\"response\":\"ERR\"}";
+    }*/
+    
+    @RequestMapping(value = "/postLink", method = RequestMethod.POST)
+    public String persistPerson(@RequestParam String token, @RequestParam String name, @RequestParam String album, @RequestBody String link) {
     	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token) && Application.clients.get(name).belongsToAlbum(album)) {
     		System.out.println("Posting linnk: " + link);
         	System.out.println("To Album: " + album);
