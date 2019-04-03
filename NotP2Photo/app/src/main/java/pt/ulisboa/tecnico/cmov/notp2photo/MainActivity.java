@@ -1,10 +1,15 @@
 package pt.ulisboa.tecnico.cmov.notp2photo;
 
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,7 +21,8 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity {
 
     private static String TAG = "LoginActivity";
-    private static String IP = "193.136.128.103:8080";
+    private static String IP = "148.63.26.170:8080";
+    private static String responseOK = "OK";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    public void login(View v) throws IOException {
+    public void login(View v) {
         // /login?name=joao&passwdHashBase64=123
         EditText userTextInput = findViewById(R.id.userInputText);
         String user = userTextInput.getText().toString();
@@ -34,23 +40,119 @@ public class MainActivity extends AppCompatActivity {
 
         String url = "http://" + IP + "/login?name="+user+"&passwdHashBase64="+pass;
         Log.d(TAG, "URL: " + url);
+        System.out.println(url);
 
-        URL obj = new URL(url);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-        con.setRequestMethod("GET");
+        new loginTask().execute(url);
+    }
 
-        int responseCode = con.getResponseCode();
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuffer response = new StringBuffer();
 
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
+
+    public void register(View v) throws IOException {
+        // /register?name=joao&passwdHashBase64=123
+        EditText userTextInput = findViewById(R.id.userInputText);
+        String user = userTextInput.getText().toString();
+
+        EditText passTextInput = findViewById(R.id.passInputText);
+        String pass = passTextInput.getText().toString();
+
+        String url = "http://" + IP + "/register?name="+user+"&passwdHashBase64="+pass;
+        Log.d(TAG, "URL: " + url);
+
+        new registerTask().execute(url);
+
+    }
+
+    class loginTask extends AsyncTask<String, Void, String> {
+
+        protected String doInBackground(String... urls) {
+
+            String response = MainActivity.this.get(urls[0]);
+            Log.i(TAG, "Response: " + response.toString());
+            System.out.println(response.toString());
+            return response.toString();
         }
-        in.close();
 
-        Log.i(TAG, "Response: " + response.toString());
+        protected void onPostExecute(String response) {
+            // TODO: check this.exception
+            // TODO: do something with the feed
+            System.out.println("On main: " + response);
+            try {
+                JSONObject mainObject = new JSONObject(response);
+                if(mainObject.has("token")){
+                    Toast toast = Toast.makeText(getApplicationContext(), "Login Ok! token: " + mainObject.getString("token"), Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+                else{
+                    Toast toast = Toast.makeText(getApplicationContext(), "Login Error!", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
 
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Toast toast = Toast.makeText(getApplicationContext(), "Login Error!", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+
+        }
+    }
+
+    class registerTask extends AsyncTask<String, Void, String> {
+
+        protected String doInBackground(String... urls) {
+
+            String response = MainActivity.this.get(urls[0]);
+            Log.i(TAG, "Response: " + response.toString());
+            System.out.println(response.toString());
+            return response.toString();
+        }
+
+        protected void onPostExecute(String response) {
+            // TODO: check this.exception
+            // TODO: do something with the feed
+            System.out.println("On main: " + response);
+            try {
+                JSONObject mainObject = new JSONObject(response);
+                if(mainObject.has("response") && mainObject.getString("response").equals(responseOK)){
+                    Toast toast = Toast.makeText(getApplicationContext(), "Register Ok!", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+                else{
+                    Toast toast = Toast.makeText(getApplicationContext(), "Register Error! " + mainObject.getString("response"), Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Toast toast = Toast.makeText(getApplicationContext(), "Register Error!", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        }
+    }
+
+    public String get(String url){
+        StringBuffer response = new StringBuffer();
+        try {
+            URL obj = new URL(url);
+            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+            con.setRequestMethod("GET");
+
+            con.setReadTimeout(10000 /* milliseconds */);
+            con.setConnectTimeout(15000 /* milliseconds */);
+            con.setDoOutput(true);
+            con.connect();
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return response.toString();
     }
 
 
