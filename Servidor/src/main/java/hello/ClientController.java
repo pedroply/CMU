@@ -14,10 +14,10 @@ public class ClientController {
     @RequestMapping("/register")
     public String register(@RequestParam String passwdHashBase64, @RequestParam String name) {
     	if (Application.clients.containsKey(name)) {
-    		return "{response:Client Already Registered}";
+    		return "{\"response\":\"Client Already Registered\"}";
     	}
     	Application.clients.put(name, new Client(passwdHashBase64, name));
-        return "{response:OK}";
+        return "{\"response\":\"OK\"}";
     }
     
     @RequestMapping("/login")
@@ -25,18 +25,18 @@ public class ClientController {
     	if (Application.clients.containsKey(name) && Application.clients.get(name).getPasswdHashBase64().equals(passwdHashBase64)) {
     		String token = randomTokenNotSecure();
     		Application.clients.get(name).setToken(token);
-    		return "{token:"+token+"}";
+    		return "{\"token\":\""+token+"\"}";
     	}
-        return "{response:ERR}";
+        return "{\"response\":\"ERR\"}";
     }
     
     @RequestMapping("/logout")
     public String logout(@RequestParam String token, @RequestParam String name) {
     	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token)) {
     		Application.clients.get(name).setToken(null);
-    		return "{response:OK}";
+    		return "{\"response\":\"OK\"}";
     	}
-        return "{response:ERR}";
+        return "{\"response\":\"ERR\"}";
     }
     
     @RequestMapping("/createAlbum")
@@ -46,9 +46,9 @@ public class ClientController {
     		Application.albums.put(album, new Album(album));
     		Application.albums.get(album).addClient(name);
     		Application.clients.get(name).addAlbum(album);
-    		return "{response:OK}";
+    		return "{\"response\":\"OK\"}";
     	}
-        return "{response:ERR}";
+        return "{\"response\":\"ERR\"}";
     }
     
     @RequestMapping("/addClient2Album")
@@ -56,9 +56,9 @@ public class ClientController {
     	if (Application.clients.containsKey(name) && Application.clients.containsKey(client2Add) && Application.clients.get(name).getToken().equals(token) && Application.clients.get(name).belongsToAlbum(album)) {
     		Application.albums.get(album).addClient(client2Add);
     		Application.clients.get(name).addAlbum(album);
-    		return "{response:OK}";
+    		return "{\"response\":\"OK\"}";
     	}
-        return "{response:ERR}";
+        return "{\"response\":\"ERR\"}";
     }
     
     @RequestMapping("/postLink")
@@ -68,9 +68,9 @@ public class ClientController {
         	System.out.println("To Album: " + album);
     		Application.clients.get(name).addLink(link);
     		Application.albums.get(album).addLink(link);
-    		return "{response:OK}";
+    		return "{\"response\":\"OK\"}";
     	}
-        return "{response:ERR}";
+        return "{\"response\":\"ERR\"}";
     }
     
     @RequestMapping("/retrive")
