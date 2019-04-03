@@ -11,7 +11,7 @@
 - **/postLink?name=pedro&token=ObVNGg==&album=test**
     - (adicionar novo link ao album test)
     - This is a post, the link should be the post body
-- **/retrive?name=pedro&token=ObVNGg==&album=test**
+- **/retriveAlbum?name=pedro&token=ObVNGg==&album=test**
     - (saber q links estao no album test, devolve json igual a {"name":"test","links":["https://..."]})
 - **/addClient2Album?name=pedro&token=ObVNGg==&album=test&client2Add=joao**
     - (adiciona outro client ao album test)
