@@ -46,8 +46,6 @@ public class MainActivity extends AppCompatActivity {
         new loginTask().execute(url);
     }
 
-
-
     public void register(View v) throws IOException {
         // /register?name=joao&passwdHashBase64=123
         EditText userTextInput = findViewById(R.id.userInputText);
@@ -82,9 +80,11 @@ public class MainActivity extends AppCompatActivity {
                 if(mainObject.has("token")){
                     Toast toast = Toast.makeText(getApplicationContext(), "Login Ok! token: " + mainObject.getString("token"), Toast.LENGTH_SHORT);
                     toast.show();
-                    Intent intent = new Intent(getBaseContext(), AlbunsActivity.class);
+                    /*Intent intent = new Intent(getBaseContext(), AlbunsActivity.class);
                     intent.putExtra("token", mainObject.getString("token"));
                     intent.putExtra("user", user);
+                    startActivity(intent);*/
+                    Intent intent = new Intent(getBaseContext(), HomeActivity.class);
                     startActivity(intent);
                 }
                 else{
