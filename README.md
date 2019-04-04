@@ -16,7 +16,9 @@
 - **/addClient2Album?name=pedro&token=ObVNGg==&album=test&client2Add=joao**
     - (adiciona outro client ao album test)
 - **/retriveAllAlbuns?name=qwe&token=BZUGZg==**
-    - (saber todos os albuns partilhados com sigo, devolve json igual a ["album1","album2", etc])
+    - (saber todos os albuns partilhados com sigo, devolve json igual a ["album1","album2", ...])
+- **/retriveUsers?name=qwe&token=DiMuhA==**
+    - (saber todos os utilizadores registados no sistema, devolve json igual a ["user1", "user2", ...])
     
 #### maven + spring 
 Como compilar e correr:
