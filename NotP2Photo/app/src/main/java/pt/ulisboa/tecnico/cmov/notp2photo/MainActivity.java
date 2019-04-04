@@ -21,7 +21,9 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String TAG = "LoginActivity";
+    private static String TAG = "LoginActivity";
+
+    private String user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     public void login(View v) {
         // /login?name=joao&passwdHashBase64=123
         EditText userTextInput = findViewById(R.id.userInputText);
-        String user = userTextInput.getText().toString();
+        user = userTextInput.getText().toString();
 
         EditText passTextInput = findViewById(R.id.passInputText);
         String pass = passTextInput.getText().toString();
@@ -41,19 +43,10 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "URL: " + url);
         System.out.println(url);
 
-        LoginTask task = new LoginTask(getApplicationContext());
-        task.execute(url);
-
-        try{
-            Intent intent = new Intent(MainActivity.this, AlbunsActivity.class);
-            intent.putExtra("token", task.getMainObject().getString("token"));
-            intent.putExtra("user", user);
-            startActivity(intent);
-        } catch(JSONException e){
-            e.printStackTrace();
-        }
-
+        new loginTask().execute(url);
     }
+
+
 
     public void register(View v) throws IOException {
         // /register?name=joao&passwdHashBase64=123
@@ -66,8 +59,79 @@ public class MainActivity extends AppCompatActivity {
         String url = "http://" + WebInterface.IP + "/register?name="+user+"&passwdHashBase64="+pass;
         Log.d(TAG, "URL: " + url);
 
-        new RegisterTask(getApplicationContext()).execute(url);
+        new registerTask().execute(url);
 
+    }
+
+    class loginTask extends AsyncTask<String, Void, String> {
+
+        protected String doInBackground(String... urls) {
+
+            String response = WebInterface.get(urls[0]);
+            Log.i(TAG, "Response: " + response.toString());
+            System.out.println(response.toString());
+            return response.toString();
+        }
+
+        protected void onPostExecute(String response) {
+            // TODO: check this.exception
+            // TODO: do something with the feed
+            System.out.println("On main: " + response);
+            try {
+                JSONObject mainObject = new JSONObject(response);
+                if(mainObject.has("token")){
+                    Toast toast = Toast.makeText(getApplicationContext(), "Login Ok! token: " + mainObject.getString("token"), Toast.LENGTH_SHORT);
+                    toast.show();
+                    Intent intent = new Intent(getBaseContext(), AlbunsActivity.class);
+                    intent.putExtra("token", mainObject.getString("token"));
+                    intent.putExtra("user", user);
+                    startActivity(intent);
+                }
+                else{
+                    Toast toast = Toast.makeText(getApplicationContext(), "Login Error!", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Toast toast = Toast.makeText(getApplicationContext(), "Login Error!", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+
+        }
+    }
+
+    class registerTask extends AsyncTask<String, Void, String> {
+
+        protected String doInBackground(String... urls) {
+
+            String response = WebInterface.get(urls[0]);
+            Log.i(TAG, "Response: " + response.toString());
+            System.out.println(response.toString());
+            return response.toString();
+        }
+
+        protected void onPostExecute(String response) {
+            // TODO: check this.exception
+            // TODO: do something with the feed
+            System.out.println("On main: " + response);
+            try {
+                JSONObject mainObject = new JSONObject(response);
+                if(mainObject.has("response") && mainObject.getString("response").equals(WebInterface.responseOK)){
+                    Toast toast = Toast.makeText(getApplicationContext(), "Register Ok!", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+                else{
+                    Toast toast = Toast.makeText(getApplicationContext(), "Register Error! " + mainObject.getString("response"), Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Toast toast = Toast.makeText(getApplicationContext(), "Register Error!", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        }
     }
 
 }
