@@ -64,13 +64,6 @@
                 android:onClick="register"
                 android:text="Register" />
 
-            <Button
-                android:id="@+id/dropboxButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="goToDropbox"
-                android:text="Test Dropbox" />
-
         </LinearLayout>
 
     </RelativeLayout>

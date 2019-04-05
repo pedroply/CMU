@@ -23,8 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static String TAG = "LoginActivity";
 
-    public static String user;
-    public static String token;
+    private String user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,11 +61,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void goToDropbox(View v) {
-        Intent intent = new Intent(getBaseContext(), InteractWithDropBox.class);
-        startActivity(intent);
-    }
-
     class loginTask extends AsyncTask<String, Void, String> {
 
         protected String doInBackground(String... urls) {
@@ -86,8 +80,9 @@ public class MainActivity extends AppCompatActivity {
                 if(mainObject.has("token")){
                     Toast toast = Toast.makeText(getApplicationContext(), "Login Ok! token: " + mainObject.getString("token"), Toast.LENGTH_SHORT);
                     toast.show();
-                    token = mainObject.getString("token");
                     /*Intent intent = new Intent(getBaseContext(), AlbunsActivity.class);
+                    intent.putExtra("token", mainObject.getString("token"));
+                    intent.putExtra("user", user);
                     startActivity(intent);*/
                     Intent intent = new Intent(getBaseContext(), HomeActivity.class);
                     startActivity(intent);

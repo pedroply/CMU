@@ -11,7 +11,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".InteractWithDropBox"></activity>
         <activity
             android:name=".CreateAlbum"
             android:label="@string/title_activity_create_album"
@@ -19,7 +18,7 @@
         <activity
             android:name=".HomeActivity"
             android:label="@string/title_activity_home"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity android:name=".AlbumViewActivity" />
         <activity android:name=".AlbunsActivity" />
         <activity android:name=".MainActivity">
@@ -27,6 +26,22 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.dropbox.client2.android.AuthActivity"
+            android:configChanges="orientation|keyboard"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+
+                <!-- Change this to be db- followed by your app key -->
+                <data android:scheme="db-jm1yrjpxz13l8ng" />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
     </application>
