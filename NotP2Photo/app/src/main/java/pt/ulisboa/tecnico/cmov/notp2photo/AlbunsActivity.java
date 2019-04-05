@@ -22,20 +22,15 @@ import java.io.IOException;
 public class AlbunsActivity extends AppCompatActivity {
 
     private static String TAG = "AlbunsActivity";
-    private String user;
-    private String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_albuns);
 
-        token = getIntent().getStringExtra("token");
-        user = getIntent().getStringExtra("user");
-
         findViewById(R.id.refreshAlbunsButton).performClick();
 
-        System.out.println("User: " + user + " token: " + token);
+        System.out.println("User: " + MainActivity.user + " token: " + MainActivity.token);
     }
 
     public void newAlbum(View v) {
@@ -44,7 +39,7 @@ public class AlbunsActivity extends AppCompatActivity {
         EditText userTextInput = findViewById(R.id.albumInputText);
         String album = userTextInput.getText().toString();
 
-        String url = "http://" + WebInterface.IP + "/createAlbum?name="+user+"&token="+token+"&album="+album;
+        String url = "http://" + WebInterface.IP + "/createAlbum?name="+MainActivity.user+"&token="+MainActivity.token+"&album="+album;
         Log.d(TAG, "URL: " + url);
         System.out.println(url);
 
@@ -54,7 +49,7 @@ public class AlbunsActivity extends AppCompatActivity {
     public void refreshAlbuns(View v) throws IOException {
         // /retriveAllAlbuns?name=qwe&token=BZUGZg==
 
-        String url = "http://" + WebInterface.IP + "/retriveAllAlbuns?name="+user+"&token="+token;
+        String url = "http://" + WebInterface.IP + "/retriveAllAlbuns?name="+MainActivity.user+"&token="+MainActivity.token;
         Log.d(TAG, "URL: " + url);
         System.out.println(url);
 
@@ -119,8 +114,6 @@ public class AlbunsActivity extends AppCompatActivity {
                     tmpAlbumView.setOnClickListener(new View.OnClickListener() {
                         public void onClick(View v) {
                             Intent intent = new Intent(getBaseContext(), AlbumViewActivity.class);
-                            intent.putExtra("token", token);
-                            intent.putExtra("user", user);
                             intent.putExtra("album", ((TextView)v).getText().toString());
                             startActivity(intent);
                         }

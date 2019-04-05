@@ -20,8 +20,6 @@ import java.io.IOException;
 public class AlbumViewActivity extends AppCompatActivity {
 
     private static String TAG = "AlbumViewActivity";
-    private String user;
-    private String token;
     private String album;
 
     @Override
@@ -29,8 +27,6 @@ public class AlbumViewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album_view);
 
-        token = getIntent().getStringExtra("token");
-        user = getIntent().getStringExtra("user");
         album = getIntent().getStringExtra("album");
 
         TextView albumTextView = findViewById(R.id.albumTextView);
@@ -38,7 +34,7 @@ public class AlbumViewActivity extends AppCompatActivity {
 
         findViewById(R.id.refreshLinksButton).performClick();
 
-        System.out.println("User: " + user + " token: " + token + " album: " + album);
+        System.out.println("User: " + MainActivity.user + " token: " + MainActivity.token + " album: " + album);
     }
 
     public void postLink(View v) {
@@ -47,7 +43,7 @@ public class AlbumViewActivity extends AppCompatActivity {
         EditText linkTextInput = findViewById(R.id.linkInputText);
         String link = linkTextInput.getText().toString();
 
-        String url = "http://" + WebInterface.IP + "/postLink?name="+user+"&token="+token+"&album="+album;
+        String url = "http://" + WebInterface.IP + "/postLink?name="+MainActivity.user+"&token="+MainActivity.token+"&album="+album;
         Log.d(TAG, "URL: " + url);
         System.out.println(url);
 
@@ -57,7 +53,7 @@ public class AlbumViewActivity extends AppCompatActivity {
     public void refreshLinks(View v) {
         // /retriveAlbum?name=pedro&token=ObVNGg==&album=test
 
-        String url = "http://" + WebInterface.IP + "/retriveAlbum?name="+user+"&token="+token+"&album="+album;
+        String url = "http://" + WebInterface.IP + "/retriveAlbum?name="+MainActivity.user+"&token="+MainActivity.token+"&album="+album;
         Log.d(TAG, "URL: " + url);
         System.out.println(url);
 

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".InteractWithDropBox">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -24,27 +24,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="User"/>
+                    android:text="Data"/>
 
                 <EditText
-                    android:id="@+id/userInputText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Pass"/>
-
-                <EditText
-                    android:id="@+id/passInputText"
+                    android:id="@+id/dataInputText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
@@ -58,20 +41,14 @@
                 android:text="Login" />
 
             <Button
-                android:id="@+id/registerButton"
+                android:id="@+id/addDataButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:onClick="register"
-                android:text="Register" />
-
-            <Button
-                android:id="@+id/dropboxButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="goToDropbox"
-                android:text="Test Dropbox" />
+                android:onClick="uploadData"
+                android:text="Upload Data" />
 
         </LinearLayout>
 
     </RelativeLayout>
+
 </android.support.constraint.ConstraintLayout>
