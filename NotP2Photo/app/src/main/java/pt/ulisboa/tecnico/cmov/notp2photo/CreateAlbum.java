@@ -21,40 +21,33 @@ import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.FolderMetadata;
+import com.dropbox.core.v2.users.FullAccount;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 public class CreateAlbum extends AppCompatActivity {
 
-    DropboxAPI<AndroidAuthSession> mDBApi;
-    AccessTokenPair tokens;
+    DbxClientV2 client;
+    String accessToken = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_album);
 
-        AppKeyPair appKeys = new AppKeyPair(HomeActivity.APP_KEY, HomeActivity.APP_SECRET);
-        AndroidAuthSession session = new AndroidAuthSession(appKeys);
-        mDBApi = new DropboxAPI<AndroidAuthSession>(session);
-    }
+        Intent intent = getIntent();
+        accessToken = intent.getStringExtra("token");
 
-    @Override
-    protected void onResume(){
-        if(tokens == null){
-            mDBApi.getSession().startAuthentication(CreateAlbum.this);
-            if (mDBApi.getSession().authenticationSuccessful()) {
-                try {
-                    mDBApi.getSession().finishAuthentication();
-
-                    tokens = mDBApi.getSession().getAccessTokenPair();
-                } catch (IllegalStateException e) {
-                    Log.i("DbAuthLog", "Error authenticating", e);
-                }
-            }
-        }
-
-        super.onResume();
     }
 
     public void createAlbum(View v){
@@ -71,15 +64,23 @@ public class CreateAlbum extends AppCompatActivity {
         }
 
         protected String doInBackground(String... path) {
-            try {
-                boolean logged = mDBApi.getSession().isLinked();
-                DropboxAPI.Account account = mDBApi.accountInfo();
-                DropboxAPI.Entry albumEntry = mDBApi.createFolder(path[0]);
+            DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
+            client = new DbxClientV2(config, accessToken);
 
-            } catch (DropboxException e) {
+            FullAccount account = null;
+            try {
+                account = client.users().getCurrentAccount();
+            } catch (DbxException e) {
                 e.printStackTrace();
             }
+            Log.i(MainActivity.TAG, account.getName().getDisplayName());
 
+            try {
+                FolderMetadata folderMetadata = client.files().createFolder(path[0]);
+
+            } catch (DbxException e) {
+                e.printStackTrace();
+            }
 
             return null;
         }

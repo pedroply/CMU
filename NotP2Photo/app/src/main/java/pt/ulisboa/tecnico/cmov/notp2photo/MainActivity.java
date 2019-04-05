@@ -21,7 +21,7 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static String TAG = "LoginActivity";
+    protected static String TAG = "LoginActivity";
 
     private String user;
 

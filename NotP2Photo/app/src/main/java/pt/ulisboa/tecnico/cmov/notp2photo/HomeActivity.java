@@ -26,9 +26,12 @@ import com.dropbox.client2.session.AppKeyPair;
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    DropboxAPI<AndroidAuthSession> mDBApi;
     final static String APP_KEY = "jm1yrjpxz13l8ng";
     final static String APP_SECRET = "0mrpn6kv1wkclev";
+
+    String token;
+    DropboxAPI<AndroidAuthSession> mDBApi;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +62,24 @@ public class HomeActivity extends AppCompatActivity
         AndroidAuthSession session = new AndroidAuthSession(appKeys);
         mDBApi = new DropboxAPI<AndroidAuthSession>(session);
 
+    }
+
+    @Override
+    protected void onResume(){
+        if(token == null){
+            mDBApi.getSession().startAuthentication(HomeActivity.this);
+            if (mDBApi.getSession().authenticationSuccessful()) {
+                try {
+                    mDBApi.getSession().finishAuthentication();
+
+                    token = mDBApi.getSession().getAccessTokenPair().secret;
+                } catch (IllegalStateException e) {
+                    Log.i("DbAuthLog", "Error authenticating", e);
+                }
+            }
+        }
+
+        super.onResume();
     }
 
     @Override
@@ -103,7 +124,9 @@ public class HomeActivity extends AppCompatActivity
         if (id == R.id.nav_viewalbums) {
 
         } else if (id == R.id.nav_createalbums) {
-            startActivity(new Intent(this, CreateAlbum.class));
+            Intent intent = new Intent(this, CreateAlbum.class);
+            intent.putExtra("token", token);
+            startActivity(intent);
 
         } else if (id == R.id.nav_addphoto) {
 

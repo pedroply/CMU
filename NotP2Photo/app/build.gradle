@@ -17,6 +17,13 @@ android {
         }
     }
     buildToolsVersion '28.0.3'
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+    }
 }
 
 dependencies {
@@ -29,4 +36,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation files('libs/dropbox-android-sdk-1.6.3.jar')
+    implementation files('libs/json_simple-1.1.jar')
+    implementation 'com.dropbox.core:dropbox-core-sdk:2.0.1'
+    implementation 'com.squareup.picasso:picasso:2.5.2'
 }
