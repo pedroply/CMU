@@ -80,12 +80,12 @@ public class MainActivity extends AppCompatActivity {
                 if(mainObject.has("token")){
                     Toast toast = Toast.makeText(getApplicationContext(), "Login Ok! token: " + mainObject.getString("token"), Toast.LENGTH_SHORT);
                     toast.show();
-                    /*Intent intent = new Intent(getBaseContext(), AlbunsActivity.class);
-                    intent.putExtra("token", mainObject.getString("token"));
-                    intent.putExtra("user", user);
-                    startActivity(intent);*/
+
                     Intent intent = new Intent(getBaseContext(), HomeActivity.class);
+                    intent.putExtra("loginToken", mainObject.getString("token"));
+                    intent.putExtra("user", user);
                     startActivity(intent);
+
                 }
                 else{
                     Toast toast = Toast.makeText(getApplicationContext(), "Login Error!", Toast.LENGTH_SHORT);

@@ -17,11 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 
-import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.android.AndroidAuthSession;
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.session.AccessTokenPair;
-import com.dropbox.client2.session.AppKeyPair;
+import com.dropbox.core.android.Auth;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -30,8 +26,8 @@ public class HomeActivity extends AppCompatActivity
     final static String APP_SECRET = "0mrpn6kv1wkclev";
 
     String token;
-    DropboxAPI<AndroidAuthSession> mDBApi;
-
+    String loginToken;
+    String user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,25 +54,20 @@ public class HomeActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
-        AndroidAuthSession session = new AndroidAuthSession(appKeys);
-        mDBApi = new DropboxAPI<AndroidAuthSession>(session);
+        Intent intent = getIntent();
+        loginToken = intent.getStringExtra("loginToken");
+        user = intent.getStringExtra("user");
+
+        if(token == null){
+            Auth.startOAuth2Authentication(HomeActivity.this, APP_KEY);
+        }
 
     }
 
     @Override
     protected void onResume(){
-        if(token == null){
-            mDBApi.getSession().startAuthentication(HomeActivity.this);
-            if (mDBApi.getSession().authenticationSuccessful()) {
-                try {
-                    mDBApi.getSession().finishAuthentication();
-
-                    token = mDBApi.getSession().getAccessTokenPair().secret;
-                } catch (IllegalStateException e) {
-                    Log.i("DbAuthLog", "Error authenticating", e);
-                }
-            }
+        if (token == null) {
+            token = Auth.getOAuth2Token();
         }
 
         super.onResume();
@@ -126,6 +117,8 @@ public class HomeActivity extends AppCompatActivity
         } else if (id == R.id.nav_createalbums) {
             Intent intent = new Intent(this, CreateAlbum.class);
             intent.putExtra("token", token);
+            intent.putExtra("loginToken", loginToken);
+            intent.putExtra("user", user);
             startActivity(intent);
 
         } else if (id == R.id.nav_addphoto) {

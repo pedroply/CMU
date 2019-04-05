@@ -38,7 +38,8 @@ import java.io.InputStream;
 public class CreateAlbum extends AppCompatActivity {
 
     DbxClientV2 client;
-    String accessToken = "";
+    String accessToken = "", token;
+    String user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +48,8 @@ public class CreateAlbum extends AppCompatActivity {
 
         Intent intent = getIntent();
         accessToken = intent.getStringExtra("token");
+        token = intent.getStringExtra("loginToken");
+        user = intent.getStringExtra("user");
 
     }
 
@@ -65,6 +68,7 @@ public class CreateAlbum extends AppCompatActivity {
 
         protected String doInBackground(String... path) {
             DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
+            Log.i(MainActivity.TAG, accessToken);
             client = new DbxClientV2(config, accessToken);
 
             FullAccount account = null;
@@ -76,18 +80,31 @@ public class CreateAlbum extends AppCompatActivity {
             Log.i(MainActivity.TAG, account.getName().getDisplayName());
 
             try {
-                FolderMetadata folderMetadata = client.files().createFolder(path[0]);
+                FolderMetadata folderMetadata = client.files().createFolder("/" + path[0]);
+                String url = "http://" + WebInterface.IP + "/createAlbum?name="+user+"&token="+token+"&album="+path[0];
+                Log.d(MainActivity.TAG, "URL: " + url);
+                String response = WebInterface.get(url);
+                //TODO: DO SOMETHING WITH RESPONSES
+
+                url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + token + "&album" + path[0];
+                Log.d(MainActivity.TAG, "URL: " + url);
+                response = WebInterface.post(url, "/" + path[0]);
+
 
             } catch (DbxException e) {
                 e.printStackTrace();
             }
 
-            return null;
+            return path[0];
         }
 
         @Override
         protected void onPostExecute(String response) {
-
+            if(response != null){
+                Toast toast = Toast.makeText(getApplicationContext(), "New Album Created!", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+            finish();
         }
     }
 
