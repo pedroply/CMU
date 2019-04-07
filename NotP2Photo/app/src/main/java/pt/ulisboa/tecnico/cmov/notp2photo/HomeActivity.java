@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.cmov.notp2photo;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,9 +16,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
 
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.android.Auth;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.users.FullAccount;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -25,9 +43,13 @@ public class HomeActivity extends AppCompatActivity
     final static String APP_KEY = "jm1yrjpxz13l8ng";
     final static String APP_SECRET = "0mrpn6kv1wkclev";
 
+    private Context context = this;
+    private ListView listView;
+    DbxClientV2 client;
     String token;
     String loginToken;
     String user;
+    ArrayList<String> albumList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +83,6 @@ public class HomeActivity extends AppCompatActivity
         if(token == null){
             Auth.startOAuth2Authentication(HomeActivity.this, APP_KEY);
         }
-
     }
 
     @Override
@@ -69,6 +90,8 @@ public class HomeActivity extends AppCompatActivity
         if (token == null) {
             token = Auth.getOAuth2Token();
         }
+
+        new albumLoader().execute();
 
         super.onResume();
     }
@@ -132,6 +155,66 @@ public class HomeActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private class albumLoader extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            albumList = new ArrayList<>();
+            /*DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
+            client = new DbxClientV2(config, token);
+
+            // WORKS FULLY
+            FullAccount account = null;
+            try {
+                account = client.users().getCurrentAccount();
+                List<Metadata> folders = client.files().listFolder("/P2Photo").getEntries();
+                for (Metadata md : folders) {
+                    albumList.add(md.getName());
+                }
+            } catch (DbxException e) {
+                e.printStackTrace();
+            }*/
+
+            // DOESN'T WORK FULLY (MIGHT NOT LIST RECENTLY ADDED ALBUM)
+            String url = "http://" + WebInterface.IP + "/retriveAllAlbuns?name="+user+"&token="+loginToken;
+            Log.d(MainActivity.TAG, "URL: " + url);
+            String response = WebInterface.get(url);
+            Log.d("Response", response);
+            try {
+                JSONArray mainObject = new JSONArray(response);
+                for (int i = 0; i < mainObject.length(); i++) {
+                    albumList.add(mainObject.get(i).toString());
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            ArrayAdapter adapter = new ArrayAdapter<String>(context,
+                    R.layout.activity_home_album_view, albumList);
+
+            listView = (ListView) findViewById(R.id.albumList);
+            listView.setAdapter(adapter);
+
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    String album = (String) listView.getItemAtPosition(position);
+                    Toast.makeText(context, "You selected : " + album, Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(context, ViewAlbumActivity.class);
+                    intent.putExtra("token", token);
+                    intent.putExtra("loginToken", loginToken);
+                    intent.putExtra("album", album);
+                    startActivity(intent);
+                }
+            });
+        }
     }
 
 }

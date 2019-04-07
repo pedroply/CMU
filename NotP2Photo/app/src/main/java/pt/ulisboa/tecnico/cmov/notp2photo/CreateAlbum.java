@@ -80,7 +80,7 @@ public class CreateAlbum extends AppCompatActivity {
             Log.i(MainActivity.TAG, account.getName().getDisplayName());
 
             try {
-                FolderMetadata folderMetadata = client.files().createFolder("/" + path[0]);
+                FolderMetadata folderMetadata = client.files().createFolder("/P2Photo/" + path[0]);
                 String url = "http://" + WebInterface.IP + "/createAlbum?name="+user+"&token="+token+"&album="+path[0];
                 Log.d(MainActivity.TAG, "URL: " + url);
                 String response = WebInterface.get(url);
@@ -88,7 +88,7 @@ public class CreateAlbum extends AppCompatActivity {
 
                 url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + token + "&album" + path[0];
                 Log.d(MainActivity.TAG, "URL: " + url);
-                response = WebInterface.post(url, "/" + path[0]);
+                response = WebInterface.post(url, "/P2Photo/" + path[0]);
 
 
             } catch (DbxException e) {

@@ -21,7 +21,7 @@ import java.io.InputStream;
 
 public class InteractWithDropBox extends AppCompatActivity {
 
-    private static final String ACCESS_TOKEN = "A4Fx_jmriwQAAAAAAAAA9EzYY69YksldOyfNzc93zqs6vxjlV0H2crW4M-ViEelV";
+    private static final String ACCESS_TOKEN = "ud3fjARugXAAAAAAAAAA-4J6ratjsHRXFFJE3lt9ImTwaTj2ap_b4OO3vA9SCYVL";
 
     DbxClientV2 client;
 
