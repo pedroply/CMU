@@ -71,14 +71,6 @@ public class CreateAlbum extends AppCompatActivity {
             Log.i(MainActivity.TAG, accessToken);
             client = new DbxClientV2(config, accessToken);
 
-            FullAccount account = null;
-            try {
-                account = client.users().getCurrentAccount();
-            } catch (DbxException e) {
-                e.printStackTrace();
-            }
-            Log.i(MainActivity.TAG, account.getName().getDisplayName());
-
             try {
                 FolderMetadata folderMetadata = client.files().createFolder("/P2Photo/" + path[0]);
                 String url = "http://" + WebInterface.IP + "/createAlbum?name="+user+"&token="+token+"&album="+path[0];
@@ -88,7 +80,7 @@ public class CreateAlbum extends AppCompatActivity {
 
                 url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + token + "&album" + path[0];
                 Log.d(MainActivity.TAG, "URL: " + url);
-                response = WebInterface.post(url, "/P2Photo/" + path[0]);
+                response = WebInterface.post(url, folderMetadata.getPathDisplay());
 
 
             } catch (DbxException e) {

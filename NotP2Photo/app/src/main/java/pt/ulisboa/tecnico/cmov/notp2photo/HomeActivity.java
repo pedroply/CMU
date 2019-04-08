@@ -91,7 +91,9 @@ public class HomeActivity extends AppCompatActivity
             token = Auth.getOAuth2Token();
         }
 
-        new albumLoader().execute();
+        if(token != null){
+            new albumLoader().execute();
+        }
 
         super.onResume();
     }
@@ -145,6 +147,9 @@ public class HomeActivity extends AppCompatActivity
             startActivity(intent);
 
         } else if (id == R.id.nav_addphoto) {
+            Intent intent = new Intent(this, ChooseAlbumActivity.class);
+            intent.putExtra("token", token);
+            startActivity(intent);
 
         } else if (id == R.id.nav_findusers) {
 
@@ -157,49 +162,31 @@ public class HomeActivity extends AppCompatActivity
         return true;
     }
 
-    private class albumLoader extends AsyncTask<Void, Void, Void> {
+    private class albumLoader extends AsyncTask<Void, Void, ArrayList<String>> {
 
         @Override
-        protected Void doInBackground(Void... voids) {
-            albumList = new ArrayList<>();
-            /*DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
+        protected ArrayList<String> doInBackground(Void... voids) {
+            ArrayList<String> albumList = new ArrayList<>();
+            DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
             client = new DbxClientV2(config, token);
 
-            // WORKS FULLY
-            FullAccount account = null;
             try {
-                account = client.users().getCurrentAccount();
                 List<Metadata> folders = client.files().listFolder("/P2Photo").getEntries();
                 for (Metadata md : folders) {
                     albumList.add(md.getName());
                 }
             } catch (DbxException e) {
                 e.printStackTrace();
-            }*/
-
-            // DOESN'T WORK FULLY (MIGHT NOT LIST RECENTLY ADDED ALBUM)
-            String url = "http://" + WebInterface.IP + "/retriveAllAlbuns?name="+user+"&token="+loginToken;
-            Log.d(MainActivity.TAG, "URL: " + url);
-            String response = WebInterface.get(url);
-            Log.d("Response", response);
-            try {
-                JSONArray mainObject = new JSONArray(response);
-                for (int i = 0; i < mainObject.length(); i++) {
-                    albumList.add(mainObject.get(i).toString());
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
 
-            return null;
+            return albumList;
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            ArrayAdapter adapter = new ArrayAdapter<String>(context,
-                    R.layout.activity_home_album_view, albumList);
+        protected void onPostExecute(ArrayList<String> list) {
+            ArrayAdapter adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.activity_home_album_view, list);
 
-            listView = (ListView) findViewById(R.id.albumList);
+            final ListView listView = (ListView) findViewById(R.id.albumList);
             listView.setAdapter(adapter);
 
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

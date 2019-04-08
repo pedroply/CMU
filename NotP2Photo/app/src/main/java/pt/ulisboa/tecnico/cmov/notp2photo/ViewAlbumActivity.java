@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.cmov.notp2photo;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -15,6 +16,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.DbxException;
@@ -23,17 +25,23 @@ import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.DbxRawClientV2;
 import com.dropbox.core.v2.files.DbxUserFilesRequests;
 import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.GetMetadataErrorException;
+import com.dropbox.core.v2.files.ListFolderErrorException;
+import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.users.FullAccount;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ViewAlbumActivity extends AppCompatActivity {
     private Context context = this;
-    private List<String> links;
-    private String album, token, loginToken;
+    private String album, token;
     private DbxClientV2 client;
     private GridView gridView;
 
@@ -44,18 +52,79 @@ public class ViewAlbumActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         album = intent.getStringExtra("album");
-        loginToken = intent.getStringExtra("loginToken");
         token = intent.getStringExtra("token");
-        links = new ArrayList<>();
-        links.add("https://cdn.pixabay.com/photo/2016/04/15/04/02/water-1330252__340.jpg");
-        links.add("https://www.topimagens.com.br/imagens/imagens-mais-novas.jpg");
-        links.add("https://i.pinimg.com/736x/92/09/5e/92095ed056a02f384111be6c40fb28e0.jpg");
-        links.add("https://cdn.pixabay.com/photo/2017/09/05/23/01/background-2719572_960_720.jpg");
 
         new ImageDownloader().execute();
     }
 
     private class ImageDownloader extends AsyncTask<Void, Void, Bitmap[]> {
+
+        @Override
+        public void onPreExecute(){
+            Toast toast = Toast.makeText(getApplicationContext(), "Getting photos from album...", Toast.LENGTH_SHORT);
+            toast.show();
+        }
+
+        @SuppressLint("NewApi")
+        @Override
+        protected Bitmap[] doInBackground(Void... voids) {
+            ArrayList<Bitmap> photoBitMap = new ArrayList<Bitmap>();
+
+            DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
+            Log.i(MainActivity.TAG, token);
+            client = new DbxClientV2(config, token);
+
+            try{
+                ListFolderResult listFolder = client.files().listFolder("/P2Photo/" + album);
+                List<Metadata> photosMetadata = listFolder.getEntries();
+
+                for(Metadata metadata : photosMetadata){
+                    DbxDownloader<FileMetadata> download = client.files().download("/P2Photo/" + album + "/" + metadata.getName());
+
+                    try(ByteArrayOutputStream baos = new ByteArrayOutputStream()){
+                        download.download(baos);
+
+                        byte[] bitmapdata = baos.toByteArray();
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapdata, 0, bitmapdata.length);
+
+                        photoBitMap.add(bitmap);
+                    }
+
+                }
+
+
+            } catch (ListFolderErrorException e) {
+                e.printStackTrace();
+            } catch (DbxException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Bitmap[] result = new Bitmap[photoBitMap.size()];
+            result = photoBitMap.toArray(result);
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap[] bm) {
+            gridView = (GridView) findViewById(R.id.gridAlbum);
+            gridView.setAdapter(new ImageAdapter(context, bm));
+
+            /*gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Intent intent = new Intent(context, ViewPhotoActivity.class);
+                    intent.putExtra("Link", links.get(position));
+                    startActivity(intent);
+                }
+            });*/
+        }
+
+    }
+
+
+    /*private class ImageDownloader extends AsyncTask<Void, Void, Bitmap[]> {
 
         @Override
         protected Bitmap[] doInBackground(Void... voids) {
@@ -91,5 +160,5 @@ public class ViewAlbumActivity extends AppCompatActivity {
                 }
             });
         }
-    }
+    }*/
 }
