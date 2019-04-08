@@ -40,8 +40,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ViewAlbumActivity extends AppCompatActivity {
+    public static byte[] chosenPhotoBytes;
     private Context context = this;
     private String album, token;
+    private List<byte[]> bitmaps;
     private DbxClientV2 client;
     private GridView gridView;
 
@@ -54,6 +56,7 @@ public class ViewAlbumActivity extends AppCompatActivity {
         album = intent.getStringExtra("album");
         token = intent.getStringExtra("token");
 
+        bitmaps = new ArrayList<>();
         new ImageDownloader().execute();
     }
 
@@ -87,6 +90,7 @@ public class ViewAlbumActivity extends AppCompatActivity {
                         byte[] bitmapdata = baos.toByteArray();
                         Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapdata, 0, bitmapdata.length);
 
+                        bitmaps.add(bitmapdata);
                         photoBitMap.add(bitmap);
                     }
 
@@ -111,14 +115,16 @@ public class ViewAlbumActivity extends AppCompatActivity {
             gridView = (GridView) findViewById(R.id.gridAlbum);
             gridView.setAdapter(new ImageAdapter(context, bm));
 
-            /*gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    chosenPhotoBytes = bitmaps.get(position);
                     Intent intent = new Intent(context, ViewPhotoActivity.class);
-                    intent.putExtra("Link", links.get(position));
+                    // byte[] too large for intent
+                    // intent.putExtra("ByteArray", bitmaps.get(position));
                     startActivity(intent);
                 }
-            });*/
+            });
         }
 
     }
