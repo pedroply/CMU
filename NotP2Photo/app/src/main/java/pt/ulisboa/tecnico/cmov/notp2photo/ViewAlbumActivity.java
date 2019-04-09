@@ -97,6 +97,8 @@ public class ViewAlbumActivity extends AppCompatActivity {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     downloader.download(baos);
                     Log.i(MainActivity.TAG, "BAOS: " + baos.toString());
+                    if (baos.toString().isEmpty())
+                        break;
                     String[] photoLinks = baos.toString().split("\n");
 
                     // Get the bitmaps of each photo
