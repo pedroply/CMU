@@ -76,7 +76,7 @@ public class ViewAlbumActivity extends AppCompatActivity {
             DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
             Log.i(MainActivity.TAG, token);
             client = new DbxClientV2(config, token);
-
+            // TODO: Get server links, access the link file, download all the images in those links
             try{
                 ListFolderResult listFolder = client.files().listFolder("/P2Photo/" + album);
                 List<Metadata> photosMetadata = listFolder.getEntries();

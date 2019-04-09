@@ -18,11 +18,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.UploadErrorException;
+import com.dropbox.core.v2.sharing.SharedLinkMetadata;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -109,13 +111,33 @@ public class AddPhotoActivity extends AppCompatActivity {
             Log.i(MainActivity.TAG, accessToken);
             client = new DbxClientV2(config, accessToken);
 
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            photo.compress(Bitmap.CompressFormat.PNG, 0, bos);
-            byte[] bitmapdata = bos.toByteArray();
-            ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
-
             try{
-                FileMetadata metadata = client.files().uploadBuilder("/P2Photo/" + album[0] + "/" + photoName).uploadAndFinish(bs);
+                // Compress photo to byte array
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                photo.compress(Bitmap.CompressFormat.PNG, 0, bos);
+                byte[] bitmapdata = bos.toByteArray();
+                ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
+
+                // Upload photo and create shared link
+                String photoPath = "/P2Photo/" + album[0] + "/" + photoName;
+                FileMetadata metadata = client.files().uploadBuilder(photoPath).uploadAndFinish(bs);
+                SharedLinkMetadata photoLink = client.sharing().createSharedLinkWithSettings(photoPath);
+
+                // Update album catalog
+                String catalogPath = "/P2Photo/" + album[0] + "/index.txt";
+                DbxDownloader<FileMetadata> download = client.files().download(catalogPath);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                download.download(baos);
+                String previousCatalog = baos.toString();
+                String newCatalog = "";
+                if (previousCatalog.isEmpty())
+                    newCatalog = photoLink.getUrl();
+                else
+                    newCatalog = newCatalog + "\n" + photoLink.getUrl();
+                InputStream targetStream = new ByteArrayInputStream(newCatalog.getBytes());
+                client.files().delete(catalogPath);
+                client.files().uploadBuilder(catalogPath).uploadAndFinish(targetStream);
+
                 photoName = metadata.getName();
 
             } catch (UploadErrorException e) {
