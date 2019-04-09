@@ -2,6 +2,7 @@ package hello;
 
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -109,6 +110,13 @@ public class ClientController {
     		return Application.clients.get(name).getAlbums();
     	}
         return new ArrayList<>();
+    }
+    
+    @RequestMapping("/reset")
+    public String reset() {
+    	Application.clients = new HashMap<String, Client>();
+    	Application.albums = new HashMap<String, Album>();
+		return "Done!";
     }
     
     private String randomTokenNotSecure() {
