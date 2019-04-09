@@ -86,4 +86,20 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
             });
         }
     }
+
+    private class shareAlbumWithUsersTask extends AsyncTask<String, String, String> {
+
+        //TODO: reset server
+        //TODO: no ViewAlbumActivity fazer get de todos os albuns no servidor
+        //TODO: Se albuns não existirem na dropbox criar nesse utilizador um folder novo + fazer post desse link
+        //TODO: Para ir buscar as fotos, ir a todos os links do servidor e fazer client.sharing().getFileFromURL(link)
+        //TODO: Mostrar as imagens combinadas de todos os links
+
+        @Override
+        protected String doInBackground(String... album){
+
+            return null;
+        }
+
+    }
 }

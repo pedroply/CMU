@@ -26,6 +26,8 @@ import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
+import com.dropbox.core.v2.files.FolderSharingInfo;
+import com.dropbox.core.v2.sharing.PathLinkMetadata;
 import com.dropbox.core.v2.users.FullAccount;
 
 import org.json.JSONException;
@@ -73,14 +75,17 @@ public class CreateAlbum extends AppCompatActivity {
 
             try {
                 FolderMetadata folderMetadata = client.files().createFolder("/P2Photo/" + path[0]);
+
                 String url = "http://" + WebInterface.IP + "/createAlbum?name="+user+"&token="+token+"&album="+path[0];
                 Log.d(MainActivity.TAG, "URL: " + url);
                 String response = WebInterface.get(url);
                 //TODO: DO SOMETHING WITH RESPONSES
 
+                PathLinkMetadata linkMetadata = client.sharing().createSharedLink("/P2Photo/" + path[0]);
+
                 url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + token + "&album" + path[0];
                 Log.d(MainActivity.TAG, "URL: " + url);
-                response = WebInterface.post(url, folderMetadata.getPathDisplay());
+                response = WebInterface.post(url, linkMetadata.getUrl());
 
 
             } catch (DbxException e) {
