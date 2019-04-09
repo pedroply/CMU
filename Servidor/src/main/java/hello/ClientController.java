@@ -121,6 +121,13 @@ public class ClientController {
         return (new HashMap<String, Void>()).keySet();
     }
     
+    @RequestMapping("/reset")
+    public String reset() {
+    	Application.clients = new HashMap<String, Client>();
+    	Application.albums = new HashMap<String, Album>();
+		return "Done!";
+    }
+    
     private String randomTokenNotSecure() {
         byte[] array = new byte[4]; // length is bounded by 7
         new Random().nextBytes(array);
