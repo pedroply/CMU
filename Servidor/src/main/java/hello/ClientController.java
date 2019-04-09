@@ -67,7 +67,7 @@ public class ClientController {
     public String addClient2Album(@RequestParam String token, @RequestParam String name, @RequestParam String album, @RequestParam String client2Add) {
     	if (Application.clients.containsKey(name) && Application.clients.containsKey(client2Add) && Application.clients.get(name).getToken().equals(token) && Application.clients.get(name).belongsToAlbum(album)) {
     		Application.albums.get(album).updateClient(client2Add, null);
-    		Application.clients.get(name).addAlbum(album);
+    		Application.clients.get(client2Add).addAlbum(album);
     		return "{\"response\":\"OK\"}";
     	}
         return "{\"response\":\"ERR\"}";
