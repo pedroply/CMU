@@ -7,13 +7,11 @@ public class Client {
     private String passwdHashBase64;
     private String name;
     private String token;
-    private ArrayList<String> links;
     private ArrayList<String> albums;
 
     public Client(String passwdHashBase64, String name) {
         this.passwdHashBase64 = passwdHashBase64;
         this.name = name;
-        this.links = new ArrayList<String>();
         this.albums = new ArrayList<String>();
     }
 
@@ -39,24 +37,6 @@ public class Client {
 
 	public void setToken(String token) {
 		this.token = token;
-	}
-
-	public ArrayList<String> getLinks() {
-		return links;
-	}
-
-	public void setLinks(ArrayList<String> links) {
-		this.links = links;
-	}
-	
-	public void addLink(String link) {
-		this.links.add(link);
-	}
-	
-	public void rmLink(String link) {
-		for(String i : links)
-			if(i.equals(link))
-				links.remove(i);
 	}
 
 	public ArrayList<String> getAlbums() {

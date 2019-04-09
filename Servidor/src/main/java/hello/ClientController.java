@@ -52,7 +52,7 @@ public class ClientController {
     	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token)) {
     		if(!Application.albums.containsKey(album)) {
 	    		Application.albums.put(album, new Album(album));
-	    		Application.albums.get(album).addClient(name);
+	    		Application.albums.get(album).updateClient(name, null);
 	    		Application.clients.get(name).addAlbum(album);
 	    		return "{\"response\":\"OK\"}";
     		}
@@ -66,7 +66,7 @@ public class ClientController {
     @RequestMapping("/addClient2Album")
     public String addClient2Album(@RequestParam String token, @RequestParam String name, @RequestParam String album, @RequestParam String client2Add) {
     	if (Application.clients.containsKey(name) && Application.clients.containsKey(client2Add) && Application.clients.get(name).getToken().equals(token) && Application.clients.get(name).belongsToAlbum(album)) {
-    		Application.albums.get(album).addClient(client2Add);
+    		Application.albums.get(album).updateClient(client2Add, null);
     		Application.clients.get(name).addAlbum(album);
     		return "{\"response\":\"OK\"}";
     	}
@@ -90,8 +90,7 @@ public class ClientController {
     	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token) && Application.clients.get(name).belongsToAlbum(album)) {
     		System.out.println("Posting linnk: " + link);
         	System.out.println("To Album: " + album);
-    		Application.clients.get(name).addLink(link);
-    		Application.albums.get(album).addLink(link);
+    		Application.albums.get(album).updateClient(name, link);
     		return "{\"response\":\"OK\"}";
     	}
         return "{\"response\":\"ERR\"}";

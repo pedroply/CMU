@@ -1,19 +1,20 @@
 package hello;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Album {
 	private String name;
+	//Clients only contribute with a single link to the album
 	@JsonIgnore
-	private ArrayList<String> clients;
+	private HashMap<String, String> clientsLinks;
 	private ArrayList<String> links;
 	
 	public Album(String name) {
 		this.name = name;
-		this.clients = new ArrayList<String>();
-		this.links = new ArrayList<String>();
+		this.clientsLinks = new HashMap<>();
 	}
 
 	public String getName() {
@@ -25,39 +26,23 @@ public class Album {
 	}
 
 	public ArrayList<String> getClients() {
+		ArrayList<String> clients = new ArrayList<>();
+		for(String i : clientsLinks.keySet())
+			clients.add(i);
 		return clients;
 	}
-
-	public void setClients(ArrayList<String> clients) {
-		this.clients = clients;
-	}
 	
-	public void addClient(String name) {
-		this.clients.add(name);
-	}
-	
-	public void rmClient(String name) {
-		for(String i : clients)
-			if(i.equals(name))
-				clients.remove(i);
+	public void updateClient(String client, String link) {
+		if(clientsLinks.containsKey(client))
+			clientsLinks.remove(client);
+		clientsLinks.put(client, link);
 	}
 
 	public ArrayList<String> getLinks() {
+		ArrayList<String> links = new ArrayList<>();
+		for(String i : clientsLinks.values())
+			links.add(i);
 		return links;
-	}
-
-	public void setLinks(ArrayList<String> links) {
-		this.links = links;
-	}
-	
-	public void addLink(String link) {
-		this.links.add(link);
-	}
-	
-	public void rmLink(String link) {
-		for(String i : links)
-			if(i.equals(link))
-				links.remove(i);
 	}
 	
 	
