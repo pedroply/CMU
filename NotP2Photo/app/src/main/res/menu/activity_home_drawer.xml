@@ -5,10 +5,6 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_viewalbums"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="View Albums" />
-        <item
             android:id="@+id/nav_createalbums"
             android:icon="@drawable/ic_menu_gallery"
             android:title="Create Albums" />

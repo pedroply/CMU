@@ -137,9 +137,7 @@ public class HomeActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_viewalbums) {
-
-        } else if (id == R.id.nav_createalbums) {
+        if (id == R.id.nav_createalbums) {
             Intent intent = new Intent(this, CreateAlbum.class);
             intent.putExtra("token", token);
             intent.putExtra("loginToken", loginToken);
@@ -152,6 +150,11 @@ public class HomeActivity extends AppCompatActivity
             startActivity(intent);
 
         } else if (id == R.id.nav_findusers) {
+            Intent intent = new Intent(this, UserListActivity.class);
+            intent.putExtra("token", token);
+            intent.putExtra("loginToken", loginToken);
+            intent.putExtra("user", user);
+            startActivity(intent);
 
         } else if (id == R.id.nav_adduseralbum) {
 

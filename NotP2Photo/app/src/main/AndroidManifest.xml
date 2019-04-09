@@ -12,7 +12,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ChooseAlbumActivity"></activity>
+        <activity android:name=".ChooseAlbumUserActivity"></activity>
+        <activity
+            android:name=".UserListActivity"
+            android:label="@string/title_user_list" />
+        <activity android:name=".ChooseAlbumActivity" />
         <activity android:name=".AddPhotoActivity" />
         <activity
             android:name=".ViewPhotoActivity"
