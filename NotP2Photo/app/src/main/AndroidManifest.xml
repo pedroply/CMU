@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="pt.ulisboa.tecnico.cmov.notp2photo">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,6 +12,26 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".ChooseAlbumUserActivity"></activity>
+        <activity
+            android:name=".UserListActivity"
+            android:label="@string/title_user_list" />
+        <activity android:name=".ChooseAlbumActivity" />
+        <activity android:name=".AddPhotoActivity" />
+        <activity
+            android:name=".ViewPhotoActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".ViewAlbumActivity" />
+        <activity
+            android:name=".CreateAlbum"
+            android:label="@string/title_activity_create_album"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".HomeActivity"
+            android:label="@string/title_activity_home"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".AlbumViewActivity" />
+        <activity android:name=".AlbunsActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -16,23 +39,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name="com.dropbox.client2.android.AuthActivity"
+            android:name="com.dropbox.core.android.AuthActivity"
+            android:configChanges="orientation|keyboard"
             android:launchMode="singleTask"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:configChanges="orientation|keyboard">
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
+
                 <!-- Change this to be db- followed by your app key -->
                 <data android:scheme="db-jm1yrjpxz13l8ng" />
+
                 <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
     </application>
-
-    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
 
 </manifest>

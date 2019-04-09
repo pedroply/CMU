@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.http.HttpStatus;
@@ -110,6 +111,14 @@ public class ClientController {
     		return Application.clients.get(name).getAlbums();
     	}
         return new ArrayList<>();
+    }
+    
+    @RequestMapping("/retriveUsers")
+    public Set<String> getUsers(@RequestParam String token, @RequestParam String name) {
+    	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token)) {
+    		return Application.clients.keySet();
+    	}
+        return (new HashMap<String, Void>()).keySet();
     }
     
     @RequestMapping("/reset")

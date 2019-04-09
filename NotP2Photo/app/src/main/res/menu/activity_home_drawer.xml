@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_createalbums"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="Create Albums" />
+        <item
+            android:id="@+id/nav_addphoto"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="Add Photo to Album" />
+    </group>
+
+    <item android:title="Shared and Find">
+        <menu>
+            <item
+                android:id="@+id/nav_findusers"
+                android:icon="@drawable/ic_menu_slideshow"
+                android:title="Find Users" />
+            <item
+                android:id="@+id/nav_adduseralbum"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Add User to Album" />
+        </menu>
+    </item>
+
+</menu>
