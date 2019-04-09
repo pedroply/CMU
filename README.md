@@ -19,6 +19,8 @@
     - (saber todos os albuns partilhados com sigo, devolve json igual a ["album1","album2", ...])
 - **/retriveUsers?name=qwe&token=DiMuhA==**
     - (saber todos os utilizadores registados no sistema, devolve json igual a ["user1", "user2", ...])
+- **/reset**
+    - **Limpa Tudo do Server!**
     
 #### maven + spring 
 Como compilar e correr:
