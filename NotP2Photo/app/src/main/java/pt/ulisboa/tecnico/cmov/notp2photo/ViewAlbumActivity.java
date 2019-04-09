@@ -29,7 +29,13 @@ import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.sharing.GetSharedLinkFileErrorException;
+import com.dropbox.core.v2.sharing.SharedLinkMetadata;
 import com.dropbox.core.v2.users.FullAccount;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -42,7 +48,7 @@ import java.util.List;
 public class ViewAlbumActivity extends AppCompatActivity {
     public static byte[] chosenPhotoBytes;
     private Context context = this;
-    private String album, token;
+    private String album, token, loginToken, user;
     private List<byte[]> bitmaps;
     private DbxClientV2 client;
     private GridView gridView;
@@ -55,6 +61,8 @@ public class ViewAlbumActivity extends AppCompatActivity {
         Intent intent = getIntent();
         album = intent.getStringExtra("album");
         token = intent.getStringExtra("token");
+        loginToken = intent.getStringExtra("loginToken");
+        user = intent.getStringExtra("user");
 
         bitmaps = new ArrayList<>();
         new ImageDownloader().execute();
@@ -68,36 +76,37 @@ public class ViewAlbumActivity extends AppCompatActivity {
             toast.show();
         }
 
-        @SuppressLint("NewApi")
         @Override
         protected Bitmap[] doInBackground(Void... voids) {
             ArrayList<Bitmap> photoBitMap = new ArrayList<Bitmap>();
-
             DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
-            Log.i(MainActivity.TAG, token);
             client = new DbxClientV2(config, token);
-            // TODO: Get server links, access the link file, download all the images in those links
-            try{
-                ListFolderResult listFolder = client.files().listFolder("/P2Photo/" + album);
-                List<Metadata> photosMetadata = listFolder.getEntries();
 
-                for(Metadata metadata : photosMetadata){
-                    DbxDownloader<FileMetadata> download = client.files().download("/P2Photo/" + album + "/" + metadata.getName());
+            String url = "http://" + WebInterface.IP + "/retriveAlbum?name=" + user + "&token=" + loginToken + "&album=" + album;
+            String response = WebInterface.get(url);
+            Log.i(MainActivity.TAG, "ViewResponse: " + response);
 
-                    try(ByteArrayOutputStream baos = new ByteArrayOutputStream()){
-                        download.download(baos);
+            try {
+                JSONObject mainObject = new JSONObject(response);
+                JSONArray linkArray = mainObject.getJSONArray("links");
+                for(int i = 0; i < linkArray.length(); i++) {
+                    // Get the catalog file links
+                    String catalogLink = linkArray.getString(i);
+                    Log.i(MainActivity.TAG, "LINK: " + catalogLink);
+                    DbxDownloader<SharedLinkMetadata> downloader = client.sharing().getSharedLinkFile(catalogLink);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    downloader.download(baos);
+                    Log.i(MainActivity.TAG, "BAOS: " + baos.toString());
+                    String[] photoLinks = baos.toString().split("\n");
 
-                        byte[] bitmapdata = baos.toByteArray();
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapdata, 0, bitmapdata.length);
-
-                        bitmaps.add(bitmapdata);
+                    // Get the bitmaps of each photo
+                    for (String link : photoLinks) {
+                        URL photoURL = new URL(link);
+                        Bitmap bitmap = BitmapFactory.decodeStream(photoURL.openStream());
                         photoBitMap.add(bitmap);
                     }
-
                 }
-
-
-            } catch (ListFolderErrorException e) {
+            } catch (JSONException e) {
                 e.printStackTrace();
             } catch (DbxException e) {
                 e.printStackTrace();
@@ -131,6 +140,48 @@ public class ViewAlbumActivity extends AppCompatActivity {
 
 
     /*private class ImageDownloader extends AsyncTask<Void, Void, Bitmap[]> {
+        // Gather feito pela Filipa
+        @SuppressLint("NewApi")
+        @Override
+        protected Bitmap[] doInBackground(Void... voids) {
+            ArrayList<Bitmap> photoBitMap = new ArrayList<Bitmap>();
+
+            DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
+            Log.i(MainActivity.TAG, token);
+            client = new DbxClientV2(config, token);
+
+            try{
+                ListFolderResult listFolder = client.files().listFolder("/P2Photo/" + album);
+                List<Metadata> photosMetadata = listFolder.getEntries();
+
+                for(Metadata metadata : photosMetadata){
+                    DbxDownloader<FileMetadata> download = client.files().download("/P2Photo/" + album + "/" + metadata.getName());
+
+                    try(ByteArrayOutputStream baos = new ByteArrayOutputStream()){
+                        download.download(baos);
+
+                        byte[] bitmapdata = baos.toByteArray();
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapdata, 0, bitmapdata.length);
+
+                        bitmaps.add(bitmapdata);
+                        photoBitMap.add(bitmap);
+                    }
+
+                }
+
+
+            } catch (ListFolderErrorException e) {
+                e.printStackTrace();
+            } catch (DbxException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Bitmap[] result = new Bitmap[photoBitMap.size()];
+            result = photoBitMap.toArray(result);
+            return result;
+        }
 
         @Override
         protected Bitmap[] doInBackground(Void... voids) {

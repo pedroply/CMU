@@ -37,9 +37,8 @@ public class AddPhotoActivity extends AppCompatActivity {
     int REQUEST_GET_SINGLE_FILE;
     DbxClientV2 client;
     String accessToken = "";
-    String album;
+    String album, photoName, loginToken, user;
     Bitmap photo;
-    String photoName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +48,8 @@ public class AddPhotoActivity extends AppCompatActivity {
         Intent intent = getIntent();
         accessToken = intent.getStringExtra("token");
         album = intent.getStringExtra("album");
+        loginToken = intent.getStringExtra("loginToken");
+        user = intent.getStringExtra("user");
     }
 
     public void uploadPhoto(View v){
@@ -133,10 +134,13 @@ public class AddPhotoActivity extends AppCompatActivity {
                 if (previousCatalog.isEmpty())
                     newCatalog = photoLink.getUrl();
                 else
-                    newCatalog = newCatalog + "\n" + photoLink.getUrl();
+                    newCatalog = previousCatalog + "\n" + photoLink.getUrl();
                 InputStream targetStream = new ByteArrayInputStream(newCatalog.getBytes());
                 client.files().delete(catalogPath);
                 client.files().uploadBuilder(catalogPath).uploadAndFinish(targetStream);
+                SharedLinkMetadata linkMetadata = client.sharing().createSharedLinkWithSettings(catalogPath);
+                String url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + loginToken + "&album=" + album;
+                WebInterface.post(url, linkMetadata.getUrl());
 
                 photoName = metadata.getName();
 

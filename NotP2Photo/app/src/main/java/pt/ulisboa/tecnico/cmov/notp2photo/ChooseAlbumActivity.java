@@ -25,7 +25,7 @@ import java.util.List;
 public class ChooseAlbumActivity extends AppCompatActivity {
 
     DbxClientV2 client;
-    String accessToken;
+    String accessToken, loginToken, user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +34,8 @@ public class ChooseAlbumActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         accessToken = intent.getStringExtra("token");
+        loginToken = intent.getStringExtra("loginToken");
+        user = intent.getStringExtra("user");
 
         new AlbumLoaderTask().execute();
     }
@@ -73,6 +75,8 @@ public class ChooseAlbumActivity extends AppCompatActivity {
                     Intent intent = new Intent(getApplicationContext(), AddPhotoActivity.class);
                     intent.putExtra("token", accessToken);
                     intent.putExtra("album", album);
+                    intent.putExtra("loginToken", loginToken);
+                    intent.putExtra("user", user);
                     startActivity(intent);
                 }
             });

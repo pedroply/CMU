@@ -27,12 +27,16 @@ import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.android.Auth;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.sharing.SharedLinkMetadata;
 import com.dropbox.core.v2.users.FullAccount;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,12 +48,10 @@ public class HomeActivity extends AppCompatActivity
     final static String APP_SECRET = "0mrpn6kv1wkclev";
 
     private Context context = this;
-    private ListView listView;
     DbxClientV2 client;
     String token;
     String loginToken;
     String user;
-    ArrayList<String> albumList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +149,8 @@ public class HomeActivity extends AppCompatActivity
         } else if (id == R.id.nav_addphoto) {
             Intent intent = new Intent(this, ChooseAlbumActivity.class);
             intent.putExtra("token", token);
+            intent.putExtra("loginToken", loginToken);
+            intent.putExtra("user", user);
             startActivity(intent);
 
         } else if (id == R.id.nav_findusers) {
@@ -169,16 +173,41 @@ public class HomeActivity extends AppCompatActivity
 
         @Override
         protected ArrayList<String> doInBackground(Void... voids) {
+            // TODO: Maybe do this to ChooseAlbum and ChooseAlbumUser activities, in case the invited user is online and does not see this first
             ArrayList<String> albumList = new ArrayList<>();
             DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
             client = new DbxClientV2(config, token);
+            String url = "http://" + WebInterface.IP + "/retriveAllAlbuns?name=" + user + "&token=" + loginToken;
+            String response = WebInterface.get(url);
 
             try {
+                // Gather all albuns in Dropbox
                 List<Metadata> folders = client.files().listFolder("/P2Photo").getEntries();
                 for (Metadata md : folders) {
                     albumList.add(md.getName());
                 }
+
+                // Check all albuns in server. If they are not in Dropbox, add them
+                JSONArray mainObject = new JSONArray(response);
+                for(int i = 0; i < mainObject.length(); i++) {
+                    String albumName = mainObject.getString(i);
+                    if (!albumList.contains(albumName)) {
+                        albumList.add(mainObject.getString(i));
+                        // Carbon copy from create album
+                        client.files().createFolder("/P2Photo/" + albumName);
+                        String catalogPath = "/P2Photo/" + albumName + "/index.txt";
+                        InputStream targetStream = new ByteArrayInputStream("".getBytes());
+                        client.files().uploadBuilder(catalogPath).uploadAndFinish(targetStream);
+                        SharedLinkMetadata linkMetadata = client.sharing().createSharedLinkWithSettings(catalogPath);
+                        url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + loginToken + "&album=" + albumName;
+                        WebInterface.post(url, linkMetadata.getUrl());
+                    }
+                }
             } catch (DbxException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
 
@@ -200,6 +229,7 @@ public class HomeActivity extends AppCompatActivity
                     Intent intent = new Intent(context, ViewAlbumActivity.class);
                     intent.putExtra("token", token);
                     intent.putExtra("loginToken", loginToken);
+                    intent.putExtra("user", user);
                     intent.putExtra("album", album);
                     startActivity(intent);
                 }

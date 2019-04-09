@@ -81,16 +81,16 @@ public class CreateAlbum extends AppCompatActivity {
                 client.files().createFolder("/P2Photo/" + path[0]);
 
                 // TODO: DO SOMETHING WITH RESPONSES
-                /* String url = "http://" + WebInterface.IP + "/createAlbum?name="+user+"&token="+token+"&album="+path[0];
+                String url = "http://" + WebInterface.IP + "/createAlbum?name="+user+"&token="+token+"&album="+path[0];
                 Log.d(MainActivity.TAG, "URL: " + url);
-                String response = WebInterface.get(url); */
+                WebInterface.get(url);
 
                 // Create new blank file in the created folder and put its link in the server
                 String catalogPath = "/P2Photo/" + path[0] + "/index.txt";
                 InputStream targetStream = new ByteArrayInputStream("".getBytes());
                 client.files().uploadBuilder(catalogPath).uploadAndFinish(targetStream);
                 SharedLinkMetadata linkMetadata = client.sharing().createSharedLinkWithSettings(catalogPath);
-                String url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + token + "&album" + path[0];
+                url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + token + "&album=" + path[0];
                 WebInterface.post(url, linkMetadata.getUrl());
             } catch (DbxException e) {
                 e.printStackTrace();
