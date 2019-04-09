@@ -1,9 +1,11 @@
 package pt.ulisboa.tecnico.cmov.notp2photo;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -19,9 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChooseAlbumUserActivity extends AppCompatActivity {
-
+    private Context context = this;
     private DbxClientV2 client;
-    private String accessToken, loginToken;
+    private String accessToken, loginToken, user;
     private String[] usernames;
 
     @Override
@@ -32,6 +34,7 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
         Intent intent = getIntent();
         accessToken = intent.getStringExtra("token");
         loginToken = intent.getStringExtra("loginToken");
+        user = intent.getStringExtra("user");
         usernames = intent.getStringArrayExtra("usernames");
 
         new AlbumLoaderTask().execute();
@@ -64,12 +67,21 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
             final ListView listView = (ListView) findViewById(R.id.albumList);
             listView.setAdapter(adapter);
 
+            // TODO: Make this async
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     String album = (String) listView.getItemAtPosition(position);
-                    Toast.makeText(getApplicationContext(), "You selected : " + album, Toast.LENGTH_SHORT).show();
-                    // TODO: DO SOMETHING IN THE SERVER
+                    for (String otheruser : usernames) {
+                        String url = "http://" + WebInterface.IP + "/addClient2Album?name=" + user + "&token=" + loginToken
+                                               + "&album=" + album + "&client2Add=" + otheruser;
+                        WebInterface.get(url);
+                    }
+                    Toast.makeText(getApplicationContext(), "Added users to album: " + album, Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(context, HomeActivity.class);
+                    intent.putExtra("loginToken", loginToken);
+                    intent.putExtra("user", user);
+                    startActivity(intent);
                 }
             });
         }

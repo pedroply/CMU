@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -59,7 +60,8 @@ public class UserListActivity extends AppCompatActivity {
         Intent intent = new Intent(context, ChooseAlbumUserActivity.class);
         intent.putExtra("token", token);
         intent.putExtra("loginToken", loginToken);
-        intent.putExtra("usernames", usernames.toArray());
+        intent.putExtra("user", user);
+        intent.putExtra("usernames", usernames.toArray(new String[0]));
         startActivity(intent);
     }
 
