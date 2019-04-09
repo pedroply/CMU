@@ -28,12 +28,15 @@ import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.FolderSharingInfo;
 import com.dropbox.core.v2.sharing.PathLinkMetadata;
+import com.dropbox.core.v2.sharing.SharedLinkMetadata;
 import com.dropbox.core.v2.users.FullAccount;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -81,7 +84,7 @@ public class CreateAlbum extends AppCompatActivity {
                 String response = WebInterface.get(url);
                 //TODO: DO SOMETHING WITH RESPONSES
 
-                PathLinkMetadata linkMetadata = client.sharing().createSharedLink("/P2Photo/" + path[0]);
+                SharedLinkMetadata linkMetadata = client.sharing().createSharedLinkWithSettings("/P2Photo/" + path[0]);
 
                 url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + token + "&album" + path[0];
                 Log.d(MainActivity.TAG, "URL: " + url);
