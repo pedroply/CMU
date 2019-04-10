@@ -179,12 +179,15 @@ public class HomeActivity extends AppCompatActivity
             client = new DbxClientV2(config, token);
             String url = "http://" + WebInterface.IP + "/retriveAllAlbuns?name=" + user + "&token=" + loginToken;
             String response = WebInterface.get(url);
+            Log.i(MainActivity.TAG, "Albuns: " + response);
 
             try {
                 // Gather all albuns in Dropbox
                 List<Metadata> folders = client.files().listFolder("/P2Photo").getEntries();
-                for (Metadata md : folders) {
-                    albumList.add(md.getName());
+                if (!folders.isEmpty()) {
+                    for (Metadata md : folders) {
+                        albumList.add(md.getName());
+                    }
                 }
 
                 // Check all albuns in server. If they are not in Dropbox, add them
@@ -192,7 +195,7 @@ public class HomeActivity extends AppCompatActivity
                 for(int i = 0; i < mainObject.length(); i++) {
                     String albumName = mainObject.getString(i);
                     if (!albumList.contains(albumName)) {
-                        albumList.add(mainObject.getString(i));
+                        albumList.add(albumName);
                         // Carbon copy from create album
                         client.files().createFolder("/P2Photo/" + albumName);
                         String catalogPath = "/P2Photo/" + albumName + "/index.txt";

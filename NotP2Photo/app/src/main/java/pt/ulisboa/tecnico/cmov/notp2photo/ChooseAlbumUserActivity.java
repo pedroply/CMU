@@ -72,11 +72,7 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     String album = (String) listView.getItemAtPosition(position);
-                    for (String otheruser : usernames) {
-                        String url = "http://" + WebInterface.IP + "/addClient2Album?name=" + user + "&token=" + loginToken
-                                               + "&album=" + album + "&client2Add=" + otheruser;
-                        WebInterface.get(url);
-                    }
+                    new shareAlbumWithUsersTask().execute(album);
                     Toast.makeText(getApplicationContext(), "Added users to album: " + album, Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(context, HomeActivity.class);
                     intent.putExtra("loginToken", loginToken);
@@ -87,17 +83,14 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
         }
     }
 
-    private class shareAlbumWithUsersTask extends AsyncTask<String, String, String> {
-
-        //TODO: reset server
-        //TODO: no ViewAlbumActivity fazer get de todos os albuns no servidor
-        //TODO: Se albuns não existirem na dropbox criar nesse utilizador um folder novo + fazer post desse link
-        //TODO: Para ir buscar as fotos, ir a todos os links do servidor e fazer client.sharing().getFileFromURL(link)
-        //TODO: Mostrar as imagens combinadas de todos os links
+    private class shareAlbumWithUsersTask extends AsyncTask<String, Void, Void> {
 
         @Override
-        protected String doInBackground(String... album){
-
+        protected Void doInBackground(String... album){
+            for (String otheruser : usernames) {
+                String url = "http://" + WebInterface.IP + "/addClient2Album?name=" + user + "&token=" + loginToken + "&album=" + album[0] + "&client2Add=" + otheruser;
+                WebInterface.get(url);
+            }
             return null;
         }
 
