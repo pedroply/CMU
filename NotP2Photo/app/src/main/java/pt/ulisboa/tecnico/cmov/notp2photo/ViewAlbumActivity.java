@@ -46,10 +46,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ViewAlbumActivity extends AppCompatActivity {
-    public static byte[] chosenPhotoBytes;
     private Context context = this;
     private String album, token, loginToken, user;
-    private List<byte[]> bitmaps;
+    private List<String> bitmaps;
     private DbxClientV2 client;
     private GridView gridView;
 
@@ -103,6 +102,7 @@ public class ViewAlbumActivity extends AppCompatActivity {
 
                     // Get the bitmaps of each photo
                     for (String link : photoLinks) {
+                        bitmaps.add(link);
                         URL photoURL = new URL(link);
                         Bitmap bitmap = BitmapFactory.decodeStream(photoURL.openStream());
                         photoBitMap.add(bitmap);
@@ -129,10 +129,8 @@ public class ViewAlbumActivity extends AppCompatActivity {
             gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    chosenPhotoBytes = bitmaps.get(position);
                     Intent intent = new Intent(context, ViewPhotoActivity.class);
-                    // byte[] too large for intent
-                    // intent.putExtra("ByteArray", bitmaps.get(position));
+                    intent.putExtra("link", bitmaps.get(position));
                     startActivity(intent);
                 }
             });
