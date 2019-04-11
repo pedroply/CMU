@@ -177,6 +177,7 @@ public class HomeActivity extends AppCompatActivity
             ArrayList<String> albumList = new ArrayList<>();
             DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
             client = new DbxClientV2(config, token);
+
             String url = "http://" + WebInterface.IP + "/retriveAllAlbuns?name=" + user + "&token=" + loginToken;
             String response = WebInterface.get(url);
 
@@ -191,13 +192,16 @@ public class HomeActivity extends AppCompatActivity
                 JSONArray mainObject = new JSONArray(response);
                 for(int i = 0; i < mainObject.length(); i++) {
                     String albumName = mainObject.getString(i);
+
                     if (!albumList.contains(albumName)) {
                         albumList.add(mainObject.getString(i));
                         // Carbon copy from create album
                         client.files().createFolder("/P2Photo/" + albumName);
+
                         String catalogPath = "/P2Photo/" + albumName + "/index.txt";
                         InputStream targetStream = new ByteArrayInputStream("".getBytes());
                         client.files().uploadBuilder(catalogPath).uploadAndFinish(targetStream);
+
                         SharedLinkMetadata linkMetadata = client.sharing().createSharedLinkWithSettings(catalogPath);
                         url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + loginToken + "&album=" + albumName;
                         WebInterface.post(url, linkMetadata.getUrl());

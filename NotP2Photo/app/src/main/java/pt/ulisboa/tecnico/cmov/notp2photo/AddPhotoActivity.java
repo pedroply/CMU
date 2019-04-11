@@ -129,16 +129,20 @@ public class AddPhotoActivity extends AppCompatActivity {
                 DbxDownloader<FileMetadata> download = client.files().download(catalogPath);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 download.download(baos);
+
                 String previousCatalog = baos.toString();
                 String newCatalog = "";
                 String imageURL = photoLink.getUrl().replace("dl=0", "raw=1");
+
                 if (previousCatalog.isEmpty())
                     newCatalog = imageURL;
                 else
                     newCatalog = previousCatalog + "\n" + imageURL;
+
                 InputStream targetStream = new ByteArrayInputStream(newCatalog.getBytes());
                 client.files().delete(catalogPath);
                 client.files().uploadBuilder(catalogPath).uploadAndFinish(targetStream);
+
                 SharedLinkMetadata linkMetadata = client.sharing().createSharedLinkWithSettings(catalogPath);
                 String url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + loginToken + "&album=" + album[0];
                 WebInterface.post(url, linkMetadata.getUrl());

@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import java.net.URL;
 
 public class ViewPhotoActivity extends AppCompatActivity {
-    private String bitmapLink;
+    private Bitmap bitmapLink;
     private ImageView imageView;
 
     @Override
@@ -20,28 +20,11 @@ public class ViewPhotoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view_photo);
 
         Intent intent = getIntent();
-        bitmapLink = intent.getStringExtra("link");
+        byte[] byteArray = intent.getByteArrayExtra("link");
+        bitmapLink = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
 
-        new ImageDownloader().execute();
-    }
+        imageView = (ImageView) findViewById(R.id.photo);
+        imageView.setImageBitmap(bitmapLink);
 
-    private class ImageDownloader extends AsyncTask<Void, Void, Bitmap> {
-
-        @Override
-        protected Bitmap doInBackground(Void... voids) {
-            try {
-                URL url = new URL(bitmapLink);
-                return BitmapFactory.decodeStream(url.openStream());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap bm) {
-            imageView = (ImageView) findViewById(R.id.photo);
-            imageView.setImageBitmap(bm);
-        }
     }
 }

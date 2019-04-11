@@ -88,14 +88,17 @@ public class ViewAlbumActivity extends AppCompatActivity {
             try {
                 JSONObject mainObject = new JSONObject(response);
                 JSONArray linkArray = mainObject.getJSONArray("links");
+
                 for(int i = 0; i < linkArray.length(); i++) {
                     // Get the catalog file links
                     String catalogLink = linkArray.getString(i);
                     Log.i(MainActivity.TAG, "LINK: " + catalogLink);
+
                     DbxDownloader<SharedLinkMetadata> downloader = client.sharing().getSharedLinkFile(catalogLink);
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     downloader.download(baos);
                     Log.i(MainActivity.TAG, "BAOS: " + baos.toString());
+
                     if (baos.toString().isEmpty())
                         break;
                     String[] photoLinks = baos.toString().split("\n");
@@ -104,6 +107,7 @@ public class ViewAlbumActivity extends AppCompatActivity {
                     for (String link : photoLinks) {
                         bitmaps.add(link);
                         URL photoURL = new URL(link);
+
                         Bitmap bitmap = BitmapFactory.decodeStream(photoURL.openStream());
                         photoBitMap.add(bitmap);
                     }
@@ -124,98 +128,24 @@ public class ViewAlbumActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Bitmap[] bm) {
             gridView = (GridView) findViewById(R.id.gridAlbum);
-            gridView.setAdapter(new ImageAdapter(context, bm));
+            ImageAdapter adapter = new ImageAdapter(context,bm);
+            gridView.setAdapter(adapter);
 
             gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Bitmap bitmap = (Bitmap) parent.getItemAtPosition(position).;
+
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
+                    byte[] byteArray = stream.toByteArray();
+
                     Intent intent = new Intent(context, ViewPhotoActivity.class);
-                    intent.putExtra("link", bitmaps.get(position));
+                    intent.putExtra("link", byteArray);
                     startActivity(intent);
                 }
             });
         }
 
     }
-
-
-    /*private class ImageDownloader extends AsyncTask<Void, Void, Bitmap[]> {
-        // Gather feito pela Filipa
-        @SuppressLint("NewApi")
-        @Override
-        protected Bitmap[] doInBackground(Void... voids) {
-            ArrayList<Bitmap> photoBitMap = new ArrayList<Bitmap>();
-
-            DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
-            Log.i(MainActivity.TAG, token);
-            client = new DbxClientV2(config, token);
-
-            try{
-                ListFolderResult listFolder = client.files().listFolder("/P2Photo/" + album);
-                List<Metadata> photosMetadata = listFolder.getEntries();
-
-                for(Metadata metadata : photosMetadata){
-                    DbxDownloader<FileMetadata> download = client.files().download("/P2Photo/" + album + "/" + metadata.getName());
-
-                    try(ByteArrayOutputStream baos = new ByteArrayOutputStream()){
-                        download.download(baos);
-
-                        byte[] bitmapdata = baos.toByteArray();
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapdata, 0, bitmapdata.length);
-
-                        bitmaps.add(bitmapdata);
-                        photoBitMap.add(bitmap);
-                    }
-
-                }
-
-
-            } catch (ListFolderErrorException e) {
-                e.printStackTrace();
-            } catch (DbxException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            Bitmap[] result = new Bitmap[photoBitMap.size()];
-            result = photoBitMap.toArray(result);
-            return result;
-        }
-
-        @Override
-        protected Bitmap[] doInBackground(Void... voids) {
-            try {
-                // Só a testar aqui umas imagens, don't mind me
-                URL end1 = new URL(links.get(0));
-                Bitmap image1 = BitmapFactory.decodeStream(end1.openStream());
-                URL end2 = new URL(links.get(1));
-                Bitmap image2 = BitmapFactory.decodeStream(end2.openStream());
-                URL end3 = new URL(links.get(2));
-                Bitmap image3 = BitmapFactory.decodeStream(end3.openStream());
-                URL end4 = new URL(links.get(3));
-                Bitmap image4 = BitmapFactory.decodeStream(end4.openStream());
-                Bitmap[] cenas = {image1, image2, image3, image4};
-                return cenas;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap[] bm) {
-            gridView = (GridView) findViewById(R.id.gridAlbum);
-            gridView.setAdapter(new ImageAdapter(context, bm));
-
-            gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Intent intent = new Intent(context, ViewPhotoActivity.class);
-                    intent.putExtra("Link", links.get(position));
-                    startActivity(intent);
-                }
-            });
-        }
-    }*/
 }

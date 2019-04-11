@@ -89,9 +89,11 @@ public class CreateAlbum extends AppCompatActivity {
                 String catalogPath = "/P2Photo/" + path[0] + "/index.txt";
                 InputStream targetStream = new ByteArrayInputStream("".getBytes());
                 client.files().uploadBuilder(catalogPath).uploadAndFinish(targetStream);
+
                 SharedLinkMetadata linkMetadata = client.sharing().createSharedLinkWithSettings(catalogPath);
                 url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + token + "&album=" + path[0];
                 WebInterface.post(url, linkMetadata.getUrl());
+
             } catch (DbxException e) {
                 e.printStackTrace();
             } catch (IOException e) {
