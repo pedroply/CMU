@@ -125,6 +125,7 @@ public class ViewAlbumActivity extends AppCompatActivity {
             return result;
         }
 
+        // DOES NOT WORK
         @Override
         protected void onPostExecute(Bitmap[] bm) {
             gridView = (GridView) findViewById(R.id.gridAlbum);
@@ -134,7 +135,7 @@ public class ViewAlbumActivity extends AppCompatActivity {
             gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Bitmap bitmap = (Bitmap) parent.getItemAtPosition(position).;
+                    Bitmap bitmap = (Bitmap) parent.getItemAtPosition(position);
 
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
