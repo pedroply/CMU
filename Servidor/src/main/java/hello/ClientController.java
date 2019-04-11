@@ -131,6 +131,10 @@ public class ClientController {
         byte[] array = new byte[4]; // length is bounded by 7
         new Random().nextBytes(array);
         String generatedString = Base64.getEncoder().encodeToString(array);
+        while(generatedString.contains("+")) {
+        	new Random().nextBytes(array);
+        	generatedString = Base64.getEncoder().encodeToString(array);
+        }
         System.out.println("Token Generated: " + generatedString);
         return generatedString;
     }
