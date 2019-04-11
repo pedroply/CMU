@@ -53,6 +53,7 @@ public class ViewAlbumActivity extends AppCompatActivity {
     private GridView gridView;
     private GlobalClass global;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,83 +69,17 @@ public class ViewAlbumActivity extends AppCompatActivity {
 
         bitmaps = new ArrayList<>();
 
-        if(global.albumPhotosIsEmpty(album)){
-            new ImageDownloader().execute();
-
-        } else {
-            ArrayList<Bitmap> photoBitMap = global.getAlbumPhotoList(album);
-            Bitmap[] result = new Bitmap[photoBitMap.size()];
-            result = photoBitMap.toArray(result);
-            setGridView(result);
+        if(global.albumPhotosIsEmpty(album) && !DownloadPhotosService.downloadingAlbums.contains(album)){
+            DownloadPhotosService.downloadingAlbums.add(album);
+            intent = new Intent(this, DownloadPhotosService.class);
+            intent.putExtra("album", album);
+            startService(intent);
         }
 
-    }
-
-    private class ImageDownloader extends AsyncTask<Void, Void, Bitmap[]> {
-
-        @Override
-        public void onPreExecute(){
-            Toast toast = Toast.makeText(getApplicationContext(), "Getting photos from album...", Toast.LENGTH_SHORT);
-            toast.show();
-        }
-
-        @Override
-        protected Bitmap[] doInBackground(Void... voids) {
-            ArrayList<Bitmap> photoBitMap = new ArrayList<Bitmap>();
-            DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
-            client = new DbxClientV2(config, token);
-
-            String url = "http://" + WebInterface.IP + "/retriveAlbum?name=" + user + "&token=" + loginToken + "&album=" + album;
-            String response = WebInterface.get(url);
-            Log.i(MainActivity.TAG, "ViewResponse: " + response);
-
-            try {
-                JSONObject mainObject = new JSONObject(response);
-                JSONArray linkArray = mainObject.getJSONArray("links");
-
-                for(int i = 0; i < linkArray.length(); i++) {
-                    // Get the catalog file links
-                    String catalogLink = linkArray.getString(i);
-                    Log.i(MainActivity.TAG, "LINK: " + catalogLink);
-
-                    DbxDownloader<SharedLinkMetadata> downloader = client.sharing().getSharedLinkFile(catalogLink);
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    downloader.download(baos);
-                    Log.i(MainActivity.TAG, "BAOS: " + baos.toString());
-
-                    if (baos.toString().isEmpty())
-                        break;
-                    String[] photoLinks = baos.toString().split("\n");
-
-                    // Get the bitmaps of each photo
-                    for (String link : photoLinks) {
-                        bitmaps.add(link);
-                        URL photoURL = new URL(link);
-
-                        Bitmap bitmap = BitmapFactory.decodeStream(photoURL.openStream());
-                        photoBitMap.add(bitmap);
-                    }
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (DbxException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            global.addPhotosToAlbum(album, photoBitMap);
-
-            Bitmap[] result = new Bitmap[photoBitMap.size()];
-            result = photoBitMap.toArray(result);
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(final Bitmap[] bm) {
-            setGridView(bm);
-        }
-
+        ArrayList<Bitmap> photoBitMap = global.getAlbumPhotoList(album);
+        Bitmap[] result = new Bitmap[photoBitMap.size()];
+        result = photoBitMap.toArray(result);
+        setGridView(result);
     }
 
     private void setGridView(final Bitmap[] bm){

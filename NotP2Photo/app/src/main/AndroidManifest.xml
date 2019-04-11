@@ -61,6 +61,7 @@
         </activity>
         <service android:name=".UploadPhotoService" android:enabled="true"/>
         <service android:name=".UploadFolderService" android:enabled="true"/>
+        <service android:name=".DownloadPhotosService" android:enabled="true"/>
     </application>
 
 </manifest>

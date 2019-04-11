@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.cmov.notp2photo;
 
+import android.app.ActivityManager;
 import android.app.Application;
 import android.graphics.Bitmap;
 
@@ -80,6 +81,16 @@ public class GlobalClass extends Application {
 
     public void addPhotoToAlbum(String albumName, Bitmap photo){
         user.addPhotoToAlbum(albumName, photo);
+    }
+
+    public boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
