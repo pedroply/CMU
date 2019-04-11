@@ -13,20 +13,23 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:name="pt.ulisboa.tecnico.cmov.notp2photo.GlobalClass">
-        <activity android:name=".ChooseAlbumUserActivity"></activity>
+        <activity android:name=".ChooseAlbumUserActivity"
+            android:label="@string/title_activity_choose_album"></activity>
         <activity
             android:name=".UserListActivity"
             android:label="@string/title_user_list" />
-        <activity android:name=".ChooseAlbumActivity" />
-        <activity android:name=".AddPhotoActivity" />
+        <activity android:name=".ChooseAlbumActivity"
+            android:label="@string/title_activity_choose_album"/>
+        <activity android:name=".AddPhotoActivity"
+            android:label="@string/title_activity_add_photo"/>
         <activity
             android:name=".ViewPhotoActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ViewAlbumActivity" />
+        <activity android:name=".ViewAlbumActivity"
+            android:label="@string/title_activity_view_album"/>
         <activity
             android:name=".CreateAlbum"
-            android:label="@string/title_activity_create_album"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:label="@string/title_activity_create_album"/>
         <activity
             android:name=".HomeActivity"
             android:label="@string/title_activity_home"
@@ -56,6 +59,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <service android:name=".UploadPhotoService" android:enabled="true"/>
+        <service android:name=".UploadFolderService" android:enabled="true"/>
     </application>
 
 </manifest>

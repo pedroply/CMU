@@ -76,9 +76,12 @@ public class ChooseAlbumActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String album = (String) listView.getItemAtPosition(position);
                 Toast.makeText(getApplicationContext(), "You selected : " + album, Toast.LENGTH_SHORT).show();
+
                 Intent intent = new Intent(getApplicationContext(), AddPhotoActivity.class);
                 intent.putExtra("album", album);
                 startActivity(intent);
+
+                finish();
             }
         });
     }

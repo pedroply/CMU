@@ -64,57 +64,11 @@ public class CreateAlbum extends AppCompatActivity {
         EditText albumNameText = findViewById(R.id.editAlbumName);
         String albumName = albumNameText.getText().toString();
 
-        new CreateAlbumTask().execute(albumName);
-    }
+        Intent intent = new Intent(this, UploadFolderService.class);
+        intent.putExtra("album", albumName);
+        startService(intent);
 
-    class CreateAlbumTask extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected void onPreExecute(){
-        }
-
-        protected String doInBackground(String... path) {
-            DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
-            Log.i(MainActivity.TAG, accessToken);
-            client = new DbxClientV2(config, accessToken);
-
-            try {
-                // Create folder in dropbox
-                client.files().createFolder("/P2Photo/" + path[0]);
-
-                // TODO: DO SOMETHING WITH RESPONSES
-                String url = "http://" + WebInterface.IP + "/createAlbum?name="+user+"&token="+token+"&album="+path[0];
-                Log.d(MainActivity.TAG, "URL: " + url);
-                WebInterface.get(url);
-
-                // Create new blank file in the created folder and put its link in the server
-                String catalogPath = "/P2Photo/" + path[0] + "/index.txt";
-                InputStream targetStream = new ByteArrayInputStream("".getBytes());
-                client.files().uploadBuilder(catalogPath).uploadAndFinish(targetStream);
-
-                SharedLinkMetadata linkMetadata = client.sharing().createSharedLinkWithSettings(catalogPath);
-                url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + token + "&album=" + path[0];
-                WebInterface.post(url, linkMetadata.getUrl());
-
-                global.addNewAlbum(path[0]);
-
-            } catch (DbxException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return path[0];
-        }
-
-        @Override
-        protected void onPostExecute(String response) {
-            if(response != null){
-                Toast toast = Toast.makeText(getApplicationContext(), "New Album Created!", Toast.LENGTH_SHORT);
-                toast.show();
-            }
-            finish();
-        }
+        finish();
     }
 
 

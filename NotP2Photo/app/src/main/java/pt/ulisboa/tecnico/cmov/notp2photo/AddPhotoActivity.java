@@ -82,9 +82,13 @@ public class AddPhotoActivity extends AppCompatActivity {
             return;
         }
 
-        UploadPhotoTask task = new UploadPhotoTask();
-        task.onPreExecute();
-        task.execute(album);
+        global.setServicePhoto(photo);
+        Intent intent = new Intent(this, UploadPhotoService.class);
+        intent.putExtra("album", album);
+        intent.putExtra("photoName", photoName);
+        startService(intent);
+
+        finish();
     }
 
     @SuppressLint("NewApi")
@@ -99,85 +103,5 @@ public class AddPhotoActivity extends AppCompatActivity {
         } finally {
             cursor.close();
         }
-    }
-
-
-    class UploadPhotoTask extends AsyncTask<String, Void, String>{
-
-        @Override
-        protected void onPreExecute(){
-            TextView text = (TextView) findViewById(R.id.uploadText);
-            text.setText("Uploading photo...");
-        }
-
-        @Override
-        protected String doInBackground(String... album){
-            DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
-            Log.i(MainActivity.TAG, accessToken);
-            client = new DbxClientV2(config, accessToken);
-
-            try{
-                // Compress photo to byte array
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                photo.compress(Bitmap.CompressFormat.PNG, 0, bos);
-                byte[] bitmapdata = bos.toByteArray();
-                ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
-
-                // Upload photo and create shared link
-                String photoPath = "/P2Photo/" + album[0] + "/" + photoName;
-                FileMetadata metadata = client.files().uploadBuilder(photoPath).uploadAndFinish(bs);
-                SharedLinkMetadata photoLink = client.sharing().createSharedLinkWithSettings(photoPath);
-
-                // Update album catalog
-                String catalogPath = "/P2Photo/" + album[0] + "/index.txt";
-                DbxDownloader<FileMetadata> download = client.files().download(catalogPath);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                download.download(baos);
-
-                String previousCatalog = baos.toString();
-                String newCatalog = "";
-                String imageURL = photoLink.getUrl().replace("dl=0", "raw=1");
-
-                if (previousCatalog.isEmpty())
-                    newCatalog = imageURL;
-                else
-                    newCatalog = previousCatalog + "\n" + imageURL;
-
-                InputStream targetStream = new ByteArrayInputStream(newCatalog.getBytes());
-                client.files().delete(catalogPath);
-                client.files().uploadBuilder(catalogPath).uploadAndFinish(targetStream);
-
-                SharedLinkMetadata linkMetadata = client.sharing().createSharedLinkWithSettings(catalogPath);
-                String url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + loginToken + "&album=" + album[0];
-                WebInterface.post(url, linkMetadata.getUrl());
-
-                photoName = metadata.getName();
-
-            } catch (UploadErrorException e) {
-                e.printStackTrace();
-            } catch (DbxException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            global.addPhotoToAlbum(album[0], photo);
-            return photoName;
-        }
-
-        @Override
-        protected void onPostExecute(String string){
-            if(string == null){
-                Toast toast = Toast.makeText(getApplicationContext(), "Upload not okay", Toast.LENGTH_SHORT);
-                toast.show();
-            } else {
-                Toast toast = Toast.makeText(getApplicationContext(), "Uploaded: " + string, Toast.LENGTH_SHORT);
-                toast.show();
-            }
-
-            Intent intent = new Intent(context, HomeActivity.class);
-            startActivity(intent);
-        }
-
     }
 }

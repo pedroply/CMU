@@ -10,7 +10,7 @@ import java.util.TreeMap;
 public class GlobalClass extends Application {
 
     private UserInfo user;
-    private Bitmap selectedPhoto;
+    private Bitmap selectedPhoto, servicePhoto;
 
     public void createUser(String userName, String loginToken){
         user = new UserInfo(userName, loginToken);
@@ -65,8 +65,17 @@ public class GlobalClass extends Application {
     public void setSelectedPhoto(Bitmap bitmap){
         selectedPhoto = bitmap;
     }
+
     public Bitmap getSelectedPhoto(){
         return selectedPhoto;
+    }
+
+    public void setServicePhoto(Bitmap bitmap){
+        servicePhoto = bitmap;
+    }
+
+    public Bitmap getServicePhoto(){
+        return servicePhoto;
     }
 
     public void addPhotoToAlbum(String albumName, Bitmap photo){

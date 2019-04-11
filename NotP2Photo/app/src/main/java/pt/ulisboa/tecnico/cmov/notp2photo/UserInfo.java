@@ -36,30 +36,29 @@ public class UserInfo {
         return albums.isEmpty();
     }
 
-    public void addNewAlbum(String albumName){
+    public synchronized void addNewAlbum(String albumName){
         albums.put(albumName, new ArrayList<Bitmap>());
     }
 
-    public ArrayList<String> getAlbumList(){
+    public synchronized ArrayList<String> getAlbumList(){
         return new ArrayList<String>(albums.keySet());
     }
 
-    public boolean albumPhotosIsEmpty(String albumName){
+    public synchronized boolean albumPhotosIsEmpty(String albumName){
         ArrayList<Bitmap> photos = albums.get(albumName);
         return photos.isEmpty();
     }
 
-    public void addPhotosToAlbum(String albumName, ArrayList<Bitmap> photos){
-        ArrayList<Bitmap> empty = albums.get(albumName);
-        empty = photos;
+    public synchronized void addPhotosToAlbum(String albumName, ArrayList<Bitmap> photos){
+        albums.put(albumName, photos);
     }
 
-    public void addPhotoToAlbum(String albumName, Bitmap photo){
+    public synchronized void addPhotoToAlbum(String albumName, Bitmap photo){
         ArrayList<Bitmap> photos = albums.get(albumName);
         photos.add(photo);
     }
 
-    public ArrayList<Bitmap> getPhotosList(String albumName){
+    public synchronized ArrayList<Bitmap> getPhotosList(String albumName){
         return albums.get(albumName);
     }
 
