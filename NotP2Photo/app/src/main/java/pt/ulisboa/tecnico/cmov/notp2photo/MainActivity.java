@@ -24,11 +24,14 @@ public class MainActivity extends AppCompatActivity {
     protected static String TAG = "LoginActivity";
 
     private String user;
+    private GlobalClass global;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        global = (GlobalClass) getApplicationContext();
     }
 
     public void login(View v) {
@@ -82,9 +85,7 @@ public class MainActivity extends AppCompatActivity {
                     toast.show();
 
                     Intent intent = new Intent(getBaseContext(), HomeActivity.class);
-                    intent.putExtra("loginToken", mainObject.getString("token"));
-                    intent.putExtra("token", "");
-                    intent.putExtra("user", user);
+                    global.createUser(user, mainObject.getString("token"));
                     startActivity(intent);
 
                 }

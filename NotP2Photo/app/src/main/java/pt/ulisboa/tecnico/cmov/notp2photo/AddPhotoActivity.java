@@ -41,17 +41,19 @@ public class AddPhotoActivity extends AppCompatActivity {
     String album, photoName, loginToken, user;
     Bitmap photo;
     private Context context = this;
+    private GlobalClass global;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_photo);
 
+        global = (GlobalClass) getApplicationContext();
         Intent intent = getIntent();
-        accessToken = intent.getStringExtra("token");
+        accessToken = global.getUserAccessToken();
         album = intent.getStringExtra("album");
-        loginToken = intent.getStringExtra("loginToken");
-        user = intent.getStringExtra("user");
+        loginToken = global.getUserLoginToken();
+        user = global.getUserName();
     }
 
     public void uploadPhoto(View v){
@@ -159,6 +161,7 @@ public class AddPhotoActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+            global.addPhotoToAlbum(album[0], photo);
             return photoName;
         }
 
@@ -173,9 +176,6 @@ public class AddPhotoActivity extends AppCompatActivity {
             }
 
             Intent intent = new Intent(context, HomeActivity.class);
-            intent.putExtra("loginToken", loginToken);
-            intent.putExtra("token", accessToken);
-            intent.putExtra("user", user);
             startActivity(intent);
         }
 

@@ -26,16 +26,18 @@ public class UserListActivity extends AppCompatActivity {
     private Context context = this;
     private int numberOfChecks = 0;
     private Map<String, Boolean> isChecked;
+    private GlobalClass global;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_list);
 
-        Intent intent = getIntent();
-        token = intent.getStringExtra("token");
-        loginToken = intent.getStringExtra("loginToken");
-        user = intent.getStringExtra("user");
+        global = (GlobalClass) getApplicationContext();
+
+        token = global.getUserAccessToken();
+        loginToken = global.getUserLoginToken();
+        user = global.getUserName();
 
         // Disable button until at least one option is chosen
         changeButton(false, (float) 0.5);
@@ -58,9 +60,6 @@ public class UserListActivity extends AppCompatActivity {
                 usernames.add(entry.getKey());
         }
         Intent intent = new Intent(context, ChooseAlbumUserActivity.class);
-        intent.putExtra("token", token);
-        intent.putExtra("loginToken", loginToken);
-        intent.putExtra("user", user);
         intent.putExtra("usernames", usernames.toArray(new String[0]));
         startActivity(intent);
     }

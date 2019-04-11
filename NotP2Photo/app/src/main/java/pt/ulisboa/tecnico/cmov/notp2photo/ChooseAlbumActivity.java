@@ -26,21 +26,20 @@ public class ChooseAlbumActivity extends AppCompatActivity {
 
     DbxClientV2 client;
     String accessToken, loginToken, user;
+    private GlobalClass global;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_album);
 
-        Intent intent = getIntent();
-        accessToken = intent.getStringExtra("token");
-        loginToken = intent.getStringExtra("loginToken");
-        user = intent.getStringExtra("user");
+        global = (GlobalClass) getApplicationContext();
+        accessToken = global.getUserAccessToken();
 
-        new AlbumLoaderTask().execute();
+        setListView(global.getAlbumList());
     }
 
-    private class AlbumLoaderTask extends AsyncTask<Void, Void, ArrayList<String>> {
+    /*private class AlbumLoaderTask extends AsyncTask<Void, Void, ArrayList<String>> {
 
         @Override
         protected ArrayList<String> doInBackground(Void... voids) {
@@ -62,24 +61,25 @@ public class ChooseAlbumActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(ArrayList<String> list) {
-            ArrayAdapter adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.activity_home_album_view, list);
 
-            final ListView listView = (ListView) findViewById(R.id.albumList);
-            listView.setAdapter(adapter);
-
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    String album = (String) listView.getItemAtPosition(position);
-                    Toast.makeText(getApplicationContext(), "You selected : " + album, Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(getApplicationContext(), AddPhotoActivity.class);
-                    intent.putExtra("token", accessToken);
-                    intent.putExtra("album", album);
-                    intent.putExtra("loginToken", loginToken);
-                    intent.putExtra("user", user);
-                    startActivity(intent);
-                }
-            });
         }
+    }*/
+
+    private void setListView(ArrayList<String> list){
+        ArrayAdapter adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.activity_home_album_view, list);
+
+        final ListView listView = (ListView) findViewById(R.id.albumList);
+        listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String album = (String) listView.getItemAtPosition(position);
+                Toast.makeText(getApplicationContext(), "You selected : " + album, Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getApplicationContext(), AddPhotoActivity.class);
+                intent.putExtra("album", album);
+                startActivity(intent);
+            }
+        });
     }
 }

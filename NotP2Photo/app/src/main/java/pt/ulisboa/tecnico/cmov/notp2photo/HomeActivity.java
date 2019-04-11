@@ -52,6 +52,7 @@ public class HomeActivity extends AppCompatActivity
     String token;
     String loginToken;
     String user;
+    private GlobalClass global;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,14 +70,10 @@ public class HomeActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        Intent intent = getIntent();
-        loginToken = intent.getStringExtra("loginToken");
-        token = intent.getStringExtra("token");
-        user = intent.getStringExtra("user");
-
-        if(token.isEmpty()){
-            token = null;
-        }
+        global = (GlobalClass) getApplicationContext();
+        user = global.getUserName();
+        loginToken = global.getUserLoginToken();
+        token = global.getUserAccessToken();
 
         if(token == null){
             Auth.startOAuth2Authentication(HomeActivity.this, APP_KEY);
@@ -87,10 +84,15 @@ public class HomeActivity extends AppCompatActivity
     protected void onResume(){
         if (token == null) {
             token = Auth.getOAuth2Token();
+            global.setUserAccessToken(token);
         }
 
         if(token != null){
-            new albumLoader().execute();
+            if(global.albumListEmpty()){
+                new albumLoader().execute();
+            } else {
+                setAlbumList(global.getAlbumList());
+            }
         }
 
         super.onResume();
@@ -137,26 +139,15 @@ public class HomeActivity extends AppCompatActivity
 
         if (id == R.id.nav_createalbums) {
             Intent intent = new Intent(this, CreateAlbum.class);
-            intent.putExtra("token", token);
-            intent.putExtra("loginToken", loginToken);
-            intent.putExtra("user", user);
             startActivity(intent);
 
         } else if (id == R.id.nav_addphoto) {
             Intent intent = new Intent(this, ChooseAlbumActivity.class);
-            intent.putExtra("token", token);
-            intent.putExtra("loginToken", loginToken);
-            intent.putExtra("user", user);
             startActivity(intent);
 
         } else if (id == R.id.nav_findusers) {
             Intent intent = new Intent(this, UserListActivity.class);
-            intent.putExtra("token", token);
-            intent.putExtra("loginToken", loginToken);
-            intent.putExtra("user", user);
             startActivity(intent);
-
-        } else if (id == R.id.nav_adduseralbum) {
 
         }
 
@@ -219,25 +210,28 @@ public class HomeActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(ArrayList<String> list) {
-            ArrayAdapter adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.activity_home_album_view, list);
-
-            final ListView listView = (ListView) findViewById(R.id.albumList);
-            listView.setAdapter(adapter);
-
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    String album = (String) listView.getItemAtPosition(position);
-                    Toast.makeText(context, "You selected : " + album, Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(context, ViewAlbumActivity.class);
-                    intent.putExtra("token", token);
-                    intent.putExtra("loginToken", loginToken);
-                    intent.putExtra("user", user);
-                    intent.putExtra("album", album);
-                    startActivity(intent);
-                }
-            });
+            global.addUserAlbums(list);
+            setAlbumList(list);
         }
+    }
+
+    private void setAlbumList(ArrayList<String> list) {
+        ArrayAdapter adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.activity_home_album_view, list);
+
+        final ListView listView = (ListView) findViewById(R.id.albumList);
+        listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String album = (String) listView.getItemAtPosition(position);
+                Toast.makeText(context, "You selected : " + album, Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(context, ViewAlbumActivity.class);
+                intent.putExtra("album", album);
+                startActivity(intent);
+            }
+        });
     }
 
 }

@@ -25,63 +25,43 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
     private DbxClientV2 client;
     private String accessToken, loginToken, user;
     private String[] usernames;
+    private GlobalClass global;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_album_user);
 
+        global = (GlobalClass) getApplicationContext();
         Intent intent = getIntent();
-        accessToken = intent.getStringExtra("token");
-        loginToken = intent.getStringExtra("loginToken");
-        user = intent.getStringExtra("user");
+
+        accessToken = global.getUserAccessToken();
+        loginToken = global.getUserLoginToken();
+        user = global.getUserName();
         usernames = intent.getStringArrayExtra("usernames");
 
-        new AlbumLoaderTask().execute();
+        setListView(global.getAlbumList());
     }
 
-    private class AlbumLoaderTask extends AsyncTask<Void, Void, ArrayList<String>> {
+    private void setListView(ArrayList<String> list){
+        ArrayAdapter adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.activity_home_album_view, list);
 
-        @Override
-        protected ArrayList<String> doInBackground(Void... voids) {
-            ArrayList<String> albumList = new ArrayList<>();
-            DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
-            client = new DbxClientV2(config, accessToken);
+        final ListView listView = (ListView) findViewById(R.id.albumList);
+        listView.setAdapter(adapter);
 
-            try {
-                List<Metadata> folders = client.files().listFolder("/P2Photo").getEntries();
-                for (Metadata md : folders) {
-                    albumList.add(md.getName());
-                }
-            } catch (DbxException e) {
-                e.printStackTrace();
+        // TODO: Make this async
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String album = (String) listView.getItemAtPosition(position);
+                new shareAlbumWithUsersTask().execute(album);
+
+                Toast.makeText(getApplicationContext(), "Added users to album: " + album, Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(context, HomeActivity.class);
+                startActivity(intent);
             }
-
-            return albumList;
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<String> list) {
-            ArrayAdapter adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.activity_home_album_view, list);
-
-            final ListView listView = (ListView) findViewById(R.id.albumList);
-            listView.setAdapter(adapter);
-
-            // TODO: Make this async
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    String album = (String) listView.getItemAtPosition(position);
-                    new shareAlbumWithUsersTask().execute(album);
-                    Toast.makeText(getApplicationContext(), "Added users to album: " + album, Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(context, HomeActivity.class);
-                    intent.putExtra("token", accessToken);
-                    intent.putExtra("loginToken", loginToken);
-                    intent.putExtra("user", user);
-                    startActivity(intent);
-                }
-            });
-        }
+        });
     }
 
     private class shareAlbumWithUsersTask extends AsyncTask<String, Void, Void> {

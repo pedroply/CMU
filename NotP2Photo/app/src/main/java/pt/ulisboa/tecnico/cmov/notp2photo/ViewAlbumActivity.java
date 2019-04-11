@@ -51,20 +51,33 @@ public class ViewAlbumActivity extends AppCompatActivity {
     private List<String> bitmaps;
     private DbxClientV2 client;
     private GridView gridView;
+    private GlobalClass global;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_album);
 
+        global = (GlobalClass) getApplicationContext();
+
         Intent intent = getIntent();
         album = intent.getStringExtra("album");
-        token = intent.getStringExtra("token");
-        loginToken = intent.getStringExtra("loginToken");
-        user = intent.getStringExtra("user");
+        token = global.getUserAccessToken();
+        loginToken = global.getUserLoginToken();
+        user = global.getUserName();
 
         bitmaps = new ArrayList<>();
-        new ImageDownloader().execute();
+
+        if(global.albumPhotosIsEmpty(album)){
+            new ImageDownloader().execute();
+
+        } else {
+            ArrayList<Bitmap> photoBitMap = global.getAlbumPhotoList(album);
+            Bitmap[] result = new Bitmap[photoBitMap.size()];
+            result = photoBitMap.toArray(result);
+            setGridView(result);
+        }
+
     }
 
     private class ImageDownloader extends AsyncTask<Void, Void, Bitmap[]> {
@@ -120,38 +133,34 @@ public class ViewAlbumActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+            global.addPhotosToAlbum(album, photoBitMap);
+
             Bitmap[] result = new Bitmap[photoBitMap.size()];
             result = photoBitMap.toArray(result);
             return result;
         }
 
-        // DOES NOT WORK
         @Override
         protected void onPostExecute(final Bitmap[] bm) {
-            gridView = (GridView) findViewById(R.id.gridAlbum);
-            ImageAdapter adapter = new ImageAdapter(context,bm);
-            gridView.setAdapter(adapter);
-
-            gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Bitmap bitmap = bm[position];
-
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
-                    byte[] byteArray = stream.toByteArray();
-
-                    byte[] byteArray1 = new byte[(byteArray.length + 1) / 2];
-                    byte[] byteArray2 = new byte[byteArray.length - byteArray1.length];
-
-                    Intent intent = new Intent(context, ViewPhotoActivity.class);
-                    int size = byteArray.length;
-                    intent.putExtra("link", byteArray1);
-                    intent.putExtra("link1", byteArray2);
-                    startActivity(intent);
-                }
-            });
+            setGridView(bm);
         }
 
+    }
+
+    private void setGridView(final Bitmap[] bm){
+        gridView = (GridView) findViewById(R.id.gridAlbum);
+        ImageAdapter adapter = new ImageAdapter(context,bm);
+        gridView.setAdapter(adapter);
+
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Bitmap bitmap = bm[position];
+                global.setSelectedPhoto(bitmap);
+
+                Intent intent = new Intent(context, ViewPhotoActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }

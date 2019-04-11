@@ -39,22 +39,24 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 public class CreateAlbum extends AppCompatActivity {
 
     DbxClientV2 client;
     String accessToken = "", token;
     String user;
+    private GlobalClass global;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_album);
 
-        Intent intent = getIntent();
-        accessToken = intent.getStringExtra("token");
-        token = intent.getStringExtra("loginToken");
-        user = intent.getStringExtra("user");
+        global = (GlobalClass) getApplicationContext();
+        accessToken = global.getUserAccessToken();
+        token = global.getUserLoginToken();
+        user = global.getUserName();
 
     }
 
@@ -93,6 +95,8 @@ public class CreateAlbum extends AppCompatActivity {
                 SharedLinkMetadata linkMetadata = client.sharing().createSharedLinkWithSettings(catalogPath);
                 url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + token + "&album=" + path[0];
                 WebInterface.post(url, linkMetadata.getUrl());
+
+                global.addNewAlbum(path[0]);
 
             } catch (DbxException e) {
                 e.printStackTrace();

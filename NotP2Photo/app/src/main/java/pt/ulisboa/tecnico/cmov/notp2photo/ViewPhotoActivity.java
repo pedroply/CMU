@@ -11,20 +11,18 @@ import android.widget.ImageView;
 import java.net.URL;
 
 public class ViewPhotoActivity extends AppCompatActivity {
-    private Bitmap bitmapLink;
     private ImageView imageView;
+    private GlobalClass global;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_photo);
 
-        Intent intent = getIntent();
-        byte[] byteArray = intent.getByteArrayExtra("link");
-        bitmapLink = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+        global = (GlobalClass) getApplicationContext();
 
         imageView = (ImageView) findViewById(R.id.photo);
-        imageView.setImageBitmap(bitmapLink);
+        imageView.setImageBitmap(global.getSelectedPhoto());
 
     }
 }
