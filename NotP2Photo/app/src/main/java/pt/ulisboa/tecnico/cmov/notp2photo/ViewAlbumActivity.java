@@ -127,7 +127,7 @@ public class ViewAlbumActivity extends AppCompatActivity {
 
         // DOES NOT WORK
         @Override
-        protected void onPostExecute(Bitmap[] bm) {
+        protected void onPostExecute(final Bitmap[] bm) {
             gridView = (GridView) findViewById(R.id.gridAlbum);
             ImageAdapter adapter = new ImageAdapter(context,bm);
             gridView.setAdapter(adapter);
@@ -135,14 +135,19 @@ public class ViewAlbumActivity extends AppCompatActivity {
             gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Bitmap bitmap = (Bitmap) parent.getItemAtPosition(position);
+                    Bitmap bitmap = bm[position];
 
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
                     byte[] byteArray = stream.toByteArray();
 
+                    byte[] byteArray1 = new byte[(byteArray.length + 1) / 2];
+                    byte[] byteArray2 = new byte[byteArray.length - byteArray1.length];
+
                     Intent intent = new Intent(context, ViewPhotoActivity.class);
-                    intent.putExtra("link", byteArray);
+                    int size = byteArray.length;
+                    intent.putExtra("link", byteArray1);
+                    intent.putExtra("link1", byteArray2);
                     startActivity(intent);
                 }
             });

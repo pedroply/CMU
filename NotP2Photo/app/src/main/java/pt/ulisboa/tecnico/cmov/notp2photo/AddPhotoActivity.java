@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.cmov.notp2photo;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -39,6 +40,7 @@ public class AddPhotoActivity extends AppCompatActivity {
     String accessToken = "";
     String album, photoName, loginToken, user;
     Bitmap photo;
+    private Context context = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,7 +171,12 @@ public class AddPhotoActivity extends AppCompatActivity {
                 Toast toast = Toast.makeText(getApplicationContext(), "Uploaded: " + string, Toast.LENGTH_SHORT);
                 toast.show();
             }
-            finish();
+
+            Intent intent = new Intent(context, HomeActivity.class);
+            intent.putExtra("loginToken", loginToken);
+            intent.putExtra("token", accessToken);
+            intent.putExtra("user", user);
+            startActivity(intent);
         }
 
     }

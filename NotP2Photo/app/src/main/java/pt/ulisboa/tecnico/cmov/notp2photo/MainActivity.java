@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Intent intent = new Intent(getBaseContext(), HomeActivity.class);
                     intent.putExtra("loginToken", mainObject.getString("token"));
+                    intent.putExtra("token", "");
                     intent.putExtra("user", user);
                     startActivity(intent);
 

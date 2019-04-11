@@ -60,15 +60,6 @@ public class HomeActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        /* FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        }); */
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -80,7 +71,12 @@ public class HomeActivity extends AppCompatActivity
 
         Intent intent = getIntent();
         loginToken = intent.getStringExtra("loginToken");
+        token = intent.getStringExtra("token");
         user = intent.getStringExtra("user");
+
+        if(token.isEmpty()){
+            token = null;
+        }
 
         if(token == null){
             Auth.startOAuth2Authentication(HomeActivity.this, APP_KEY);

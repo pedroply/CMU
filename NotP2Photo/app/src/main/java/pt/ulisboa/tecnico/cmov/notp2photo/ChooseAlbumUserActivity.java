@@ -75,6 +75,7 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
                     new shareAlbumWithUsersTask().execute(album);
                     Toast.makeText(getApplicationContext(), "Added users to album: " + album, Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(context, HomeActivity.class);
+                    intent.putExtra("token", accessToken);
                     intent.putExtra("loginToken", loginToken);
                     intent.putExtra("user", user);
                     startActivity(intent);
