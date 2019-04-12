@@ -69,8 +69,8 @@ public class ViewAlbumActivity extends AppCompatActivity {
 
         bitmaps = new ArrayList<>();
 
-        if(global.albumPhotosIsEmpty(album) && !DownloadPhotosService.downloadingAlbums.contains(album)){
-            DownloadPhotosService.downloadingAlbums.add(album);
+        if(!DownloadPhotosService.containsAlbum(album)){
+            DownloadPhotosService.addAlbum(album);
             intent = new Intent(this, DownloadPhotosService.class);
             intent.putExtra("album", album);
             startService(intent);
@@ -82,7 +82,7 @@ public class ViewAlbumActivity extends AppCompatActivity {
         setGridView(result);
     }
 
-    private void setGridView(final Bitmap[] bm){
+    public void setGridView(final Bitmap[] bm){
         gridView = (GridView) findViewById(R.id.gridAlbum);
         ImageAdapter adapter = new ImageAdapter(context,bm);
         gridView.setAdapter(adapter);

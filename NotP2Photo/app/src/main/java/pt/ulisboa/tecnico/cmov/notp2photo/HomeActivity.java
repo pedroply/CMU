@@ -156,6 +156,14 @@ public class HomeActivity extends AppCompatActivity
         return true;
     }
 
+    public void refreshAlbums(View v)
+    {
+        DownloadPhotosService.clearAlbums();
+        ListView listView = (ListView) findViewById(R.id.albumList);
+        listView.setAdapter(null);
+        new albumLoader().execute();
+    }
+
     private class albumLoader extends AsyncTask<Void, Void, ArrayList<String>> {
 
         @Override
@@ -205,12 +213,12 @@ public class HomeActivity extends AppCompatActivity
                 e.printStackTrace();
             }
 
+            global.addUserAlbums(albumList);
             return albumList;
         }
 
         @Override
         protected void onPostExecute(ArrayList<String> list) {
-            global.addUserAlbums(list);
             setAlbumList(list);
         }
     }

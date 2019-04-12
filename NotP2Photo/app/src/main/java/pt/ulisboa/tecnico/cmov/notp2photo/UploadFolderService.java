@@ -40,6 +40,7 @@ public class UploadFolderService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId){
         Toast.makeText(this, "Creating Album...", Toast.LENGTH_SHORT).show();
         String album = intent.getStringExtra("album");
+        global.addNewAlbum(album);
 
         new CreateAlbumTask().execute(album);
         return START_STICKY;
@@ -73,8 +74,6 @@ public class UploadFolderService extends Service {
                 SharedLinkMetadata linkMetadata = client.sharing().createSharedLinkWithSettings(catalogPath);
                 url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + token + "&album=" + path[0];
                 WebInterface.post(url, linkMetadata.getUrl());
-
-                global.addNewAlbum(path[0]);
 
             } catch (DbxException e) {
                 e.printStackTrace();

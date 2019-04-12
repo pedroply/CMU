@@ -35,7 +35,9 @@ public class GlobalClass extends Application {
 
     public void addUserAlbums(ArrayList<String> albumsList){
         for(String album : albumsList){
-            user.addNewAlbum(album);
+            if(!user.containsAlbum(album)){
+                user.addNewAlbum(album);
+            }
         }
     }
 
@@ -55,7 +57,7 @@ public class GlobalClass extends Application {
         return user.albumPhotosIsEmpty(album);
     }
 
-    public void addPhotosToAlbum(String album, ArrayList<Bitmap> photos){
+    public void addPhotosToAlbum(String album, TreeMap<String, Bitmap> photos){
         user.addPhotosToAlbum(album, photos);
     }
 
@@ -79,11 +81,15 @@ public class GlobalClass extends Application {
         return servicePhoto;
     }
 
-    public void addPhotoToAlbum(String albumName, Bitmap photo){
-        user.addPhotoToAlbum(albumName, photo);
+    public void addPhotoToAlbum(String albumName, Bitmap photo, String link){
+        user.addPhotoToAlbum(albumName, photo, link);
     }
 
-    public boolean isServiceRunning(Class<?> serviceClass) {
+    public boolean containsPhoto(String album, String link){
+     return user.containsPhoto(album, link);
+    }
+
+    /*public boolean isServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (serviceClass.getName().equals(service.service.getClassName())) {
@@ -91,6 +97,6 @@ public class GlobalClass extends Application {
             }
         }
         return false;
-    }
+    }*/
 
 }

@@ -66,6 +66,8 @@ public class UploadPhotoService extends Service {
             Log.i(MainActivity.TAG, accessToken);
             client = new DbxClientV2(config, accessToken);
 
+            Bitmap photoToKeep = photo;
+
             try{
                 // Compress photo to byte array
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -80,6 +82,7 @@ public class UploadPhotoService extends Service {
 
                 // Update album catalog
                 String catalogPath = "/P2Photo/" + album[0] + "/index.txt";
+
                 DbxDownloader<FileMetadata> download = client.files().download(catalogPath);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 download.download(baos);
@@ -101,6 +104,8 @@ public class UploadPhotoService extends Service {
                 String url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + loginToken + "&album=" + album[0];
                 WebInterface.post(url, linkMetadata.getUrl());
 
+                global.addPhotoToAlbum(album[0], photoToKeep, linkMetadata.getUrl());
+
                 photoName = metadata.getName();
 
             } catch (UploadErrorException e) {
@@ -111,7 +116,6 @@ public class UploadPhotoService extends Service {
                 e.printStackTrace();
             }
 
-            global.addPhotoToAlbum(album[0], photo);
             return photoName;
         }
 
@@ -121,7 +125,7 @@ public class UploadPhotoService extends Service {
                 Toast toast = Toast.makeText(getApplicationContext(), "Upload not okay", Toast.LENGTH_SHORT);
                 toast.show();
             } else {
-                Toast toast = Toast.makeText(getApplicationContext(), "Uploaded: " + string, Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(getApplicationContext(), "Uploaded " + string + " to album " + album, Toast.LENGTH_SHORT);
                 toast.show();
             }
         }

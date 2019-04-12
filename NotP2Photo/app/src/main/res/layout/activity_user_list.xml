@@ -17,25 +17,14 @@
     <!-- Album List -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="360dp">
+        android:layout_height="600dp">
 
         <ListView
             android:id="@+id/userList"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="0dp" />
     </RelativeLayout>
-
-    <Button
-        android:id="@+id/invite"
-        android:onClick="inviteUsers"
-        android:layout_width="200dp"
-        android:layout_height="70dp"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/rounded_button"
-        android:padding="8dp"
-        android:text="Invite Users to Album Membership"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:layout_marginTop="16dp"/>
 
 </LinearLayout>

@@ -24,9 +24,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 public class DownloadPhotosService extends Service {
 
@@ -34,7 +36,7 @@ public class DownloadPhotosService extends Service {
     private DbxClientV2 client;
     private String token, loginToken, user, album;
     private ArrayList<String> bitmaps = new ArrayList<String>();
-    public static ArrayList<String> downloadingAlbums = new ArrayList<String>();
+    private static ArrayList<String> downloadingAlbums = new ArrayList<String>();
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -93,11 +95,13 @@ public class DownloadPhotosService extends Service {
 
                     // Get the bitmaps of each photo
                     for (String link : photoLinks) {
-                        bitmaps.add(link);
-                        URL photoURL = new URL(link);
+                        if(!global.containsPhoto(album, link)){
+                            bitmaps.add(link);
+                            URL photoURL = new URL(link);
 
-                        Bitmap bitmap = BitmapFactory.decodeStream(photoURL.openStream());
-                        photoBitMap.add(bitmap);
+                            Bitmap bitmap = BitmapFactory.decodeStream(photoURL.openStream());
+                            global.addPhotoToAlbum(album, bitmap, link);
+                        }
                     }
                 }
             } catch (JSONException e) {
@@ -108,8 +112,7 @@ public class DownloadPhotosService extends Service {
                 e.printStackTrace();
             }
 
-            global.addPhotosToAlbum(album, photoBitMap);
-
+            photoBitMap = global.getAlbumPhotoList(album);
             Bitmap[] result = new Bitmap[photoBitMap.size()];
             result = photoBitMap.toArray(result);
             return result;
@@ -121,7 +124,20 @@ public class DownloadPhotosService extends Service {
                 Toast toast = Toast.makeText(getApplicationContext(), "Downloaded photos for album " + album, Toast.LENGTH_SHORT);
                 toast.show();
             }
+            
         }
 
+    }
+
+    public static synchronized void addAlbum(String album){
+        downloadingAlbums.add(album);
+    }
+
+    public static synchronized boolean containsAlbum(String album){
+        return downloadingAlbums.contains(album);
+    }
+
+    public static synchronized void clearAlbums(){
+        downloadingAlbums.clear();
     }
 }

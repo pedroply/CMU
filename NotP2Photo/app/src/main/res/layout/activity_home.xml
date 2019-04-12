@@ -17,7 +17,16 @@
             android:id="@+id/albumList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="60dp" />
+            android:layout_marginTop="60dp"
+            android:layout_marginBottom="150dp"/>
+
+        <Button
+            android:id="@+id/refreshButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="620dp"
+            android:onClick="refreshAlbums"
+            android:text="Refresh" />
     </RelativeLayout>
 
     <!-- Sidebar -->

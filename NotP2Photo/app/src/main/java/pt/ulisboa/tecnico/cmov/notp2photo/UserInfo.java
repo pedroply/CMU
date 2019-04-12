@@ -2,14 +2,16 @@ package pt.ulisboa.tecnico.cmov.notp2photo;
 
 import android.graphics.Bitmap;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 public class UserInfo {
     private String loginToken;
     private String accessToken;
     private String userName;
-    private HashMap<String, ArrayList<Bitmap>> albums = new HashMap<String, ArrayList<Bitmap>>();
+    private TreeMap<String, TreeMap<String, Bitmap>> albums = new TreeMap<String, TreeMap<String, Bitmap>>();
 
     public UserInfo(String user, String loginToken){
         userName = user;
@@ -37,7 +39,7 @@ public class UserInfo {
     }
 
     public synchronized void addNewAlbum(String albumName){
-        albums.put(albumName, new ArrayList<Bitmap>());
+        albums.put(albumName, new TreeMap<String, Bitmap>());
     }
 
     public synchronized ArrayList<String> getAlbumList(){
@@ -45,21 +47,31 @@ public class UserInfo {
     }
 
     public synchronized boolean albumPhotosIsEmpty(String albumName){
-        ArrayList<Bitmap> photos = albums.get(albumName);
+        TreeMap<String,Bitmap> photos = albums.get(albumName);
         return photos.isEmpty();
     }
 
-    public synchronized void addPhotosToAlbum(String albumName, ArrayList<Bitmap> photos){
+    public synchronized void addPhotosToAlbum(String albumName, TreeMap<String, Bitmap> photos){
         albums.put(albumName, photos);
     }
 
-    public synchronized void addPhotoToAlbum(String albumName, Bitmap photo){
-        ArrayList<Bitmap> photos = albums.get(albumName);
-        photos.add(photo);
+    public synchronized void addPhotoToAlbum(String albumName, Bitmap photo, String url){
+        TreeMap<String,Bitmap> photos = albums.get(albumName);
+        photos.put(url, photo);
     }
 
     public synchronized ArrayList<Bitmap> getPhotosList(String albumName){
-        return albums.get(albumName);
+        TreeMap<String, Bitmap> photos =  albums.get(albumName);
+        return new ArrayList<Bitmap>(photos.values());
+    }
+
+    public synchronized boolean containsPhoto(String albumName, String link){
+        TreeMap<String, Bitmap> photos =  albums.get(albumName);
+        return photos.containsKey(link);
+    }
+
+    public synchronized boolean containsAlbum(String albumName){
+        return albums.containsKey(albumName);
     }
 
 

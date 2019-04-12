@@ -24,7 +24,7 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
     private Context context = this;
     private DbxClientV2 client;
     private String accessToken, loginToken, user;
-    private String[] usernames;
+    private String userName;
     private GlobalClass global;
 
     @Override
@@ -38,8 +38,9 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
         accessToken = global.getUserAccessToken();
         loginToken = global.getUserLoginToken();
         user = global.getUserName();
-        usernames = intent.getStringArrayExtra("usernames");
+        userName = intent.getStringExtra("user");
 
+        //TODO: Get albuns not shared with the other user
         setListView(global.getAlbumList());
     }
 
@@ -56,10 +57,9 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
                 String album = (String) listView.getItemAtPosition(position);
                 new shareAlbumWithUsersTask().execute(album);
 
-                Toast.makeText(getApplicationContext(), "Added users to album: " + album, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Added user " + userName + " to album " + album, Toast.LENGTH_SHORT).show();
 
-                Intent intent = new Intent(context, HomeActivity.class);
-                startActivity(intent);
+                finish();
             }
         });
     }
@@ -68,10 +68,9 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(String... album){
-            for (String otheruser : usernames) {
-                String url = "http://" + WebInterface.IP + "/addClient2Album?name=" + user + "&token=" + loginToken + "&album=" + album[0] + "&client2Add=" + otheruser;
-                WebInterface.get(url);
-            }
+            String url = "http://" + WebInterface.IP + "/addClient2Album?name=" + user + "&token=" + loginToken + "&album=" + album[0] + "&client2Add=" + userName;
+            WebInterface.get(url);
+
             return null;
         }
 

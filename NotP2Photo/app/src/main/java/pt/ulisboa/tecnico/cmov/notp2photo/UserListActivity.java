@@ -24,8 +24,6 @@ import java.util.Map;
 public class UserListActivity extends AppCompatActivity {
     private String token, loginToken, user;
     private Context context = this;
-    private int numberOfChecks = 0;
-    private Map<String, Boolean> isChecked;
     private GlobalClass global;
 
     @Override
@@ -39,32 +37,58 @@ public class UserListActivity extends AppCompatActivity {
         loginToken = global.getUserLoginToken();
         user = global.getUserName();
 
-        // Disable button until at least one option is chosen
-        changeButton(false, (float) 0.5);
-        isChecked = new HashMap<>();
-
         String url = "http://" + WebInterface.IP + "/retriveUsers?name=" + user + "&token=" + loginToken;
-        new userLoader().execute(url);
+        new UserLoader().execute(url);
     }
 
-    private void changeButton(boolean enabled, float alpha) {
-        Button button = (Button) findViewById(R.id.invite);
-        button.setEnabled(enabled);
-        button.setAlpha(alpha);
-    }
+    private class UserLoader extends AsyncTask<String, Void, List<String>>{
 
-    public void inviteUsers(View v) {
-        List<String> usernames = new ArrayList<>();
-        for (Map.Entry<String, Boolean> entry : isChecked.entrySet()) {
-            if (entry.getValue())
-                usernames.add(entry.getKey());
+        @Override
+        protected List<String> doInBackground(String... urls) {
+            List<String> userList = new ArrayList<>();
+            String serverResponse = WebInterface.get(urls[0]);
+            try {
+                JSONArray mainObject = new JSONArray(serverResponse);
+                for(int i = 0; i < mainObject.length(); i++){
+                    String username = mainObject.getString(i);
+                    if (!username.equalsIgnoreCase(user)) {
+                        userList.add(username);
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return userList;
         }
-        Intent intent = new Intent(context, ChooseAlbumUserActivity.class);
-        intent.putExtra("usernames", usernames.toArray(new String[0]));
-        startActivity(intent);
+
+        @Override
+        protected void onPostExecute(List<String> list) {
+            ArrayAdapter adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.activity_user_list_view, list);
+
+            final ListView listView = (ListView) findViewById(R.id.userList);
+            listView.setAdapter(adapter);
+
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    String userName = (String) listView.getItemAtPosition(position);
+
+                    Intent intent = new Intent(context, ChooseAlbumUserActivity.class);
+                    intent.putExtra("user", userName);
+                    startActivity(intent);
+
+                    finish();
+                }
+
+            });
+
+        }
+
     }
 
-    private class userLoader extends AsyncTask<String, Void, List<String>> {
+
+   /* private class userLoader extends AsyncTask<String, Void, List<String>> {
 
         @Override
         protected List<String> doInBackground(String... urls) {
@@ -117,5 +141,5 @@ public class UserListActivity extends AppCompatActivity {
                 }
             });
         }
-    }
+    } */
 }
