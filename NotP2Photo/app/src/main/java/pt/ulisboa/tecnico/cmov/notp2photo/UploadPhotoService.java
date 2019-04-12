@@ -66,7 +66,7 @@ public class UploadPhotoService extends Service {
             Log.i(MainActivity.TAG, accessToken);
             client = new DbxClientV2(config, accessToken);
 
-            Bitmap photoToKeep = photo;
+            Bitmap photoToKeep = Bitmap.createBitmap(photo);
 
             try{
                 // Compress photo to byte array
@@ -91,6 +91,10 @@ public class UploadPhotoService extends Service {
                 String newCatalog = "";
                 String imageURL = photoLink.getUrl().replace("dl=0", "raw=1");
 
+                if(!global.containsPhoto(album[0], imageURL)){
+                    global.addPhotoToAlbum(album[0], photoToKeep, imageURL);
+                }
+
                 if (previousCatalog.isEmpty())
                     newCatalog = imageURL;
                 else
@@ -103,8 +107,6 @@ public class UploadPhotoService extends Service {
                 SharedLinkMetadata linkMetadata = client.sharing().createSharedLinkWithSettings(catalogPath);
                 String url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + loginToken + "&album=" + album[0];
                 WebInterface.post(url, linkMetadata.getUrl());
-
-                global.addPhotoToAlbum(album[0], photoToKeep, linkMetadata.getUrl());
 
                 photoName = metadata.getName();
 
