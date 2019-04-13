@@ -29,6 +29,7 @@
             android:label="@string/title_activity_view_album"/>
         <activity
             android:name=".CreateAlbum"
+            android:windowSoftInputMode="stateVisible"
             android:label="@string/title_activity_create_album"/>
         <activity
             android:name=".HomeActivity"
@@ -36,7 +37,9 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".AlbumViewActivity" />
         <activity android:name=".AlbunsActivity" />
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

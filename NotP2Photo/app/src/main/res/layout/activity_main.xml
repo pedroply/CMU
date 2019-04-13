@@ -16,9 +16,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:paddingBottom="20dp"
+            android:paddingBottom="10dp"
             android:text="P2Photo"
-            android:textSize="80sp"
+            android:textSize="60sp"
             app:fontFamily="cursive" />
 
         <LinearLayout
