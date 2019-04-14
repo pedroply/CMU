@@ -219,7 +219,7 @@ public class HomeActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(ArrayList<String> list) {
-            setAlbumList(list);
+            setAlbumList(global.getAlbumList());
         }
     }
 

@@ -17,6 +17,11 @@ import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.Metadata;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,8 +45,8 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
         user = global.getUserName();
         userName = intent.getStringExtra("user");
 
-        //TODO: Get albuns not shared with the other user
-        setListView(global.getAlbumList());
+        new getUserAlbums().execute();
+
     }
 
     private void setListView(ArrayList<String> list){
@@ -64,6 +69,45 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
         });
     }
 
+    private class getUserAlbums extends AsyncTask<Void, Void , ArrayList<String>> {
+
+        @Override
+        protected ArrayList<String> doInBackground(Void... rndm){
+
+            ArrayList<String> albums = global.getAlbumList();
+            ArrayList<String> albumsToShare = new ArrayList<String>();
+
+            try {
+
+                for (String album : albums) {
+                    String url = "http://" + WebInterface.IP + "/retriveAlbum?name=" + user + "&token=" + loginToken + "&album=" + album;
+                    String response = WebInterface.get(url);
+
+                    JSONObject mainObject = new JSONObject(response);
+                    JSONArray linkArray = mainObject.getJSONArray("clients");
+
+                    if(!alreadyShared(linkArray)){
+                        albumsToShare.add(album);
+                    }
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return albumsToShare;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<String> albums){
+            if(albums.isEmpty()){
+                Toast.makeText(context, "No albums left to share", Toast.LENGTH_SHORT).show();
+            }
+            setListView(albums);
+        }
+
+    }
+
     private class shareAlbumWithUsersTask extends AsyncTask<String, Void, Void> {
 
         @Override
@@ -74,5 +118,21 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
             return null;
         }
 
+    }
+
+    private boolean alreadyShared(JSONArray linkArray){
+        try{
+            for (int i = 0; i < linkArray.length(); i++) {
+                String client = linkArray.getString(i);
+                if (client.equals(userName)) {
+                    return true;
+                }
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }
