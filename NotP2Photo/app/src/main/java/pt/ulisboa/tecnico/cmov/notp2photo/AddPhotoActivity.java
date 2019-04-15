@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,6 +41,7 @@ public class AddPhotoActivity extends AppCompatActivity {
     String accessToken = "";
     String album, photoName, loginToken, user;
     Bitmap photo;
+    private Button uploadButton;
     private Context context = this;
     private GlobalClass global;
 
@@ -54,13 +56,27 @@ public class AddPhotoActivity extends AppCompatActivity {
         album = intent.getStringExtra("album");
         loginToken = global.getUserLoginToken();
         user = global.getUserName();
+
+        uploadButton = (Button) findViewById(R.id.buttonUpload);
+        uploadButton.setEnabled(false);
+        uploadButton.setAlpha((float) 0.5);
     }
 
-    public void uploadPhoto(View v){
+    public void selectPhoto(View v){
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("image/*");
         startActivityForResult(Intent.createChooser(intent, "Select Picture"),REQUEST_GET_SINGLE_FILE);
+    }
+
+    public void uploadPhoto(View v) {
+        global.setServicePhoto(photo);
+        Intent intent = new Intent(this, UploadPhotoService.class);
+        intent.putExtra("album", album);
+        intent.putExtra("photoName", photoName);
+        startService(intent);
+
+        finish();
     }
 
     @Override
@@ -75,20 +91,14 @@ public class AddPhotoActivity extends AppCompatActivity {
                 dumpImageMetaData(imageUri);
                 ImageView photoView = (ImageView) findViewById(R.id.photoView);
                 photoView.setImageBitmap(photo);
+                uploadButton.setEnabled(true);
+                uploadButton.setAlpha((float) 1);
             }
 
         } catch(Exception e){
             e.printStackTrace();
             return;
         }
-
-        global.setServicePhoto(photo);
-        Intent intent = new Intent(this, UploadPhotoService.class);
-        intent.putExtra("album", album);
-        intent.putExtra("photoName", photoName);
-        startService(intent);
-
-        finish();
     }
 
     @SuppressLint("NewApi")
