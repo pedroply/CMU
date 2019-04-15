@@ -90,18 +90,16 @@ public class DownloadPhotosService extends Service {
                     Log.i(MainActivity.TAG, "BAOS: " + baos.toString());
 
                     if (baos.toString().isEmpty())
-                        break;
+                        continue;
                     String[] photoLinks = baos.toString().split("\n");
 
                     // Get the bitmaps of each photo
                     for (String link : photoLinks) {
-                        if(!global.containsPhoto(album, link)){
-                            bitmaps.add(link);
-                            URL photoURL = new URL(link);
+                        bitmaps.add(link);
+                        URL photoURL = new URL(link);
 
-                            Bitmap bitmap = BitmapFactory.decodeStream(photoURL.openStream());
-                            global.addPhotoToAlbum(album, bitmap, link);
-                        }
+                        Bitmap bitmap = BitmapFactory.decodeStream(photoURL.openStream());
+                        global.addPhotoToAlbum(album, bitmap, link);
                     }
                 }
             } catch (JSONException e) {
