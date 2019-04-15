@@ -95,11 +95,13 @@ public class DownloadPhotosService extends Service {
 
                     // Get the bitmaps of each photo
                     for (String link : photoLinks) {
-                        bitmaps.add(link);
-                        URL photoURL = new URL(link);
+                        if(!global.containsPhoto(album, link)){
+                            bitmaps.add(link);
+                            URL photoURL = new URL(link);
 
-                        Bitmap bitmap = BitmapFactory.decodeStream(photoURL.openStream());
-                        global.addPhotoToAlbum(album, bitmap, link);
+                            Bitmap bitmap = BitmapFactory.decodeStream(photoURL.openStream());
+                            global.addPhotoToAlbum(album, bitmap, link);
+                        }
                     }
                 }
             } catch (JSONException e) {
