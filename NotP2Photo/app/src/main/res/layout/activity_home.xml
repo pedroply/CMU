@@ -11,22 +11,28 @@
     <!-- Album List -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <ListView
             android:id="@+id/albumList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="60dp"
-            android:layout_marginBottom="150dp"/>
+            android:layout_above="@+id/refreshButton"
+            android:layout_alignParentTop="true"/>
 
         <Button
             android:id="@+id/refreshButton"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="620dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="15dp"
+            android:background="@drawable/button_login"
             android:onClick="refreshAlbums"
             android:text="Refresh" />
+
     </RelativeLayout>
 
     <!-- Sidebar -->

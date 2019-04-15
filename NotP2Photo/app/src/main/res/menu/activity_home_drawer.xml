@@ -7,20 +7,20 @@
         <item
             android:id="@+id/nav_createalbums"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="Create Albums" />
+            android:title="Create Album" />
         <item
             android:id="@+id/nav_addphoto"
             android:icon="@drawable/ic_menu_camera"
             android:title="Add Photo to Album" />
+        <item
+            android:id="@+id/nav_findusers"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="Add User to Album" />
     </group>
 
-    <item android:title="Shared and Find">
+    <!--item android:title="Shared and Find">
         <menu>
-            <item
-                android:id="@+id/nav_findusers"
-                android:icon="@drawable/ic_menu_slideshow"
-                android:title="Find Users" />
         </menu>
-    </item>
+    </item-->
 
 </menu>
