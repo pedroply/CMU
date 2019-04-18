@@ -6,31 +6,36 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
+        android:name=".GlobalClass"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:name="pt.ulisboa.tecnico.cmov.notp2photo.GlobalClass">
-        <activity android:name=".ChooseAlbumUserActivity"
-            android:label="@string/title_activity_choose_album"></activity>
+        android:theme="@style/AppTheme">
+        <activity android:name=".LogActivity"></activity>
+        <activity
+            android:name=".ChooseAlbumUserActivity"
+            android:label="@string/title_activity_choose_album" />
         <activity
             android:name=".UserListActivity"
             android:label="@string/title_user_list" />
-        <activity android:name=".ChooseAlbumActivity"
-            android:label="@string/title_activity_choose_album"/>
-        <activity android:name=".AddPhotoActivity"
-            android:label="@string/title_activity_add_photo"/>
+        <activity
+            android:name=".ChooseAlbumActivity"
+            android:label="@string/title_activity_choose_album" />
+        <activity
+            android:name=".AddPhotoActivity"
+            android:label="@string/title_activity_add_photo" />
         <activity
             android:name=".ViewPhotoActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ViewAlbumActivity"
-            android:label="@string/title_activity_view_album"/>
+        <activity
+            android:name=".ViewAlbumActivity"
+            android:label="@string/title_activity_view_album" />
         <activity
             android:name=".CreateAlbum"
-            android:windowSoftInputMode="stateVisible"
-            android:label="@string/title_activity_create_album"/>
+            android:label="@string/title_activity_create_album"
+            android:windowSoftInputMode="stateVisible" />
         <activity
             android:name=".HomeActivity"
             android:label="@string/title_activity_home"
@@ -39,7 +44,7 @@
         <activity android:name=".AlbunsActivity" />
         <activity
             android:name=".MainActivity"
-            android:windowSoftInputMode="stateHidden|adjustResize" >
+            android:windowSoftInputMode="stateHidden|adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -62,9 +67,16 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <service android:name=".UploadPhotoService" android:enabled="true"/>
-        <service android:name=".UploadFolderService" android:enabled="true"/>
-        <service android:name=".DownloadPhotosService" android:enabled="true"/>
+
+        <service
+            android:name=".UploadPhotoService"
+            android:enabled="true" />
+        <service
+            android:name=".UploadFolderService"
+            android:enabled="true" />
+        <service
+            android:name=".DownloadPhotosService"
+            android:enabled="true" />
     </application>
 
 </manifest>

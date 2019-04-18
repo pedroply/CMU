@@ -16,6 +16,11 @@
             android:id="@+id/nav_findusers"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="Add User to Album" />
+        <item
+            android:id="@+id/nav_eventlog"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Event Log" />
+
     </group>
 
     <!--item android:title="Shared and Find">

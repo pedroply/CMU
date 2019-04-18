@@ -12,6 +12,7 @@ public class GlobalClass extends Application {
 
     private UserInfo user;
     private Bitmap selectedPhoto, servicePhoto;
+    private ArrayList<String> eventLog = new ArrayList<String>();
 
     public void createUser(String userName, String loginToken){
         user = new UserInfo(userName, loginToken);
@@ -87,6 +88,14 @@ public class GlobalClass extends Application {
 
     public boolean containsPhoto(String album, String link){
      return user.containsPhoto(album, link);
+    }
+
+    public void addEvent(String event){
+        eventLog.add(event);
+    }
+
+    public ArrayList<String> getLogEvent(){
+        return eventLog;
     }
 
     /*public boolean isServiceRunning(Class<?> serviceClass) {

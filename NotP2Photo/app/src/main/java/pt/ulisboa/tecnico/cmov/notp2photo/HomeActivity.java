@@ -149,6 +149,9 @@ public class HomeActivity extends AppCompatActivity
             Intent intent = new Intent(this, UserListActivity.class);
             startActivity(intent);
 
+        } else if(id == R.id.nav_eventlog) {
+            Intent intent = new Intent(this, LogActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

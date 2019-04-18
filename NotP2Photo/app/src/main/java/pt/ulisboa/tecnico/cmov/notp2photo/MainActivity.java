@@ -84,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
                     Toast toast = Toast.makeText(getApplicationContext(), "Login Ok! token: " + mainObject.getString("token"), Toast.LENGTH_SHORT);
                     toast.show();
 
+                    global.addEvent("User " + user + " logged in P2Photo");
+
                     Intent intent = new Intent(getBaseContext(), HomeActivity.class);
                     global.createUser(user, mainObject.getString("token"));
                     startActivity(intent);
@@ -122,6 +124,8 @@ public class MainActivity extends AppCompatActivity {
                 if(mainObject.has("response") && mainObject.getString("response").equals(WebInterface.responseOK)){
                     Toast toast = Toast.makeText(getApplicationContext(), "Register Ok!", Toast.LENGTH_SHORT);
                     toast.show();
+
+                    global.addEvent("User " + user + " registered in P2Photo");
                 }
                 else{
                     Toast toast = Toast.makeText(getApplicationContext(), "Register Error! " + mainObject.getString("response"), Toast.LENGTH_SHORT);
