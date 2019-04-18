@@ -11,6 +11,8 @@ public class Album {
 	@JsonIgnore
 	private HashMap<String, String> clientsLinks;
 	private ArrayList<String> links;
+	private ArrayList<String> clients;
+
 	
 	public Album(String name) {
 		this.name = name;

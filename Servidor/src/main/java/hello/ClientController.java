@@ -20,10 +20,13 @@ public class ClientController {
 
     @RequestMapping("/register")
     public String register(@RequestParam String passwdHashBase64, @RequestParam String name) {
+    	Log.getInstance().addEntry("Register client: " + name + " with passhash: " + passwdHashBase64);
     	if (Application.clients.containsKey(name)) {
+    		Log.getInstance().addEntry("Client " + name + " Already Registered");
     		return "{\"response\":\"Client Already Registered\"}";
     	}
     	Application.clients.put(name, new Client(passwdHashBase64, name));
+    	Log.getInstance().addEntry("Client " + name + " Registered Successfully");
         return "{\"response\":\"OK\"}";
     }
     
@@ -32,8 +35,10 @@ public class ClientController {
     	if (Application.clients.containsKey(name) && Application.clients.get(name).getPasswdHashBase64().equals(passwdHashBase64)) {
     		String token = randomTokenNotSecure();
     		Application.clients.get(name).setToken(token);
+    		Log.getInstance().addEntry("Login client: " + name + " with passhash: " + passwdHashBase64 + " with token: " + token);
     		return "{\"token\":\""+token+"\"}";
     	}
+    	Log.getInstance().addEntry("Login Err client: " + name + " with passhash: " + passwdHashBase64);
         return "{\"response\":\"ERR\"}";
     }
     
@@ -41,8 +46,10 @@ public class ClientController {
     public String logout(@RequestParam String token, @RequestParam String name) {
     	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token)) {
     		Application.clients.get(name).setToken(null);
+    		Log.getInstance().addEntry("Logout client: " + name + " with token: " + token);
     		return "{\"response\":\"OK\"}";
     	}
+    	Log.getInstance().addEntry("Logout Err client: " + name + " with token: " + token);
         return "{\"response\":\"ERR\"}";
     }
     
@@ -54,12 +61,15 @@ public class ClientController {
 	    		Application.albums.put(album, new Album(album));
 	    		Application.albums.get(album).updateClient(name, null);
 	    		Application.clients.get(name).addAlbum(album);
+	    		Log.getInstance().addEntry("Create Album by client: " + name + " with token: " + token + " album name: " + album);
 	    		return "{\"response\":\"OK\"}";
     		}
     		else {
+    			Log.getInstance().addEntry("Create Album Err (album already exists) by client: " + name + " with token: " + token + " album name: " + album);
     			return "{\"response\":\"Album Already Registered\"}";
     		}
     	}
+    	Log.getInstance().addEntry("Create Album Err by client: " + name + " with token: " + token + " album name: " + album);
         return "{\"response\":\"ERR\"}";
     }
     
@@ -68,8 +78,10 @@ public class ClientController {
     	if (Application.clients.containsKey(name) && Application.clients.containsKey(client2Add) && Application.clients.get(name).getToken().equals(token) && Application.clients.get(name).belongsToAlbum(album)) {
     		Application.albums.get(album).updateClient(client2Add, null);
     		Application.clients.get(client2Add).addAlbum(album);
+    		Log.getInstance().addEntry("Add Client to Album by client: " + name + " with token: " + token + " album name: " + album + " added client name: " + client2Add);
     		return "{\"response\":\"OK\"}";
     	}
+		Log.getInstance().addEntry("Add Client to Album Err by client: " + name + " with token: " + token + " album name: " + album + " added client name: " + client2Add);
         return "{\"response\":\"ERR\"}";
     }
     
@@ -91,32 +103,40 @@ public class ClientController {
     		System.out.println("Posting linnk: " + link);
         	System.out.println("To Album: " + album);
     		Application.albums.get(album).updateClient(name, link);
+    		Log.getInstance().addEntry("Post Link to Album by client: " + name + " with token: " + token + " album name: " + album + " added link: " + link);
     		return "{\"response\":\"OK\"}";
     	}
+		Log.getInstance().addEntry("Post Link to Album Err by client: " + name + " with token: " + token + " album name: " + album + " added link: " + link);
         return "{\"response\":\"ERR\"}";
     }
     
     @RequestMapping("/retriveAlbum")
     public Album getAlbum(@RequestParam String token, @RequestParam String name, @RequestParam String album) {
     	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token)) {
+    		Log.getInstance().addEntry("Get Album by client: " + name + " with token: " + token + " album name: " + album);
     		return Application.albums.get(album);
     	}
+    	Log.getInstance().addEntry("Get Album Err by client: " + name + " with token: " + token + " album name: " + album);
         return new Album("null");
     }
     
     @RequestMapping("/retriveAllAlbuns")
     public ArrayList<String> getAlbuns(@RequestParam String token, @RequestParam String name) {
     	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token)) {
+    		Log.getInstance().addEntry("Get Albums by client: " + name + " with token: " + token);
     		return Application.clients.get(name).getAlbums();
     	}
+		Log.getInstance().addEntry("Get Albums Err by client: " + name + " with token: " + token);
         return new ArrayList<>();
     }
     
     @RequestMapping("/retriveUsers")
     public Set<String> getUsers(@RequestParam String token, @RequestParam String name) {
     	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token)) {
+    		Log.getInstance().addEntry("Get Clients by client: " + name + " with token: " + token);
     		return Application.clients.keySet();
     	}
+		Log.getInstance().addEntry("Get Clients Err by client: " + name + " with token: " + token);
         return (new HashMap<String, Void>()).keySet();
     }
     
@@ -124,6 +144,7 @@ public class ClientController {
     public String reset() {
     	Application.clients = new HashMap<String, Client>();
     	Application.albums = new HashMap<String, Album>();
+		Log.getInstance().addEntry("reset!");
 		return "Done!";
     }
     
