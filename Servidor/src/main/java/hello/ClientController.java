@@ -140,6 +140,11 @@ public class ClientController {
         return (new HashMap<String, Void>()).keySet();
     }
     
+    @RequestMapping("/getLog")
+    public Log getLog() {
+    	return Log.getInstance();
+    }
+    
     @RequestMapping("/reset")
     public String reset() {
     	Application.clients = new HashMap<String, Client>();
