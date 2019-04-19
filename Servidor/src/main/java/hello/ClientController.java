@@ -54,15 +54,15 @@ public class ClientController {
         return "{\"response\":\"ERR\"}";
     }
     
-    @RequestMapping("/createAlbum")
-    public String createAlbum(@RequestParam String token, @RequestParam String name, @RequestParam String album) {
+    @RequestMapping(value = "/createAlbum", method = RequestMethod.POST)
+    public String createAlbum(@RequestParam String token, @RequestParam String name, @RequestParam String album, @RequestBody String encriptedKeyBase64) {
     	System.out.println(Application.clients.get(name).getToken() + " == " + token);
     	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token)) {
     		if(!Application.albums.containsKey(album)) {
 	    		Application.albums.put(album, new Album(album));
-	    		Application.albums.get(album).updateClient(name, null);
+	    		Application.albums.get(album).updateClient(name, null, encriptedKeyBase64);
 	    		Application.clients.get(name).addAlbum(album);
-	    		Log.getInstance().addEntry("Create Album by client: " + name + " with token: " + token + " album name: " + album);
+	    		Log.getInstance().addEntry("Create Album by client: " + name + " with token: " + token + " album name: " + album + " with encriptedKey: " + encriptedKeyBase64);
 	    		return "{\"response\":\"OK\"}";
     		}
     		else {
