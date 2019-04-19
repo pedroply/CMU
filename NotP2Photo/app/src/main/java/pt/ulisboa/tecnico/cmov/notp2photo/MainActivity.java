@@ -18,6 +18,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String user;
     private GlobalClass global;
+    private KeyPair keyPair;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,16 +54,21 @@ public class MainActivity extends AppCompatActivity {
         new loginTask().execute(url);
     }
 
-    public void register(View v) throws IOException {
-        // /register?name=joao&passwdHashBase64=123
+    public void register(View v) throws GeneralSecurityException {
+        // /register?name=joao&passwdHashBase64=123&pubKeyBase64=....
         EditText userTextInput = findViewById(R.id.userInputText);
         String user = userTextInput.getText().toString();
 
         EditText passTextInput = findViewById(R.id.passInputText);
         String pass = passTextInput.getText().toString();
 
-        String url = "http://" + WebInterface.IP + "/register?name="+user+"&passwdHashBase64="+pass;
+        keyPair = RSAGenerator.generateNReturn();
+
+        String url = "http://" + WebInterface.IP + "/register?name="+user+"&passwdHashBase64="+pass+"&pubKeyBase64="+RSAGenerator.getBase64PubKey(keyPair);
+
         Log.d(TAG, "URL: " + url);
+
+
 
         new registerTask().execute(url);
 
@@ -125,6 +135,9 @@ public class MainActivity extends AppCompatActivity {
                     Toast toast = Toast.makeText(getApplicationContext(), "Register Ok!", Toast.LENGTH_SHORT);
                     toast.show();
 
+                    //generate new keypair
+                    RSAGenerator.writeKeysToFiles(keyPair, user, getBaseContext());
+
                     global.addEvent("User " + user + " registered in P2Photo");
                 }
                 else{
@@ -136,6 +149,10 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
                 Toast toast = Toast.makeText(getApplicationContext(), "Register Error!", Toast.LENGTH_SHORT);
                 toast.show();
+            } catch (GeneralSecurityException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

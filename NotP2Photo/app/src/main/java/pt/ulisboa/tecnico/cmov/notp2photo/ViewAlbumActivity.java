@@ -78,13 +78,21 @@ public class ViewAlbumActivity extends AppCompatActivity {
 
         ArrayList<Bitmap> photoBitMap = global.getAlbumPhotoList(album);
         Bitmap[] result = new Bitmap[photoBitMap.size()];
+        Bitmap[] thumbsArray = new Bitmap[photoBitMap.size()];
         result = photoBitMap.toArray(result);
-        setGridView(result);
+        ArrayList<Bitmap> thumbsList = new ArrayList<>();
+        for(int i = 0; i < photoBitMap.size(); i++){
+            thumbsList.add(Bitmap.createScaledBitmap(thumbsList.get(i), 120, 120, false));
+        }
+
+        setGridView(result, thumbsArray);
     }
 
-    public void setGridView(final Bitmap[] bm){
+    public void setGridView(final Bitmap[] bm, final Bitmap[] thumbs){
         gridView = (GridView) findViewById(R.id.gridAlbum);
-        ImageAdapter adapter = new ImageAdapter(context,bm);
+
+
+        ImageAdapter adapter = new ImageAdapter(context, thumbs);
         gridView.setAdapter(adapter);
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -98,4 +106,5 @@ public class ViewAlbumActivity extends AppCompatActivity {
             }
         });
     }
+
 }
