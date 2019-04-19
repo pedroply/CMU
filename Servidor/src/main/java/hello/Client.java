@@ -2,16 +2,23 @@ package hello;
 
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Client {
 
+	@JsonIgnore
     private String passwdHashBase64;
     private String name;
+    @JsonIgnore
     private String token;
+    private String pubKeyBase64;
+    @JsonIgnore
     private ArrayList<String> albums;
 
-    public Client(String passwdHashBase64, String name) {
+    public Client(String passwdHashBase64, String name, String pubKeyBase64) {
         this.passwdHashBase64 = passwdHashBase64;
         this.name = name;
+        this.pubKeyBase64 = pubKeyBase64;
         this.albums = new ArrayList<String>();
     }
 
@@ -64,5 +71,12 @@ public class Client {
 		return false;
 	}
 
-    
+	public String getPubKeyBase64() {
+		return pubKeyBase64;
+	}
+
+	public void setPubKeyBase64(String pubKeyBase64) {
+		this.pubKeyBase64 = pubKeyBase64;
+	}
+	
 }

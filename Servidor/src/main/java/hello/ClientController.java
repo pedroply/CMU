@@ -2,6 +2,7 @@ package hello;
 
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Set;
@@ -19,13 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class ClientController {
 
     @RequestMapping("/register")
-    public String register(@RequestParam String passwdHashBase64, @RequestParam String name) {
+    public String register(@RequestParam String passwdHashBase64, @RequestParam String name, @RequestParam String pubKeyBase64) {
     	Log.getInstance().addEntry("Register client: " + name + " with passhash: " + passwdHashBase64);
     	if (Application.clients.containsKey(name)) {
     		Log.getInstance().addEntry("Client " + name + " Already Registered");
     		return "{\"response\":\"Client Already Registered\"}";
     	}
-    	Application.clients.put(name, new Client(passwdHashBase64, name));
+    	Application.clients.put(name, new Client(passwdHashBase64, name, pubKeyBase64));
     	Log.getInstance().addEntry("Client " + name + " Registered Successfully");
         return "{\"response\":\"OK\"}";
     }
@@ -131,13 +132,13 @@ public class ClientController {
     }
     
     @RequestMapping("/retriveUsers")
-    public Set<String> getUsers(@RequestParam String token, @RequestParam String name) {
+    public Collection<Client> getUsers(@RequestParam String token, @RequestParam String name) {
     	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token)) {
     		Log.getInstance().addEntry("Get Clients by client: " + name + " with token: " + token);
-    		return Application.clients.keySet();
+    		return Application.clients.values();
     	}
 		Log.getInstance().addEntry("Get Clients Err by client: " + name + " with token: " + token);
-        return (new HashMap<String, Void>()).keySet();
+        return (new HashMap<String, Client>()).values();
     }
     
     @RequestMapping("/getLog")
