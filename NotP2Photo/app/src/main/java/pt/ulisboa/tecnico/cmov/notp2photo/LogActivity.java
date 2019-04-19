@@ -1,10 +1,20 @@
 package pt.ulisboa.tecnico.cmov.notp2photo;
 
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class LogActivity extends AppCompatActivity {
 
@@ -15,21 +25,36 @@ public class LogActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log);
 
-        global = (GlobalClass) getApplicationContext();
-
-        EditText logText = (EditText) findViewById(R.id.logEditText);
-        logText.setText(convertLogToString(global.getLogEvent()));
-
+        new getLogs().execute();
     }
 
-    private String convertLogToString(ArrayList<String> log){
-        String result = "";
-
-        for(String logEvent : log){
-            result += logEvent + "\n";
+    private class getLogs extends AsyncTask<Void, Void, String> {
+        @Override
+        protected String doInBackground(Void... voids) {
+            String url = "http://" + WebInterface.IP + "/getLog";
+            return WebInterface.get(url);
         }
 
-        return result;
-
+        @Override
+        protected void onPostExecute(String response) {
+            List<Map<String, String>> logList = new ArrayList<Map<String, String>>();
+            try {
+                JSONObject mainObject = new JSONObject(response);
+                JSONArray logArray = mainObject.getJSONArray("logs");
+                for (int i = logArray.length() - 1; i >= 0; i--) {
+                    Map<String, String> logMap = new HashMap<String, String>(2);
+                    String[] log = logArray.getString(i).split(" - ");
+                    logMap.put("title", log[1]);
+                    logMap.put("date", log[0]);
+                    logList.add(logMap);
+                }
+                SimpleAdapter adapter = new SimpleAdapter(getApplicationContext(), logList, R.layout.activity_log_view,
+                                                          new String[] {"title", "date"}, new int[] {R.id.titleText, R.id.dataText});
+                final ListView listView = (ListView) findViewById(R.id.logList);
+                listView.setAdapter(adapter);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
