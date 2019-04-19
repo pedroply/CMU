@@ -1,8 +1,11 @@
 package pt.ulisboa.tecnico.cmov.notp2photo;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -11,11 +14,19 @@ public class UserInfo {
     private String loginToken;
     private String accessToken;
     private String userName;
+    private KeyPair keyPair;
     private TreeMap<String, TreeMap<String, Bitmap>> albums = new TreeMap<String, TreeMap<String, Bitmap>>();
 
-    public UserInfo(String user, String loginToken){
+    public UserInfo(String user, String loginToken, Context c){
         userName = user;
         this.loginToken = loginToken;
+        try {
+            keyPair = RSAGenerator.readKeysFromFiles(user, c);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public String getUserName(){
@@ -32,6 +43,14 @@ public class UserInfo {
 
     public void setAccessToken(String accessToken){
         this.accessToken = accessToken;
+    }
+
+    public KeyPair getKeyPair() {
+        return keyPair;
+    }
+
+    public void setKeyPair(KeyPair keyPair) {
+        this.keyPair = keyPair;
     }
 
     public boolean albumListEmpty(){

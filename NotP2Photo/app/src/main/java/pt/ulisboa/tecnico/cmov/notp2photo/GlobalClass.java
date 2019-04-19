@@ -5,6 +5,7 @@ import android.app.Application;
 import android.graphics.Bitmap;
 
 import java.io.ByteArrayOutputStream;
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -15,7 +16,7 @@ public class GlobalClass extends Application {
     private ArrayList<String> eventLog = new ArrayList<String>();
 
     public void createUser(String userName, String loginToken){
-        user = new UserInfo(userName, loginToken);
+        user = new UserInfo(userName, loginToken, getBaseContext());
     }
 
     public String getUserName(){
@@ -28,6 +29,10 @@ public class GlobalClass extends Application {
 
     public String getUserAccessToken(){
         return user.getAccessToken();
+    }
+
+    public KeyPair getUserKeyPair(){
+        return user.getKeyPair();
     }
 
     public boolean albumListEmpty(){

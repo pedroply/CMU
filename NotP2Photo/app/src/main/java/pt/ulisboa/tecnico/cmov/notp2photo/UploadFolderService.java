@@ -15,6 +15,10 @@ import com.dropbox.core.v2.sharing.SharedLinkMetadata;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
 
 public class UploadFolderService extends Service {
 
@@ -61,10 +65,24 @@ public class UploadFolderService extends Service {
                 // Create folder in dropbox
                 client.files().createFolder("/P2Photo/" + path[0]);
 
+                //generateRandom AES key to encript the index file
+                String encriptedKeyBase64 = "";
+                try {
+                    Key k = SymmetricCrypto.generateRandomKey();
+                    byte[] encriptedKey = RSAGenerator.encrypt(global.getUserKeyPair().getPublic(), k.getEncoded());
+                    encriptedKeyBase64 = Base64.getEncoder().encodeToString(encriptedKey);
+                } catch (NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                } catch (InvalidKeySpecException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 // TODO: DO SOMETHING WITH RESPONSES
                 String url = "http://" + WebInterface.IP + "/createAlbum?name="+user+"&token="+token+"&album="+path[0];
                 Log.d(MainActivity.TAG, "URL: " + url);
-                WebInterface.get(url);
+                WebInterface.post(url, encriptedKeyBase64);
 
                 // Create new blank file in the created folder and put its link in the server
                 String catalogPath = "/P2Photo/" + path[0] + "/index.txt";
