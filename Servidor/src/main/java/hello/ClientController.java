@@ -60,7 +60,7 @@ public class ClientController {
     	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token)) {
     		if(!Application.albums.containsKey(album)) {
 	    		Application.albums.put(album, new Album(album));
-	    		Application.albums.get(album).updateClient(name, null, encriptedKeyBase64);
+	    		Application.albums.get(album).updateClient(name, encriptedKeyBase64);
 	    		Application.clients.get(name).addAlbum(album);
 	    		Log.getInstance().addEntry("Create Album by client: " + name + " with token: " + token + " album name: " + album + " with encriptedKey: " + encriptedKeyBase64);
 	    		return "{\"response\":\"OK\"}";
@@ -99,11 +99,13 @@ public class ClientController {
     }*/
     
     @RequestMapping(value = "/postLink", method = RequestMethod.POST)
-    public String persistPerson(@RequestParam String token, @RequestParam String name, @RequestParam String album, @RequestBody String link) {
+    public String postLink(@RequestParam String token, @RequestParam String name, @RequestParam String album, @RequestBody String body) {
+    	String link = body.split("\\r?\\n")[0];
+    	String ivBase64 = body.split("\\r?\\n")[1];
     	if (Application.clients.containsKey(name) && Application.clients.get(name).getToken().equals(token) && Application.clients.get(name).belongsToAlbum(album)) {
     		System.out.println("Posting linnk: " + link);
         	System.out.println("To Album: " + album);
-    		Application.albums.get(album).updateClient(name, link);
+    		Application.albums.get(album).updateClient(name, link, ivBase64);
     		Log.getInstance().addEntry("Post Link to Album by client: " + name + " with token: " + token + " album name: " + album + " added link: " + link);
     		return "{\"response\":\"OK\"}";
     	}
@@ -152,6 +154,13 @@ public class ClientController {
     	Application.albums = new HashMap<String, Album>();
 		Log.getInstance().addEntry("reset!");
 		return "Done!";
+    }
+    
+    @RequestMapping(value = "/test", method = RequestMethod.POST)
+    public String test(@RequestParam String urlParam, @RequestBody String body) {
+    	String link = body.split("\\r?\\n")[0];
+    	String ivBase64 = body.split("\\r?\\n")[1];
+    	return "url: " + urlParam + " link: " + link + " ivBase64: " + ivBase64;
     }
     
     private String randomTokenNotSecure() {
