@@ -117,17 +117,18 @@ public class UploadPhotoService extends Service {
                         break;
                     }
                 }
+                String previousCatalog = "emptyemptyemptyemptyemptyemptyemptyemptyemptyempty";
                 if(ivBase64 == null){
                     //no iv found, this should never happen (for one user)
-                    throw new Exception("No ivfound!");
+                    //throw new Exception("No ivfound!");
+
+                    //decript baos first
+                    byte[] encriptedIndexFile = baos.toByteArray();
+                    String decriptedIndexString = new String(SymmetricCrypto.decrypt(k, encriptedIndexFile, Base64.decode(ivBase64, Base64.DEFAULT)));
+
+                    previousCatalog = decriptedIndexString;
                 }
 
-                //decript baos first
-                byte[] encriptedIndexFile = baos.toByteArray();
-                String decriptedIndexString = new String(SymmetricCrypto.decrypt(k, encriptedIndexFile, Base64.decode(ivBase64, Base64.DEFAULT)));
-
-
-                String previousCatalog = decriptedIndexString;
                 String newCatalog = "";
                 String imageURL = photoLink.getUrl().replace("dl=0", "raw=1");
 
