@@ -61,6 +61,7 @@ public class Album {
 			ArrayList<String> linkIv = new ArrayList<>();
 			linkIv.add(clientsLinks.get(i));
 			linkIv.add(clientsIvs.get(i));
+			linkIv.add(i);
 			linksIvs.add(linkIv);
 		}
 		return linksIvs;

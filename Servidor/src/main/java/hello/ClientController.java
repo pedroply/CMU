@@ -21,13 +21,13 @@ public class ClientController {
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public String register(@RequestParam String passwdHashBase64, @RequestParam String name, @RequestBody String pubKeyBase64) {
-    	Log.getInstance().addEntry("Register client: " + name + " with passhash: " + passwdHashBase64);
+    	//Log.getInstance().addEntry("Register client: " + name + " with passhash: " + passwdHashBase64);
     	if (Application.clients.containsKey(name)) {
     		Log.getInstance().addEntry("Client " + name + " Already Registered");
     		return "{\"response\":\"Client Already Registered\"}";
     	}
     	Application.clients.put(name, new Client(passwdHashBase64, name, pubKeyBase64));
-    	Log.getInstance().addEntry("Client " + name + " Registered Successfully");
+    	Log.getInstance().addEntry("Client " + name + " Registered Successfully with passhash: " + passwdHashBase64 + " and pubKeyBase64: " + pubKeyBase64);
         return "{\"response\":\"OK\"}";
     }
     
