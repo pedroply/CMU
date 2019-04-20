@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ClientController {
 
-    @RequestMapping("/register")
-    public String register(@RequestParam String passwdHashBase64, @RequestParam String name, @RequestParam String pubKeyBase64) {
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    public String register(@RequestParam String passwdHashBase64, @RequestParam String name, @RequestBody String pubKeyBase64) {
     	Log.getInstance().addEntry("Register client: " + name + " with passhash: " + passwdHashBase64);
     	if (Application.clients.containsKey(name)) {
     		Log.getInstance().addEntry("Client " + name + " Already Registered");
