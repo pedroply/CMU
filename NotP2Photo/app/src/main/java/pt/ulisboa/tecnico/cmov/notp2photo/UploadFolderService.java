@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -16,15 +17,16 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Key;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
 
 public class UploadFolderService extends Service {
 
     private String accessToken, token, user;
     private DbxClientV2 client;
     private GlobalClass global;
+    private KeyPair keyPair;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -38,6 +40,7 @@ public class UploadFolderService extends Service {
         accessToken = global.getUserAccessToken();
         token = global.getUserLoginToken();
         user = global.getUserName();
+        keyPair = global.getUserKeyPair();
     }
 
     @Override
@@ -65,12 +68,17 @@ public class UploadFolderService extends Service {
                 // Create folder in dropbox
                 client.files().createFolder("/P2Photo/" + path[0]);
 
-                //generateRandom AES key to encript the index file
+                //generateRandom AES key to encript the index file (needs also iv)
                 String encriptedKeyBase64 = "";
+                String ivBase64 = "";
+                Key k = null;
+                byte[] indexBytes = {};
                 try {
-                    Key k = SymmetricCrypto.generateRandomKey();
-                    byte[] encriptedKey = RSAGenerator.encrypt(global.getUserKeyPair().getPublic(), k.getEncoded());
-                    encriptedKeyBase64 = Base64.getEncoder().encodeToString(encriptedKey);
+                    k = SymmetricCrypto.generateRandomKey();
+                    byte[] encriptedKey = RSAGenerator.encrypt(keyPair.getPublic(), k.getEncoded());
+                    encriptedKeyBase64 = Base64.encodeToString(encriptedKey, Base64.DEFAULT);
+                    ivBase64 = Base64.encodeToString(SymmetricCrypto.generateNewIv().getIV(), Base64.DEFAULT);
+                    indexBytes = SymmetricCrypto.encrypt(k,"emptyemptyemptyemptyemptyemptyemptyemptyemptyempty".getBytes(), Base64.decode(ivBase64, Base64.DEFAULT));
                 } catch (NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 } catch (InvalidKeySpecException e) {
@@ -86,12 +94,12 @@ public class UploadFolderService extends Service {
 
                 // Create new blank file in the created folder and put its link in the server
                 String catalogPath = "/P2Photo/" + path[0] + "/index.txt";
-                InputStream targetStream = new ByteArrayInputStream("".getBytes());
+                InputStream targetStream = new ByteArrayInputStream(indexBytes);
                 client.files().uploadBuilder(catalogPath).uploadAndFinish(targetStream);
 
                 SharedLinkMetadata linkMetadata = client.sharing().createSharedLinkWithSettings(catalogPath);
                 url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + token + "&album=" + path[0];
-                WebInterface.post(url, linkMetadata.getUrl());
+                WebInterface.post(url, linkMetadata.getUrl()+"\n"+ivBase64);
 
             } catch (DbxException e) {
                 e.printStackTrace();

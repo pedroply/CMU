@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -22,7 +23,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Array;
+import java.security.KeyPair;
+import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ChooseAlbumUserActivity extends AppCompatActivity {
@@ -31,6 +35,9 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
     private String accessToken, loginToken, user;
     private String userName;
     private GlobalClass global;
+    private String pubKeyBase64;
+    private HashMap<String, String> albumKeys = new HashMap<>();
+    private KeyPair keyPair;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +50,10 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
         accessToken = global.getUserAccessToken();
         loginToken = global.getUserLoginToken();
         user = global.getUserName();
+        keyPair = global.getUserKeyPair();
+
         userName = intent.getStringExtra("user");
+        pubKeyBase64 = intent.getStringExtra("pubKeyBase64");
 
         new getUserAlbums().execute();
 
@@ -88,6 +98,8 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
 
                     if(!alreadyShared(linkArray)){
                         albumsToShare.add(album);
+                        //get encripted album key with my pub key
+                        albumKeys.put(album, mainObject.getJSONObject("encriptedKeys").getString(user));
                     }
 
                 }
@@ -112,8 +124,19 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(String... album){
+            //retrive allbum key and encripted with client to add pubkey
             String url = "http://" + WebInterface.IP + "/addClient2Album?name=" + user + "&token=" + loginToken + "&album=" + album[0] + "&client2Add=" + userName;
-            WebInterface.get(url);
+            //decript to get original
+            byte[] encriptedWithClient2AddPubKey = null;
+            try {
+                byte[] encodedKey = RSAGenerator.decrypt(keyPair.getPrivate(), Base64.decode(albumKeys.get(album), Base64.DEFAULT));
+                PublicKey clietn2AddPubKey = RSAGenerator.readPublicKeyBase64(pubKeyBase64);
+                encriptedWithClient2AddPubKey = RSAGenerator.encrypt(clietn2AddPubKey, encodedKey);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            WebInterface.post(url, Base64.encodeToString(encriptedWithClient2AddPubKey, Base64.DEFAULT));
 
             return null;
         }

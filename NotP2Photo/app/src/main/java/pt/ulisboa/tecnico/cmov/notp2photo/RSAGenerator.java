@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.cmov.notp2photo;
 
 import android.content.Context;
+import android.util.Base64;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -8,11 +9,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Base64;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 
 import javax.crypto.Cipher;
@@ -33,7 +35,7 @@ public class RSAGenerator {
         return keys;
     }
 
-    public static void writeKeysToFiles(KeyPair keys, String user, Context c) throws GeneralSecurityException, IOException {
+    public static void writeKeysToFiles(KeyPair keys, String user, Context c) throws IOException {
         FileOutputStream fos = c.openFileOutput(user+keysFileName, Context.MODE_PRIVATE);
         ObjectOutputStream os = new ObjectOutputStream(fos);
         os.writeObject(keys);
@@ -50,8 +52,13 @@ public class RSAGenerator {
         return keyPair;
     }
 
+    public static PublicKey readPublicKeyBase64(String keyBase64) throws Exception {
+        X509EncodedKeySpec key = new X509EncodedKeySpec(Base64.decode(keyBase64, Base64.DEFAULT));
+        return KeyFactory.getInstance("RSA").generatePublic(key);
+    }
+
     public static String getBase64PubKey(KeyPair keyPair) {
-        return Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+        return Base64.encodeToString(keyPair.getPublic().getEncoded(), Base64.DEFAULT);
     }
 
     public static byte[] encrypt(PublicKey publicKey, byte[] obj) throws Exception {

@@ -21,7 +21,7 @@ public class SymmetricCrypto {
     private static final String CIPHER_ALGO = "AES/CTS/NoPadding";
     private static final int CIPHER_KEY_SIZE = 256;
 
-    private static final String KDF_ALGORITHM = "PBKDF2WithHmacSHA256";
+    private static final String KDF_ALGORITHM = "PBKDF2withHmacSHA1";
     private static final int KDF_ITERATIONS = 2048;
 
     private static final String DEFAULT_SALT = "F2BdmZEp8q";
@@ -48,6 +48,11 @@ public class SymmetricCrypto {
         SecretKeyFactory skf = SecretKeyFactory.getInstance(KDF_ALGORITHM);
         SecretKey tmp = skf.generateSecret(spec);
         SecretKey secret = new SecretKeySpec(tmp.getEncoded(), CIPHER_ALGO_KEY);
+        return secret;
+    }
+
+    public static Key generateKeyFromEncodedKey(byte[] encodedKey) {
+        SecretKey secret = new SecretKeySpec(encodedKey, CIPHER_ALGO_KEY);
         return secret;
     }
 

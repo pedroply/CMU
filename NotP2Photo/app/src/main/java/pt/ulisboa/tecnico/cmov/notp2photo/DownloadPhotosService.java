@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -15,6 +16,7 @@ import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.sharing.SharedLinkMetadata;
+import com.fasterxml.jackson.databind.ser.Serializers;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,9 +28,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.net.URL;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.TreeMap;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 public class DownloadPhotosService extends Service {
 
@@ -37,6 +49,7 @@ public class DownloadPhotosService extends Service {
     private String token, loginToken, user, album;
     private ArrayList<String> bitmaps = new ArrayList<String>();
     private static ArrayList<String> downloadingAlbums = new ArrayList<String>();
+    private KeyPair keyPair;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -49,6 +62,7 @@ public class DownloadPhotosService extends Service {
         token = global.getUserAccessToken();
         loginToken = global.getUserLoginToken();
         user = global.getUserName();
+        keyPair = global.getUserKeyPair();
 
     }
 
@@ -77,24 +91,40 @@ public class DownloadPhotosService extends Service {
 
             try {
                 JSONObject mainObject = new JSONObject(response);
-                JSONArray linkArray = mainObject.getJSONArray("links");
+
+                //this array is diferent now
+                JSONArray linkArray = mainObject.getJSONArray("linksIvs");
+
+                //get encriptedSymetrickey and decripte it with my privkey
+                String encriptedKeyBase64 = mainObject.getJSONObject("encriptedKeys").getString(user);
+                byte[] encodedKey = RSAGenerator.decrypt(keyPair.getPrivate(), Base64.decode(encriptedKeyBase64, Base64.DEFAULT));
+                Key k = SymmetricCrypto.generateKeyFromEncodedKey(encodedKey);
 
                 for(int i = 0; i < linkArray.length(); i++) {
                     // Get the catalog file links
-                    String catalogLink = linkArray.getString(i);
+                    String catalogLink = linkArray.getJSONArray(i).getString(0);
+                    String ivBase64 = linkArray.getJSONArray(i).getString(1);
                     Log.i(MainActivity.TAG, "LINK: " + catalogLink);
+                    Log.i(MainActivity.TAG, "IVBASE64: " + ivBase64);
 
                     DbxDownloader<SharedLinkMetadata> downloader = client.sharing().getSharedLinkFile(catalogLink);
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     downloader.download(baos);
-                    Log.i(MainActivity.TAG, "BAOS: " + baos.toString());
 
-                    if (baos.toString().isEmpty())
+                    //needs to decript baos first
+                    byte[] encriptedIndexFile = baos.toByteArray();
+                    String decriptedIndexString = new String(SymmetricCrypto.decrypt(k, encriptedIndexFile, Base64.decode(ivBase64.getBytes(), Base64.DEFAULT)));
+
+                    Log.i(MainActivity.TAG, "INDEX: " + decriptedIndexString);
+
+                    if (decriptedIndexString.isEmpty())
                         continue;
-                    String[] photoLinks = baos.toString().split("\n");
+                    String[] photoLinks = decriptedIndexString.split("\n");
+                    //photoLinks = Arrays.copyOfRange(photoLinks, 1, photoLinks.length);
 
                     // Get the bitmaps of each photo
                     for (String link : photoLinks) {
+                        //Log.i(MainActivity.TAG, "LINKS: " + link);
                         if(!global.containsPhoto(album, link)){
                             bitmaps.add(link);
                             URL photoURL = new URL(link);
@@ -109,6 +139,20 @@ public class DownloadPhotosService extends Service {
             } catch (DbxException e) {
                 e.printStackTrace();
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (InvalidKeyException e) {
+                e.printStackTrace();
+            } catch (InvalidAlgorithmParameterException e) {
+                e.printStackTrace();
+            } catch (IllegalBlockSizeException e) {
+                e.printStackTrace();
+            } catch (BadPaddingException e) {
+                e.printStackTrace();
+            } catch (NoSuchPaddingException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 

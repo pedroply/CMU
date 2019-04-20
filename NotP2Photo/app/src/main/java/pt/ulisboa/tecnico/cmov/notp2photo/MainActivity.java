@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         new loginTask().execute(url);
     }
 
-    public void register(View v) throws GeneralSecurityException {
+    public void register(View v) {
         // /register?name=joao&passwdHashBase64=123&pubKeyBase64=....
         EditText userTextInput = findViewById(R.id.userInputText);
         String user = userTextInput.getText().toString();
@@ -62,9 +62,7 @@ public class MainActivity extends AppCompatActivity {
         EditText passTextInput = findViewById(R.id.passInputText);
         String pass = passTextInput.getText().toString();
 
-        keyPair = RSAGenerator.generateNReturn();
-
-        String url = "http://" + WebInterface.IP + "/register?name="+user+"&passwdHashBase64="+pass+"&pubKeyBase64="+RSAGenerator.getBase64PubKey(keyPair);
+        String url = "http://" + WebInterface.IP + "/register?name="+user+"&passwdHashBase64="+pass;
 
         Log.d(TAG, "URL: " + url);
 
@@ -77,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
     class loginTask extends AsyncTask<String, Void, String> {
 
         protected String doInBackground(String... urls) {
-
             String response = WebInterface.get(urls[0]);
             Log.i(TAG, "Response: " + response.toString());
             System.out.println(response.toString());
@@ -118,8 +115,12 @@ public class MainActivity extends AppCompatActivity {
     class registerTask extends AsyncTask<String, Void, String> {
 
         protected String doInBackground(String... urls) {
-
-            String response = WebInterface.get(urls[0]);
+            try {
+                keyPair = RSAGenerator.generateNReturn();
+            } catch (GeneralSecurityException e) {
+                e.printStackTrace();
+            }
+            String response = WebInterface.post(urls[0], RSAGenerator.getBase64PubKey(keyPair));
             Log.i(TAG, "Response: " + response.toString());
             System.out.println(response.toString());
             return response.toString();
@@ -135,7 +136,8 @@ public class MainActivity extends AppCompatActivity {
                     Toast toast = Toast.makeText(getApplicationContext(), "Register Ok!", Toast.LENGTH_SHORT);
                     toast.show();
 
-                    //generate new keypair
+                    //save keypair
+                    Log.i(TAG, "Saving RSA Keys");
                     RSAGenerator.writeKeysToFiles(keyPair, user, getBaseContext());
 
                     global.addEvent("User " + user + " registered in P2Photo");
@@ -149,8 +151,6 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
                 Toast toast = Toast.makeText(getApplicationContext(), "Register Error!", Toast.LENGTH_SHORT);
                 toast.show();
-            } catch (GeneralSecurityException e) {
-                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }

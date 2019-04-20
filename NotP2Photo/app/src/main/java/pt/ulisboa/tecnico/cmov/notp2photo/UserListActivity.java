@@ -15,6 +15,7 @@ import android.widget.ListView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ public class UserListActivity extends AppCompatActivity {
     private String token, loginToken, user;
     private Context context = this;
     private GlobalClass global;
+    private HashMap<String, String> usersPubKeysBase64 = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +52,10 @@ public class UserListActivity extends AppCompatActivity {
             try {
                 JSONArray mainObject = new JSONArray(serverResponse);
                 for(int i = 0; i < mainObject.length(); i++){
-                    String username = mainObject.getString(i);
+                    String username = mainObject.getJSONObject(i).getString("name");
                     if (!username.equalsIgnoreCase(user)) {
                         userList.add(username);
+                        usersPubKeysBase64.put(username, mainObject.getJSONObject(i).getString("pubKeyBase64"));
                     }
                 }
             } catch (JSONException e) {
@@ -76,6 +79,7 @@ public class UserListActivity extends AppCompatActivity {
 
                     Intent intent = new Intent(context, ChooseAlbumUserActivity.class);
                     intent.putExtra("user", userName);
+                    intent.putExtra("pubKeyBase64", usersPubKeysBase64.get(userName));
                     startActivity(intent);
 
                     finish();
