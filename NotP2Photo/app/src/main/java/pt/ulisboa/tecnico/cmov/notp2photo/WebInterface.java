@@ -12,8 +12,9 @@ import java.net.URL;
 
 public class WebInterface {
 
-    public static String IP = "148.63.26.170:8080";
+    public static String IP = "192.168.1.90:8082";
     public static String responseOK = "OK";
+    public static String TAG = "WebInterface";
 
     public static String get(String url){
         StringBuffer response = new StringBuffer();
@@ -47,6 +48,8 @@ public class WebInterface {
         try {
             URL obj = new URL(url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+            System.out.println(TAG + " - " +  body);
 
             con.setRequestMethod("POST");
             con.addRequestProperty("Content-Type", "application/" + "POST");

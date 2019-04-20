@@ -76,7 +76,7 @@ public class ViewAlbumActivity extends AppCompatActivity {
             startService(intent);
         }
 
-        ArrayList<Bitmap> photoBitMap = global.getAlbumPhotoList(album);
+        /*ArrayList<Bitmap> photoBitMap = global.getAlbumPhotoList(album);
         Bitmap[] result = new Bitmap[photoBitMap.size()];
         Bitmap[] thumbsArray = new Bitmap[photoBitMap.size()];
         result = photoBitMap.toArray(result);
@@ -84,15 +84,36 @@ public class ViewAlbumActivity extends AppCompatActivity {
         for(int i = 0; i < photoBitMap.size(); i++){
             thumbsList.add(Bitmap.createScaledBitmap(thumbsList.get(i), 120, 120, false));
         }
+        setGridView(result, thumbsArray);*/
 
-        setGridView(result, thumbsArray);
+        ArrayList<Bitmap> photoBitMap = global.getAlbumPhotoList(album);
+        Bitmap[] result = new Bitmap[photoBitMap.size()];
+        result = photoBitMap.toArray(result);
+        setGridView(result);
     }
 
-    public void setGridView(final Bitmap[] bm, final Bitmap[] thumbs){
+    /*public void setGridView(final Bitmap[] bm, final Bitmap[] thumbs){
         gridView = (GridView) findViewById(R.id.gridAlbum);
 
 
         ImageAdapter adapter = new ImageAdapter(context, thumbs);
+        gridView.setAdapter(adapter);
+
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Bitmap bitmap = bm[position];
+                global.setSelectedPhoto(bitmap);
+
+                Intent intent = new Intent(context, ViewPhotoActivity.class);
+                startActivity(intent);
+            }
+        });
+    }*/
+
+    public void setGridView(final Bitmap[] bm){
+        gridView = (GridView) findViewById(R.id.gridAlbum);
+        ImageAdapter adapter = new ImageAdapter(context,bm);
         gridView.setAdapter(adapter);
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
