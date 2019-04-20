@@ -9,10 +9,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 
 import javax.crypto.Cipher;
@@ -48,6 +50,11 @@ public class RSAGenerator {
         is.close();
         fis.close();
         return keyPair;
+    }
+
+    public static PublicKey readPublicKeyBase64(String keyBase64) throws Exception {
+        X509EncodedKeySpec key = new X509EncodedKeySpec(Base64.decode(keyBase64, Base64.DEFAULT));
+        return KeyFactory.getInstance("RSA").generatePublic(key);
     }
 
     public static String getBase64PubKey(KeyPair keyPair) {
