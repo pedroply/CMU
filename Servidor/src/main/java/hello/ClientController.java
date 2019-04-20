@@ -74,10 +74,11 @@ public class ClientController {
         return "{\"response\":\"ERR\"}";
     }
     
-    @RequestMapping("/addClient2Album")
-    public String addClient2Album(@RequestParam String token, @RequestParam String name, @RequestParam String album, @RequestParam String client2Add) {
+    
+    @RequestMapping(value = "/addClient2Album", method = RequestMethod.POST)
+    public String addClient2Album(@RequestParam String token, @RequestParam String name, @RequestParam String album, @RequestParam String client2Add, @RequestBody String encriptedKeyBase64) {
     	if (Application.clients.containsKey(name) && Application.clients.containsKey(client2Add) && Application.clients.get(name).getToken().equals(token) && Application.clients.get(name).belongsToAlbum(album)) {
-    		Application.albums.get(album).updateClient(client2Add, null);
+    		Application.albums.get(album).updateClient(client2Add, encriptedKeyBase64);
     		Application.clients.get(client2Add).addAlbum(album);
     		Log.getInstance().addEntry("Add Client to Album by client: " + name + " with token: " + token + " album name: " + album + " added client name: " + client2Add);
     		return "{\"response\":\"OK\"}";
