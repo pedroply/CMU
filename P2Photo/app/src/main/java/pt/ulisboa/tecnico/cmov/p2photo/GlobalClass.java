@@ -13,6 +13,7 @@ public class GlobalClass extends Application {
     private UserInfo user;
     private Bitmap selectedPhoto, servicePhoto;
     private ArrayList<String> eventLog = new ArrayList<String>();
+    private ArrayList<String> alreadyDownloaded = new ArrayList<String>();
 
     public void createUser(String userName, String loginToken){
         user = new UserInfo(userName, loginToken);
@@ -90,4 +91,15 @@ public class GlobalClass extends Application {
         return eventLog;
     }
 
+    public void addDownload(String album){
+        alreadyDownloaded.add(album);
+    }
+
+    public boolean isDownloaded(String album){
+        return alreadyDownloaded.contains(album);
+    }
+
+    public void clearDownloads(){
+        alreadyDownloaded.clear();
+    }
 }

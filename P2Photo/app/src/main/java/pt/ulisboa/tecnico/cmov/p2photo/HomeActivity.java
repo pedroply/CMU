@@ -27,6 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
@@ -37,7 +38,6 @@ public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private Context context = this;
-    String token;
     String loginToken;
     String user;
     private GlobalClass global;
@@ -66,7 +66,7 @@ public class HomeActivity extends AppCompatActivity
     @Override
     protected void onResume(){
         if(global.albumListEmpty()){
-            //new albumLoader().execute();
+            new albumLoader().execute();
         } else {
             setAlbumList(global.getAlbumList());
         }
@@ -114,16 +114,6 @@ public class HomeActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_createalbums) {
-
-        } else if (id == R.id.nav_addphoto) {
-
-        } else if (id == R.id.nav_findusers) {
-
-        } else if(id == R.id.nav_eventlog) {
-
-        }
-
-        /*if (id == R.id.nav_createalbums) {
             Intent intent = new Intent(this, CreateAlbum.class);
             startActivity(intent);
 
@@ -138,7 +128,12 @@ public class HomeActivity extends AppCompatActivity
         } else if(id == R.id.nav_eventlog) {
             Intent intent = new Intent(this, LogActivity.class);
             startActivity(intent);
-        }*/
+
+        } else if(id == R.id.nav_findPeers) {
+            Intent intent = new Intent(this, P2PActivity.class);
+            startActivity(intent);
+
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -147,70 +142,68 @@ public class HomeActivity extends AppCompatActivity
 
     public void refreshAlbums(View v)
     {
-        /*DownloadPhotosService.clearAlbums();
+        global.clearDownloads();
         ListView listView = (ListView) findViewById(R.id.albumList);
         listView.setAdapter(null);
-        new albumLoader().execute();*/
+        new albumLoader().execute();
     }
 
-    /*private class albumLoader extends AsyncTask<Void, Void, ArrayList<String>> {
+    private ArrayList<String> listDirectory(){
+        File file = this.getFilesDir();
+        File[] list = file.listFiles();
+        ArrayList<String> titles = new ArrayList<String>();
+
+        for (int i = 0; i < list.length; i++) {
+            if (list[i].isDirectory()) {
+                titles.add(list[i].getName());
+            }
+        }
+        return titles;
+    }
+
+    private class albumLoader extends AsyncTask<Void, Void, ArrayList<String>> {
 
         @Override
         protected ArrayList<String> doInBackground(Void... voids) {
-            // TODO: Maybe do this to ChooseAlbum and ChooseAlbumUser activities, in case the invited user is online and does not see this first
-            ArrayList<String> albumList = new ArrayList<>();
-            DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
-            client = new DbxClientV2(config, token);
+            ArrayList<String> listFolders = listDirectory();
 
             String url = "http://" + WebInterface.IP + "/retriveAllAlbuns?name=" + user + "&token=" + loginToken;
             String response = WebInterface.get(url);
             Log.i(MainActivity.TAG, "Albuns: " + response);
 
             try {
-                // Gather all albuns in Dropbox
-                List<Metadata> folders = client.files().listFolder("/P2Photo").getEntries();
-                if (!folders.isEmpty()) {
-                    for (Metadata md : folders) {
-                        albumList.add(md.getName());
-                    }
-                }
-
                 // Check all albuns in server. If they are not in Dropbox, add them
                 JSONArray mainObject = new JSONArray(response);
                 for(int i = 0; i < mainObject.length(); i++) {
                     String albumName = mainObject.getString(i);
 
-                    if (!albumList.contains(albumName)) {
-                        albumList.add(albumName);
-                        // Carbon copy from create album
-                        client.files().createFolder("/P2Photo/" + albumName);
+                    if (!listFolders.contains(albumName)) {
+                        listFolders.add(albumName);
 
-                        String catalogPath = "/P2Photo/" + albumName + "/index.txt";
-                        InputStream targetStream = new ByteArrayInputStream("".getBytes());
-                        client.files().uploadBuilder(catalogPath).uploadAndFinish(targetStream);
+                        File album = new File( context.getFilesDir() + "/" + albumName);
+                        album.mkdir();
 
-                        SharedLinkMetadata linkMetadata = client.sharing().createSharedLinkWithSettings(catalogPath);
-                        url = "http://" + WebInterface.IP + "/postLink?name=" + user + "&token=" + loginToken + "&album=" + albumName;
-                        WebInterface.post(url, linkMetadata.getUrl());
+                        File indexFile = new File(context.getFilesDir() + "/" + albumName + "/" + "index.txt");
+                        indexFile.createNewFile();
+
                     }
                 }
-            } catch (DbxException e) {
-                e.printStackTrace();
+
             } catch (JSONException e) {
                 e.printStackTrace();
-            } catch (IOException e) {
+            } catch(IOException e){
                 e.printStackTrace();
             }
 
-            global.addUserAlbums(albumList);
-            return albumList;
+            global.addUserAlbums(listFolders);
+            return listFolders;
         }
 
         @Override
         protected void onPostExecute(ArrayList<String> list) {
             setAlbumList(global.getAlbumList());
         }
-    } */
+    }
 
     private void setAlbumList(ArrayList<String> list) {
         ArrayAdapter adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.activity_home_album_view, list);
@@ -224,9 +217,9 @@ public class HomeActivity extends AppCompatActivity
                 String album = (String) listView.getItemAtPosition(position);
                 Toast.makeText(context, "You selected : " + album, Toast.LENGTH_SHORT).show();
 
-                /*Intent intent = new Intent(context, ViewAlbumActivity.class);
+                Intent intent = new Intent(context, ViewAlbumActivity.class);
                 intent.putExtra("album", album);
-                startActivity(intent);*/
+                startActivity(intent);
             }
         });
     }
