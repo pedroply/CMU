@@ -6,4 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".P2PActivity">
 
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="410dp"
+        android:layout_height="55dp"
+        android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </android.support.constraint.ConstraintLayout>
