@@ -14,4 +14,57 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ListView
+        android:id="@+id/peerList"
+        android:layout_width="0dp"
+        android:layout_height="196dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/statusText" />
+
+    <Button
+        android:id="@+id/wiFiButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="turnOnOffWifi"
+        android:text="WiFi OFF"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/peerList" />
+
+    <Button
+        android:id="@+id/discoverButton"
+        android:layout_width="106dp"
+        android:layout_height="wrap_content"
+        android:onClick="discoverPeers"
+        android:text="Discover"
+        app:layout_constraintStart_toEndOf="@+id/wiFiButton"
+        app:layout_constraintTop_toBottomOf="@+id/peerList" />
+
+    <Button
+        android:id="@+id/closeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="closeConnection"
+        android:text="close"
+        app:layout_constraintStart_toEndOf="@+id/discoverButton"
+        app:layout_constraintTop_toBottomOf="@+id/peerList" />
+
+    <Button
+        android:id="@+id/sendButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:onClick="sendFiles"
+        android:text="Send Files"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/closeButton"
+        app:layout_constraintTop_toBottomOf="@+id/peerList" />
+
+    <TextView
+        android:id="@+id/eventsView"
+        android:layout_width="410dp"
+        android:layout_height="345dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/wiFiButton" />
 </android.support.constraint.ConstraintLayout>

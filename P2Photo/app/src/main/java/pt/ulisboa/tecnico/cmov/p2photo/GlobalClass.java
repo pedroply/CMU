@@ -5,6 +5,7 @@ import android.app.Application;
 import android.graphics.Bitmap;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -57,6 +58,18 @@ public class GlobalClass extends Application {
 
     public ArrayList<Bitmap> getAlbumPhotoList(String album){
         return user.getPhotosList(album);
+    }
+
+    public ArrayList<String> getAlbumPhotoNameList(String album) {
+        ArrayList<String> photos = new ArrayList<String>();
+        ArrayList<String> linkList = user.getAlbumPhotoLink(album);
+
+        for(String link : linkList){
+            File f = new File(link);
+            photos.add(f.getName());
+        }
+
+        return photos;
     }
 
     public void setSelectedPhoto(Bitmap bitmap){

@@ -224,4 +224,21 @@ public class HomeActivity extends AppCompatActivity
         });
     }
 
+    public void deleteAllFolders(View v){
+        File file = this.getFilesDir();
+        File[] list = file.listFiles();
+
+        for (int i = 0; i < list.length; i++) {
+            if (list[i].isDirectory()) {
+                File[] files = list[i].listFiles();
+
+                for(int j = 0; j < files.length; j++){
+                    files[j].delete();
+                }
+
+                list[i].delete();
+            }
+        }
+    }
+
 }

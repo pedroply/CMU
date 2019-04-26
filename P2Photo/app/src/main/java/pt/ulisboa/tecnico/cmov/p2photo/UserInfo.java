@@ -65,5 +65,8 @@ public class UserInfo {
         return albums.containsKey(albumName);
     }
 
-
+    public ArrayList<String> getAlbumPhotoLink(String albumName){
+        TreeMap<String, Bitmap> photos =  albums.get(albumName);
+        return new ArrayList<String>(photos.keySet());
+    }
 }
