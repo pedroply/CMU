@@ -46,14 +46,6 @@ public class ClientFileService extends Service {
         loginToken = global.getUserLoginToken();
         user = global.getUserName();
 
-        try {
-            socket.bind(null);
-            socket.connect((new InetSocketAddress(host, port)));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     @Override
@@ -68,9 +60,16 @@ public class ClientFileService extends Service {
     @SuppressLint("NewApi")
     class DownloadFilesFromServerTask extends AsyncTask<Void, Void, Void> {
 
-
         @Override
         protected Void doInBackground(Void... voids) {
+            try {
+                socket.bind(null);
+                socket.connect((new InetSocketAddress(host, port)));
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             TreeMap<String, ArrayList<String>> photosAvailable = new TreeMap<String, ArrayList<String>>();
             TreeMap<String, ArrayList<String>> photosToReceive = new TreeMap<String, ArrayList<String>>();
             String usernameHost = "";

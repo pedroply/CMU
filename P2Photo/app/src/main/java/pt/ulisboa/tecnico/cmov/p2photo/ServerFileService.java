@@ -41,13 +41,6 @@ public class ServerFileService extends Service {
 
     @Override
     public void onCreate(){
-        try {
-            serverSocket = new ServerSocket(8888);
-            clientUpload = serverSocket.accept();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         global = (GlobalClass) getApplicationContext();
         loginToken = global.getUserLoginToken();
@@ -84,6 +77,14 @@ public class ServerFileService extends Service {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            try {
+                serverSocket = new ServerSocket(8888);
+                clientUpload = serverSocket.accept();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             // If photo already downloaded, then do not download again
             TreeMap<String, ArrayList<String>> photosToSend = new TreeMap<String, ArrayList<String>>();
 
