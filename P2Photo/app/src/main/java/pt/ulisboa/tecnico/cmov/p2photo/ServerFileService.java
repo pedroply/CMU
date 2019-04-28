@@ -124,7 +124,7 @@ public class ServerFileService extends Service {
                 OutputStream os = clientUpload.getOutputStream();
 
                 os.write(mybytearray,0,mybytearray.length);
-                os.close();
+                os.flush();
 
                 //Get results.txt from Client
                 String resultsPath = getApplicationContext().getFilesDir() + "/results.txt";
