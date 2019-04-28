@@ -5,6 +5,8 @@ import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.IBinder;
@@ -165,8 +167,14 @@ public class ServerFileService extends Service {
                     ArrayList<String> photos = album.getValue();
 
                     for(String photo : photos){
-                        File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album.getKey() + "/" + photo);
-                        mybytearray = new byte [(int)photoFile.length()];
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                        Bitmap bitmap = BitmapFactory.decodeFile(getApplicationContext().getFilesDir() + "/" + album.getKey() + "/" + photo, options);
+
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        mybytearray = stream.toByteArray();
+
                         fis = new FileInputStream(file);
                         bis = new BufferedInputStream(fis);
                         bis.read(mybytearray,0,mybytearray.length);

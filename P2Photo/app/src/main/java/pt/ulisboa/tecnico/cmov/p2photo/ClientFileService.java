@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -183,10 +185,15 @@ public class ClientFileService extends Service {
                         File photoFile = new File(Environment.getExternalStorageDirectory().toString() + "/" + album + "/" + photo);
                         if(!photoFile.exists())
                             photoFile.createNewFile();
+
                         scanner = new Scanner(socket.getInputStream());
                         encodedString = scanner.nextLine();
                         mybytearray = Base64.decode(encodedString, Base64.NO_WRAP);
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(mybytearray, 0, mybytearray.length);
+                        
                         fos = new FileOutputStream(photoFile);
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 0, fos);
+
                         fos.write(mybytearray);
                         fos.close();
 
