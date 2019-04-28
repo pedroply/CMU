@@ -182,7 +182,7 @@ public class ClientFileService extends Service {
                     ArrayList<String> photoList = album.getValue();
 
                     for(String photo : photoList){
-                        File photoFile = new File(Environment.getExternalStorageDirectory().toString() + "/" + album + "/" + photo);
+                        File photoFile = new File(Environment.getExternalStorageDirectory().toString() + "/" + album.getKey() + "/" + photo);
                         if(!photoFile.exists())
                             photoFile.createNewFile();
 
@@ -190,7 +190,7 @@ public class ClientFileService extends Service {
                         encodedString = scanner.nextLine();
                         mybytearray = Base64.decode(encodedString, Base64.NO_WRAP);
                         Bitmap bitmap = BitmapFactory.decodeByteArray(mybytearray, 0, mybytearray.length);
-                        
+
                         fos = new FileOutputStream(photoFile);
                         bitmap.compress(Bitmap.CompressFormat.PNG, 0, fos);
 
