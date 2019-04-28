@@ -182,7 +182,7 @@ public class ClientFileService extends Service {
                     ArrayList<String> photoList = album.getValue();
 
                     for(String photo : photoList){
-                        File photoFile = new File(Environment.getExternalStorageDirectory().toString() + "/" + album.getKey() + "/" + photo);
+                        File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album.getKey() + "/" + photo);
                         if(!photoFile.exists())
                             photoFile.createNewFile();
 
