@@ -172,12 +172,8 @@ public class ServerFileService extends Service {
                         Bitmap bitmap = BitmapFactory.decodeFile(getApplicationContext().getFilesDir() + "/" + album.getKey() + "/" + photo, options);
 
                         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
                         mybytearray = stream.toByteArray();
-
-                        fis = new FileInputStream(file);
-                        bis = new BufferedInputStream(fis);
-                        bis.read(mybytearray,0,mybytearray.length);
 
                         pw = new PrintWriter(clientUpload.getOutputStream(), true);
                         encoded = Base64.encodeToString(mybytearray, Base64.NO_WRAP);
