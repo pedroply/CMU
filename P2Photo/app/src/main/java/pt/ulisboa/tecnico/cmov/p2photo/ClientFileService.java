@@ -1,7 +1,10 @@
 package pt.ulisboa.tecnico.cmov.p2photo;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -16,9 +19,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
 
@@ -55,11 +60,12 @@ public class ClientFileService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId){
         host = intent.getStringExtra("host");
 
-
+        new DownloadFilesFromServerTask().execute();
         return START_STICKY;
     }
 
 
+    @SuppressLint("NewApi")
     class DownloadFilesFromServerTask extends AsyncTask<Void, Void, Void> {
 
 
@@ -111,15 +117,98 @@ public class ClientFileService extends Service {
                     JSONArray linkArray = mainObject.getJSONArray("clients");
 
                     if (alreadyShared(linkArray, usernameHost)) {
+                        ArrayList<String> photos = photosAvailable.get(album);
+                        ArrayList<String> photosMissing = new ArrayList<String>();
+
+                        for(String photo : photos){
+                            File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album + "/" + photo);
+                            if(!photoFile.exists()){
+                                photosMissing.add(photo);
+                                photoFile.createNewFile();
+                            }
+                        }
+
+                        if(photosMissing.size() > 0){
+                            photosToReceive.put(album, photosMissing);
+                        }
+                    }
+                }
+
+                String resultsPath = getApplicationContext().getFilesDir() + "/results.txt";
+                File file = new File(resultsPath);
+                if(!file.exists()){
+                    file.createNewFile();
+                }
+
+                try(FileOutputStream out = new FileOutputStream(resultsPath,false)) {
+                    String write = "";
+
+                    for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()){
+                        ArrayList<String> photoList = album.getValue();
+                        write += "Album: " + album.getKey() + "\n";
+
+                        for(String photo : photoList){
+                            write += "Photo: " + photo + "\n";
+                        }
+
+                    }
+
+                    byte[] data = write.getBytes();
+                    out.write(data);
+
+                } catch(IOException e){
+                    e.printStackTrace();
+                }
+
+                OutputStream os = socket.getOutputStream();
+                is = null;
+                int len;
+                byte buf[]  = new byte[1024];
+
+                ContentResolver cr = getApplicationContext().getContentResolver();
+                is = cr.openInputStream(Uri.parse(resultsPath));
+
+                while ((len = is.read(buf)) != -1) {
+                    os.write(buf, 0, len);
+                }
+                os.close();
+
+                is = socket.getInputStream();
+
+                for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()){
+                    ArrayList<String> photoList = album.getValue();
+
+                    for(String photo : photoList){
+                        File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album + "/" + photo);
+                        copyFile(is, new FileOutputStream(photoFile));
+
+                        os = socket.getOutputStream();
+                        String ok = "OK";
+
+                        os.write(ok.getBytes());
 
                     }
 
                 }
 
+                os.close();
+                socket.close();
+
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
+            } finally {
+                if (socket != null) {
+                    if (socket.isConnected()) {
+                        try {
+                            socket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
             }
 
 
