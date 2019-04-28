@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Base64;
@@ -179,7 +180,7 @@ public class ClientFileService extends Service {
                     ArrayList<String> photoList = album.getValue();
 
                     for(String photo : photoList){
-                        File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album + "/" + photo);
+                        File photoFile = new File(Environment.getExternalStorageDirectory().toString() + "/" + album + "/" + photo);
                         if(!photoFile.exists())
                             photoFile.createNewFile();
                         scanner = new Scanner(socket.getInputStream());
