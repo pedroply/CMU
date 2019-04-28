@@ -129,7 +129,6 @@ public class ClientFileService extends Service {
 
                         for(String photo : photos){
                             File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album + "/" + photo);
-                            photoFile.delete();
                             if(!photoFile.exists()){
                                 photosMissing.add(photo);
                             }
@@ -182,7 +181,8 @@ public class ClientFileService extends Service {
 
                     for(String photo : photoList){
                         File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album + "/" + photo);
-                        photoFile.createNewFile();
+                        if(!photoFile.exists())
+                            photoFile.createNewFile();
                         scanner = new Scanner(socket.getInputStream());
                         encodedString = scanner.nextLine();
                         mybytearray = Base64.decode(encodedString, Base64.NO_WRAP);
