@@ -125,7 +125,7 @@ public class ServerFileService extends Service {
                 bis.read(mybytearray,0,mybytearray.length);
 
                 PrintWriter pw = new PrintWriter(clientUpload.getOutputStream(), true);
-                String encoded = Base64.encodeToString(mybytearray, Base64.DEFAULT);
+                String encoded = Base64.encodeToString(mybytearray, Base64.NO_WRAP);
                 pw.println(encoded);
 
                 //Get results.txt from Client
@@ -172,7 +172,7 @@ public class ServerFileService extends Service {
                         bis.read(mybytearray,0,mybytearray.length);
 
                         pw = new PrintWriter(clientUpload.getOutputStream(), true);
-                        encoded = Base64.encodeToString(mybytearray, Base64.DEFAULT);
+                        encoded = Base64.encodeToString(mybytearray, Base64.NO_WRAP);
                         pw.println(encoded);
 
                         InputStream is = clientUpload.getInputStream();

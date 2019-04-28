@@ -87,7 +87,7 @@ public class ClientFileService extends Service {
 
                 Scanner scanner = new Scanner(socket.getInputStream());
                 String encodedString = scanner.nextLine();
-                byte[] mybytearray = Base64.decode(encodedString, Base64.DEFAULT);
+                byte[] mybytearray = Base64.decode(encodedString, Base64.NO_WRAP);
                 FileOutputStream fos = new FileOutputStream(queryFile);
                 fos.write(mybytearray);
                 fos.close();
@@ -173,7 +173,7 @@ public class ClientFileService extends Service {
                 bis.read(mybytearray,0,mybytearray.length);
 
                 PrintWriter pw = new PrintWriter(socket.getOutputStream(), true);
-                String encoded = Base64.encodeToString(mybytearray, Base64.DEFAULT);
+                String encoded = Base64.encodeToString(mybytearray, Base64.NO_WRAP);
                 pw.println(encoded);
 
 
@@ -184,7 +184,7 @@ public class ClientFileService extends Service {
                         File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album + "/" + photo);
                         scanner = new Scanner(socket.getInputStream());
                         encodedString = scanner.nextLine();
-                        mybytearray = Base64.decode(encodedString, Base64.DEFAULT);
+                        mybytearray = Base64.decode(encodedString, Base64.NO_WRAP);
                         fos = new FileOutputStream(photoFile);
                         fos.write(mybytearray);
                         fos.close();
