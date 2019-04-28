@@ -9,17 +9,20 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Base64;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -121,9 +124,9 @@ public class ServerFileService extends Service {
                 BufferedInputStream bis = new BufferedInputStream(fis);
                 bis.read(mybytearray,0,mybytearray.length);
 
-                OutputStream os = clientUpload.getOutputStream();
-
-                os.write(mybytearray,0,mybytearray.length);
+                PrintWriter pw = new PrintWriter(clientUpload.getOutputStream(), true);
+                String encoded = Base64.encodeToString(mybytearray, Base64.DEFAULT);
+                pw.println(encoded);
 
                 //Get results.txt from Client
                 String resultsPath = getApplicationContext().getFilesDir() + "/results.txt";
@@ -132,10 +135,14 @@ public class ServerFileService extends Service {
                     file.createNewFile();
                 }
 
-                InputStream is = clientUpload.getInputStream();
-                copyFile(is, new FileOutputStream(resultsFile));
+                Scanner scanner = new Scanner(clientUpload.getInputStream());
+                String encodedString = scanner.nextLine();
+                mybytearray = Base64.decode(encodedString, Base64.DEFAULT);
+                FileOutputStream fos = new FileOutputStream(resultsFile);
+                fos.write(mybytearray);
+                fos.close();
 
-                Scanner scanner = new Scanner(resultsFile);
+                scanner = new Scanner(resultsFile);
                 String currentAlbum = "";
 
                 while(scanner.hasNextLine()){
@@ -164,11 +171,11 @@ public class ServerFileService extends Service {
                         bis = new BufferedInputStream(fis);
                         bis.read(mybytearray,0,mybytearray.length);
 
-                        os = clientUpload.getOutputStream();
+                        pw = new PrintWriter(clientUpload.getOutputStream(), true);
+                        encoded = Base64.encodeToString(mybytearray, Base64.DEFAULT);
+                        pw.println(encoded);
 
-                        os.write(mybytearray,0,mybytearray.length);
-
-                        is = clientUpload.getInputStream();
+                        InputStream is = clientUpload.getInputStream();
                         scanner = new Scanner(is);
 
                         while(scanner.hasNextLine()){
@@ -184,7 +191,6 @@ public class ServerFileService extends Service {
 
                 }
 
-                os.close();
                 clientUpload.close();
                 serverSocket.close();
 

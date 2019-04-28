@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Base64;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -83,10 +85,14 @@ public class ClientFileService extends Service {
                     queryFile.createNewFile();
                 }
 
-                InputStream is = socket.getInputStream();
-                copyFile(is, new FileOutputStream(queryFile));
+                Scanner scanner = new Scanner(socket.getInputStream());
+                String encodedString = scanner.nextLine();
+                byte[] mybytearray = Base64.decode(encodedString, Base64.DEFAULT);
+                FileOutputStream fos = new FileOutputStream(queryFile);
+                fos.write(mybytearray);
+                fos.close();
 
-                Scanner scanner = new Scanner(queryFile);
+                scanner = new Scanner(queryFile);
                 String currentAlbum = "";
 
                 while (scanner.hasNextLine()) {
@@ -161,34 +167,34 @@ public class ClientFileService extends Service {
                     e.printStackTrace();
                 }
 
-                byte [] mybytearray = new byte [(int)file.length()];
+                mybytearray = new byte [(int)file.length()];
                 FileInputStream fis = new FileInputStream(file);
                 BufferedInputStream bis = new BufferedInputStream(fis);
                 bis.read(mybytearray,0,mybytearray.length);
 
-                OutputStream os = socket.getOutputStream();
+                PrintWriter pw = new PrintWriter(socket.getOutputStream(), true);
+                String encoded = Base64.encodeToString(mybytearray, Base64.DEFAULT);
+                pw.println(encoded);
 
-                os.write(mybytearray,0,mybytearray.length);
-
-                is = socket.getInputStream();
 
                 for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()){
                     ArrayList<String> photoList = album.getValue();
 
                     for(String photo : photoList){
                         File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album + "/" + photo);
-                        copyFile(is, new FileOutputStream(photoFile));
+                        scanner = new Scanner(socket.getInputStream());
+                        encodedString = scanner.nextLine();
+                        mybytearray = Base64.decode(encodedString, Base64.DEFAULT);
+                        fos = new FileOutputStream(photoFile);
+                        fos.write(mybytearray);
+                        fos.close();
 
-                        os = socket.getOutputStream();
-                        String ok = "OK";
-
-                        os.write(ok.getBytes());
-
+                        pw = new PrintWriter(socket.getOutputStream(), true);
+                        pw.println("OK");
                     }
 
                 }
 
-                os.close();
                 socket.close();
 
             } catch (IOException e) {
