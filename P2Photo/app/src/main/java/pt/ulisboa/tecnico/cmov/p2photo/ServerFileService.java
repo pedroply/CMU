@@ -22,13 +22,14 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
 
 public class ServerFileService extends Service {
 
     private ServerSocket serverSocket;
-    private Socket client;
+    private Socket clientUpload, clientDownload;
     private GlobalClass global;
     private String loginToken, user;
 
@@ -42,7 +43,7 @@ public class ServerFileService extends Service {
     public void onCreate(){
         try {
             serverSocket = new ServerSocket(8888);
-            client = serverSocket.accept();
+            clientUpload = serverSocket.accept();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -56,6 +57,7 @@ public class ServerFileService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
+        new UploadFilesToClientTask().execute();
 
         return START_STICKY;
     }
@@ -78,13 +80,12 @@ public class ServerFileService extends Service {
     }
 
     @SuppressLint("NewApi")
-    class UploadFilesToClientTask extends AsyncTask {
+    class UploadFilesToClientTask extends AsyncTask<Void, Void, Void > {
 
         @Override
-        protected Object doInBackground(Object[] objects) {
+        protected Void doInBackground(Void... voids) {
             // If photo already downloaded, then do not download again
             TreeMap<String, ArrayList<String>> photosToSend = new TreeMap<String, ArrayList<String>>();
-
 
             try{
                 // Build a query txt of all information on local files + user
@@ -96,7 +97,7 @@ public class ServerFileService extends Service {
 
                 try(FileOutputStream out = new FileOutputStream(queryPath,false)) {
                     String write = "";
-                    write += user + "\n";
+                    write += "User: " + user + "\n";
 
                     for(String album : global.getAlbumList()){
                         write += "Album: " + album + "\n";
@@ -113,7 +114,7 @@ public class ServerFileService extends Service {
                     e.printStackTrace();
                 }
 
-                OutputStream os = client.getOutputStream();
+                OutputStream os = clientUpload.getOutputStream();
                 InputStream is = null;
                 int len;
                 byte buf[]  = new byte[1024];
@@ -133,7 +134,7 @@ public class ServerFileService extends Service {
                     file.createNewFile();
                 }
 
-                is = client.getInputStream();
+                is = clientUpload.getInputStream();
                 copyFile(is, new FileOutputStream(resultsFile));
 
                 Scanner scanner = new Scanner(resultsFile);
@@ -155,15 +156,53 @@ public class ServerFileService extends Service {
 
                 }
 
-                // Construct paths from getFilesDir() + photosToSend
-                // Send to client all the photos he asked for
+                for(Map.Entry<String, ArrayList<String>> album : photosToSend.entrySet()){
+                    ArrayList<String> photos = album.getValue();
 
+                    for(String photo : photos){
+                        os = clientUpload.getOutputStream();
+                        cr = getApplicationContext().getContentResolver();
+                        is = null;
+                        is = cr.openInputStream(Uri.parse(getApplicationContext().getFilesDir() + "/" + album + "/" + photo));
+                        while ((len = is.read(buf)) != -1) {
+                            os.write(buf, 0, len);
+                        }
+
+                        is = clientUpload.getInputStream();
+                        scanner = new Scanner(is);
+
+                        while(scanner.hasNextLine()){
+                            String string = scanner.nextLine();
+                            if(string.equals("OK")){
+                                continue;
+                            } else{
+                                // Do something
+                            }
+                        }
+
+                    }
+
+                }
+
+                os.close();
+                clientUpload.close();
+                serverSocket.close();
 
             } catch(IOException e){
                 e.printStackTrace();
+
+            } finally {
+                if(clientUpload != null){
+                    if(clientUpload.isConnected()){
+                        try {
+                            clientUpload.close();
+                            serverSocket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
             }
-
-
 
             return null;
         }

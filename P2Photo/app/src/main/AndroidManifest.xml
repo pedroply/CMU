@@ -45,6 +45,14 @@
         <service
             android:name=".SavePhotoService"
             android:enabled="true" />
+
+        <service
+            android:name=".ServerFileService"
+            android:enabled="true" />
+
+        <service
+            android:name=".ClientFileService"
+            android:enabled="true" />
     </application>
 
 </manifest>

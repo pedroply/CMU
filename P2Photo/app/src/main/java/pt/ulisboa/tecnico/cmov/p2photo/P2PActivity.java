@@ -3,12 +3,14 @@ package pt.ulisboa.tecnico.cmov.p2photo;
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
@@ -31,6 +33,7 @@ public class P2PActivity extends AppCompatActivity {
     private IntentFilter intentFilter;
     private WifiP2pManager.Channel channel;
     private WifiManager wifiManager;
+    private WifiP2pInfo p2pInfo;
     private WifiP2pManager manager;
     private BroadcastReceiver receiver;
     private List<WifiP2pDevice> peers;
@@ -159,6 +162,8 @@ public class P2PActivity extends AppCompatActivity {
             Button sendButton = (Button) findViewById(R.id.sendButton);
             closeButton.setEnabled(true);
             sendButton.setEnabled(true);
+
+            p2pInfo = wifiP2pInfo;
         }
     };
 
@@ -224,9 +229,13 @@ public class P2PActivity extends AppCompatActivity {
 
     public void sendFiles(View v){
         if(isGroupOwner){
+            Intent intent = new Intent(this, ServerFileService.class);
+            startService(intent);
 
         } else {
-
+            Intent intent = new Intent(this, ClientFileService.class);
+            intent.putExtra("host", p2pInfo.groupOwnerAddress.getHostAddress());
+            startService(intent);
         }
     }
 }
