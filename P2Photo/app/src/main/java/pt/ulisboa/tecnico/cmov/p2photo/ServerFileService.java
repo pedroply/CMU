@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -115,17 +116,14 @@ public class ServerFileService extends Service {
                     e.printStackTrace();
                 }
 
+                byte [] mybytearray = new byte [(int)file.length()];
+                FileInputStream fis = new FileInputStream(file);
+                BufferedInputStream bis = new BufferedInputStream(fis);
+                bis.read(mybytearray,0,mybytearray.length);
+
                 OutputStream os = clientUpload.getOutputStream();
-                InputStream is = null;
-                int len;
-                byte buf[]  = new byte[1024];
 
-                ContentResolver cr = getApplicationContext().getContentResolver();
-                is = cr.openInputStream(Uri.parse(queryPath));
-
-                while ((len = is.read(buf)) != -1) {
-                    os.write(buf, 0, len);
-                }
+                os.write(mybytearray,0,mybytearray.length);
                 os.close();
 
                 //Get results.txt from Client
@@ -135,7 +133,7 @@ public class ServerFileService extends Service {
                     file.createNewFile();
                 }
 
-                is = clientUpload.getInputStream();
+                InputStream is = clientUpload.getInputStream();
                 copyFile(is, new FileOutputStream(resultsFile));
 
                 Scanner scanner = new Scanner(resultsFile);
@@ -161,13 +159,16 @@ public class ServerFileService extends Service {
                     ArrayList<String> photos = album.getValue();
 
                     for(String photo : photos){
+                        File photoFile = new File(getApplicationContext() + "/" + album.getKey() + "/" + photo);
+                        mybytearray = new byte [(int)photoFile.length()];
+                        fis = new FileInputStream(file);
+                        bis = new BufferedInputStream(fis);
+                        bis.read(mybytearray,0,mybytearray.length);
+
                         os = clientUpload.getOutputStream();
-                        cr = getApplicationContext().getContentResolver();
-                        is = null;
-                        is = cr.openInputStream(Uri.parse(getApplicationContext().getFilesDir() + "/" + album + "/" + photo));
-                        while ((len = is.read(buf)) != -1) {
-                            os.write(buf, 0, len);
-                        }
+
+                        os.write(mybytearray,0,mybytearray.length);
+                        os.flush();
 
                         is = clientUpload.getInputStream();
                         scanner = new Scanner(is);

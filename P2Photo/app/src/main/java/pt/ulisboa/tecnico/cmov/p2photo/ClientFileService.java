@@ -13,7 +13,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -159,17 +161,14 @@ public class ClientFileService extends Service {
                     e.printStackTrace();
                 }
 
+                byte [] mybytearray = new byte [(int)file.length()];
+                FileInputStream fis = new FileInputStream(file);
+                BufferedInputStream bis = new BufferedInputStream(fis);
+                bis.read(mybytearray,0,mybytearray.length);
+
                 OutputStream os = socket.getOutputStream();
-                is = null;
-                int len;
-                byte buf[]  = new byte[1024];
 
-                ContentResolver cr = getApplicationContext().getContentResolver();
-                is = cr.openInputStream(Uri.parse(resultsPath));
-
-                while ((len = is.read(buf)) != -1) {
-                    os.write(buf, 0, len);
-                }
+                os.write(mybytearray,0,mybytearray.length);
                 os.close();
 
                 is = socket.getInputStream();
