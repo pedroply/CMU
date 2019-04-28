@@ -169,7 +169,6 @@ public class ClientFileService extends Service {
                 OutputStream os = socket.getOutputStream();
 
                 os.write(mybytearray,0,mybytearray.length);
-                os.flush();
 
                 is = socket.getInputStream();
 
