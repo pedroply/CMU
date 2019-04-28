@@ -165,7 +165,7 @@ public class ServerFileService extends Service {
                     ArrayList<String> photos = album.getValue();
 
                     for(String photo : photos){
-                        File photoFile = new File(getApplicationContext() + "/" + album.getKey() + "/" + photo);
+                        File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album.getKey() + "/" + photo);
                         mybytearray = new byte [(int)photoFile.length()];
                         fis = new FileInputStream(file);
                         bis = new BufferedInputStream(fis);

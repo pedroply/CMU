@@ -176,7 +176,6 @@ public class ClientFileService extends Service {
                 String encoded = Base64.encodeToString(mybytearray, Base64.NO_WRAP);
                 pw.println(encoded);
 
-
                 for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()){
                     ArrayList<String> photoList = album.getValue();
 
