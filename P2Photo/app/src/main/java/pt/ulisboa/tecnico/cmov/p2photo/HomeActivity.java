@@ -2,6 +2,8 @@ package pt.ulisboa.tecnico.cmov.p2photo;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -33,6 +35,7 @@ import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -185,6 +188,24 @@ public class HomeActivity extends AppCompatActivity
 
                         File indexFile = new File(context.getFilesDir() + "/" + albumName + "/" + "index.txt");
                         indexFile.createNewFile();
+
+                    } else {
+                        File file = new File(getApplicationContext().getFilesDir() + "/" + albumName);
+                        File[] list = file.listFiles();
+                        TreeMap<String,Bitmap> photos = new TreeMap<String, Bitmap>();
+
+                        for (int j = 0; i < list.length; i++) {
+                            if (list[i].isFile() && !list[i].getName().contains("index.txt")) {
+
+                                BitmapFactory.Options options = new BitmapFactory.Options();
+                                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                                Bitmap bitmap = BitmapFactory.decodeFile(list[i].getPath(), options);
+                                photos.put(list[i].getPath(), bitmap);
+                            }
+                        }
+
+                        global.addNewAlbum(albumName);
+                        global.addPhotosToAlbum(albumName, photos);
 
                     }
                 }
