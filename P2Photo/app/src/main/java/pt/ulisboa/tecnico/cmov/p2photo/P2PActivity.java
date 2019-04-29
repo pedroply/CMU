@@ -114,7 +114,7 @@ public class P2PActivity extends AppCompatActivity {
                     namesArray[i] = peers.get(i).deviceName;
                 }
 
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplication(), android.R.layout.simple_list_item_1, namesArray);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplication(), R.layout.activity_user_list_view, namesArray);
                 ListView peerListView = (ListView) findViewById(R.id.peerList);
                 peerListView.setAdapter(adapter);
 

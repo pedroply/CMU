@@ -19,33 +19,36 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="60dp"
-            android:layout_above="@+id/refreshButton"
+            android:layout_above="@+id/someLinearLayout"
             android:layout_alignParentTop="true"/>
 
-        <Button
-            android:id="@+id/refreshButton"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/someLinearLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_margin="15dp"
-            android:background="@drawable/button_login"
-            android:onClick="refreshAlbums"
-            android:text="Refresh" />
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/deleteButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginStart="15dp"
-            android:layout_marginLeft="15dp"
-            android:layout_marginTop="15dp"
-            android:layout_marginEnd="15dp"
-            android:layout_marginRight="15dp"
-            android:layout_marginBottom="15dp"
-            android:onClick="deleteAllFolders"
-            android:text="Delete Folders" />
+            <Button
+                android:id="@+id/refreshButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:layout_margin="15dp"
+                android:background="@drawable/button_login"
+                android:onClick="refreshAlbums"
+                android:text="Refresh" />
+
+            <Button
+                android:id="@+id/deleteButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:layout_margin="15dp"
+                android:background="@drawable/button_login"
+                android:onClick="deleteAllFolders"
+                android:text="Delete Folders" />
+        </LinearLayout>
 
     </RelativeLayout>
 
