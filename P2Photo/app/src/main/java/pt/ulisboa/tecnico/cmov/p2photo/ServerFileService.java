@@ -60,7 +60,7 @@ public class ServerFileService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId){
         Toast.makeText(this, "Exchanging photos with peer...", Toast.LENGTH_SHORT).show();
 
-        new UploadFilesToClientTask().execute();
+        //new UploadFilesToClientTask().execute();
         new DownloadFilesFromClientTask().execute();
 
         return START_STICKY;
@@ -209,27 +209,26 @@ public class ServerFileService extends Service {
                 clientDownload.close();
                 serverSocketDownload.close();
 
-                return "OK";
-
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
             } finally {
                 if (clientDownload != null) {
-                    if (clientDownload.isConnected()) {
+                    if (!clientDownload.isClosed()) {
                         try {
                             clientDownload.close();
                             serverSocketDownload.close();
                         } catch (IOException e) {
                             e.printStackTrace();
+                            return null;
                         }
                     }
                 }
 
             }
 
-            return null;
+            return "OK";
         }
 
         @Override
@@ -363,25 +362,25 @@ public class ServerFileService extends Service {
                 clientUpload.close();
                 serverSocket.close();
 
-                return "OK";
 
             } catch(IOException e){
                 e.printStackTrace();
 
             } finally {
                 if(clientUpload != null){
-                    if(clientUpload.isConnected()){
+                    if(!clientUpload.isClosed()){
                         try {
                             clientUpload.close();
                             serverSocket.close();
                         } catch (IOException e) {
                             e.printStackTrace();
+                            return null;
                         }
                     }
                 }
             }
 
-            return null;
+            return "OK";
         }
 
         @Override
