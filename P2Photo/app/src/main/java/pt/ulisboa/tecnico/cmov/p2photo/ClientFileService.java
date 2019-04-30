@@ -65,7 +65,7 @@ public class ClientFileService extends Service {
         host = intent.getStringExtra("host");
         Toast.makeText(this, "Exchanging photos with peer...", Toast.LENGTH_SHORT).show();
 
-        new DownloadFilesFromServerTask().execute();
+        //new DownloadFilesFromServerTask().execute();
         new UploadFilesToServerTask().execute();
         return START_STICKY;
     }
@@ -212,27 +212,27 @@ public class ClientFileService extends Service {
 
                 socket.close();
 
-                return "OK";
-
             } catch (IOException e) {
                 e.printStackTrace();
+                return null;
             } catch (JSONException e) {
                 e.printStackTrace();
+                return null;
             } finally {
                 if (socket != null) {
-                    if (socket.isConnected()) {
+                    if (!socket.isClosed()) {
                         try {
                             socket.close();
                         } catch (IOException e) {
                             e.printStackTrace();
+                            return null;
                         }
                     }
                 }
 
             }
 
-
-            return null;
+            return "OK";
         }
 
         @Override
@@ -364,24 +364,24 @@ public class ClientFileService extends Service {
 
                 uploadSocket.close();
 
-                return "OK";
-
             } catch(IOException e){
                 e.printStackTrace();
+                return null;
 
             } finally {
                 if(uploadSocket != null){
-                    if(uploadSocket.isConnected()){
+                    if(!uploadSocket.isClosed()){
                         try {
                             uploadSocket.close();
                         } catch (IOException e) {
                             e.printStackTrace();
+                            return null;
                         }
                     }
                 }
             }
 
-            return null;
+            return "OK";
         }
 
         @Override
