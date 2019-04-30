@@ -12,12 +12,14 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Base64;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -39,6 +41,9 @@ public class ClientFileService extends Service {
     private GlobalClass global;
     private String loginToken, user, host;
     private Socket socket = new Socket();
+    private Socket uploadSocket = new Socket();
+
+    private int uploadPort = 8889;
     private int port = 8888;
 
     @Nullable
@@ -58,17 +63,19 @@ public class ClientFileService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
         host = intent.getStringExtra("host");
+        Toast.makeText(this, "Exchanging photos with peer...", Toast.LENGTH_SHORT).show();
 
         new DownloadFilesFromServerTask().execute();
+        new UploadFilesToServerTask().execute();
         return START_STICKY;
     }
 
 
     @SuppressLint("NewApi")
-    class DownloadFilesFromServerTask extends AsyncTask<Void, Void, Void> {
+    class DownloadFilesFromServerTask extends AsyncTask<Void, Void, String> {
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected String doInBackground(Void... voids) {
             try {
                 socket.bind(null);
                 socket.connect((new InetSocketAddress(host, port)));
@@ -205,6 +212,8 @@ public class ClientFileService extends Service {
 
                 socket.close();
 
+                return "OK";
+
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
@@ -224,6 +233,165 @@ public class ClientFileService extends Service {
 
 
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(String string){
+            if(string != null){
+                Toast.makeText(getApplicationContext(), "Received photos from peer", Toast.LENGTH_SHORT).show();
+
+            } else {
+                Toast.makeText(getApplicationContext(), "Could not receive photos from peer", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @SuppressLint("NewApi")
+    class UploadFilesToServerTask extends AsyncTask<Void, Void, String> {
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                uploadSocket.bind(null);
+                uploadSocket.connect((new InetSocketAddress(host, uploadPort)));
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            TreeMap<String, ArrayList<String>> photosToSend = new TreeMap<String, ArrayList<String>>();
+
+            try{
+                // Build a query txt of all information on local files + user
+                String queryPath = getApplicationContext().getFilesDir() + "/query.txt";
+                File file = new File(queryPath);
+                if(!file.exists()){
+                    file.createNewFile();
+                }
+
+                try(FileOutputStream out = new FileOutputStream(queryPath,false)) {
+                    String write = "";
+                    write += "User: " + user + "\n";
+
+                    for(String album : global.getAlbumList()){
+                        write += "Album: " + album + "\n";
+
+                        for(String photo : global.getAlbumPhotoNameList(album)){
+                            write += "Photo: " + photo + "\n";
+                        }
+                    }
+
+                    byte[] data = write.getBytes();
+                    out.write(data);
+
+                } catch(IOException e){
+                    e.printStackTrace();
+                }
+
+                byte [] mybytearray = new byte [(int)file.length()];
+                FileInputStream fis = new FileInputStream(file);
+                BufferedInputStream bis = new BufferedInputStream(fis);
+                bis.read(mybytearray,0,mybytearray.length);
+
+                PrintWriter pw = new PrintWriter(uploadSocket.getOutputStream(), true);
+                String encoded = Base64.encodeToString(mybytearray, Base64.NO_WRAP);
+                pw.println(encoded);
+
+                //Get results.txt from Client
+                String resultsPath = getApplicationContext().getFilesDir() + "/results.txt";
+                File resultsFile = new File(resultsPath);
+                if(!file.exists()){
+                    file.createNewFile();
+                }
+
+                Scanner scanner = new Scanner(uploadSocket.getInputStream());
+                String encodedString = scanner.nextLine();
+                mybytearray = Base64.decode(encodedString, Base64.DEFAULT);
+                FileOutputStream fos = new FileOutputStream(resultsFile);
+                fos.write(mybytearray);
+                fos.close();
+
+                scanner = new Scanner(resultsFile);
+                String currentAlbum = "";
+
+                while(scanner.hasNextLine()){
+                    String line = scanner.nextLine();
+                    if(line.contains("Album")){
+                        line = line.replace("Album: ", "");
+                        currentAlbum = line.replace("\n", "");
+                        photosToSend.put(currentAlbum, new ArrayList<String>());
+
+                    } else if(line.contains("Photo")){
+                        line = line.replace("Photo: ", "");
+                        line = line.replace("\n", "");
+                        ArrayList<String> photosList = photosToSend.get(currentAlbum);
+                        photosList.add(line);
+                    }
+
+                }
+
+                for(Map.Entry<String, ArrayList<String>> album : photosToSend.entrySet()){
+                    ArrayList<String> photos = album.getValue();
+
+                    for(String photo : photos){
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                        Bitmap bitmap = BitmapFactory.decodeFile(getApplicationContext().getFilesDir() + "/" + album.getKey() + "/" + photo, options);
+
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
+                        mybytearray = stream.toByteArray();
+
+                        pw = new PrintWriter(uploadSocket.getOutputStream(), true);
+                        encoded = Base64.encodeToString(mybytearray, Base64.NO_WRAP);
+                        pw.println(encoded);
+
+                        InputStream is = uploadSocket.getInputStream();
+                        scanner = new Scanner(is);
+
+                        while(scanner.hasNextLine()){
+                            String string = scanner.nextLine();
+                            if(string.equals("OK")){
+                                continue;
+                            } else{
+                                // Do something
+                            }
+                        }
+
+                    }
+
+                }
+
+                uploadSocket.close();
+
+                return "OK";
+
+            } catch(IOException e){
+                e.printStackTrace();
+
+            } finally {
+                if(uploadSocket != null){
+                    if(uploadSocket.isConnected()){
+                        try {
+                            uploadSocket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String string){
+            if(string != null){
+                Toast.makeText(getApplicationContext(), "Exchanged my photos with peer", Toast.LENGTH_SHORT).show();
+
+            } else {
+                Toast.makeText(getApplicationContext(), "Could not send my photos to peer", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

@@ -76,6 +76,9 @@ public class P2PActivity extends AppCompatActivity {
             wiFiButton.setText("WiFi ON");
             discoverButton.setEnabled(true);
         }
+
+        TextView statusText = (TextView) findViewById(R.id.statusText);
+        statusText.setText("Turn on your location");
     }
 
     @Override

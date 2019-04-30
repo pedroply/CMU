@@ -12,9 +12,11 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Base64;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,7 +36,7 @@ import java.util.TreeMap;
 
 public class ServerFileService extends Service {
 
-    private ServerSocket serverSocket;
+    private ServerSocket serverSocket, serverSocketDownload;
     private Socket clientUpload, clientDownload;
     private GlobalClass global;
     private String loginToken, user;
@@ -56,33 +58,196 @@ public class ServerFileService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
+        Toast.makeText(this, "Exchanging photos with peer...", Toast.LENGTH_SHORT).show();
+
         new UploadFilesToClientTask().execute();
+        new DownloadFilesFromClientTask().execute();
 
         return START_STICKY;
     }
 
-    class DownloadFilesFromClientTask extends AsyncTask {
+    @SuppressLint("NewApi")
+    class DownloadFilesFromClientTask extends AsyncTask<Void, Void, String> {
 
         @Override
-        protected Object doInBackground(Object[] objects) {
+        protected String doInBackground(Void... voids) {
 
-            // Receive query.txt from client
-            // Get the client username, query server for shared albums
-            // Select photos from those albums server does not have locally
-            // Send new results.txt with wanted albums and photos
-            // Wait for client to start sending photos
-            // Get photos from client
-            // Store photos locally
+            try {
+                serverSocketDownload = new ServerSocket(8889);
+                clientDownload = serverSocket.accept();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            TreeMap<String, ArrayList<String>> photosAvailable = new TreeMap<String, ArrayList<String>>();
+            TreeMap<String, ArrayList<String>> photosToReceive = new TreeMap<String, ArrayList<String>>();
+            String usernameHost = "";
+
+            try {
+                // Get query.txt from server
+                File queryFile = new File(getApplicationContext().getFilesDir() + "/query.txt");
+                if (!queryFile.exists()) {
+                    queryFile.createNewFile();
+                }
+
+                Scanner scanner = new Scanner(clientDownload.getInputStream());
+                String encodedString = scanner.nextLine();
+                byte[] mybytearray = Base64.decode(encodedString, Base64.NO_WRAP);
+                FileOutputStream fos = new FileOutputStream(queryFile);
+                fos.write(mybytearray);
+                fos.close();
+
+                scanner = new Scanner(queryFile);
+                String currentAlbum = "";
+
+                while (scanner.hasNextLine()) {
+                    String line = scanner.nextLine();
+
+                    if (line.contains("User")) {
+                        line = line.replace("User: ", "");
+                        usernameHost = line.replace("\n", "");
+
+                    } else if (line.contains("Album")) {
+                        line = line.replace("Album: ", "");
+                        currentAlbum = line.replace("\n", "");
+                        photosAvailable.put(currentAlbum, new ArrayList<String>());
+
+                    } else if (line.contains("Photo")) {
+                        line = line.replace("Photo: ", "");
+                        line = line.replace("\n", "");
+                        ArrayList<String> photosList = photosAvailable.get(currentAlbum);
+                        photosList.add(line);
+                    }
+                }
+
+                // See shared folders with Host's user
+                for (String album : photosAvailable.keySet()) {
+                    String url = "http://" + WebInterface.IP + "/retriveAlbum?name=" + user + "&token=" + loginToken + "&album=" + album;
+                    String response = WebInterface.get(url);
+
+                    JSONObject mainObject = new JSONObject(response);
+                    JSONArray linkArray = mainObject.getJSONArray("clients");
+
+                    if (alreadyShared(linkArray, usernameHost)) {
+                        ArrayList<String> photos = photosAvailable.get(album);
+                        ArrayList<String> photosMissing = new ArrayList<String>();
+
+                        for(String photo : photos){
+                            File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album + "/" + photo);
+                            if(!photoFile.exists()){
+                                photosMissing.add(photo);
+                            }
+                        }
+
+                        if(photosMissing.size() > 0){
+                            photosToReceive.put(album, photosMissing);
+                        }
+                    }
+                }
+
+                String resultsPath = getApplicationContext().getFilesDir() + "/results.txt";
+                File file = new File(resultsPath);
+                if(!file.exists()){
+                    file.createNewFile();
+                }
+
+                try(FileOutputStream out = new FileOutputStream(resultsPath,false)) {
+                    String write = "";
+
+                    for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()){
+                        ArrayList<String> photoList = album.getValue();
+                        write += "Album: " + album.getKey() + "\n";
+
+                        for(String photo : photoList){
+                            write += "Photo: " + photo + "\n";
+                        }
+
+                    }
+
+                    byte[] data = write.getBytes();
+                    out.write(data);
+
+                } catch(IOException e){
+                    e.printStackTrace();
+                }
+
+                mybytearray = new byte [(int)file.length()];
+                FileInputStream fis = new FileInputStream(file);
+                BufferedInputStream bis = new BufferedInputStream(fis);
+                bis.read(mybytearray,0,mybytearray.length);
+
+                PrintWriter pw = new PrintWriter(clientDownload.getOutputStream(), true);
+                String encoded = Base64.encodeToString(mybytearray, Base64.NO_WRAP);
+                pw.println(encoded);
+
+                for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()){
+                    ArrayList<String> photoList = album.getValue();
+
+                    for(String photo : photoList){
+                        File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album.getKey() + "/" + photo);
+                        if(!photoFile.exists())
+                            photoFile.createNewFile();
+
+                        scanner = new Scanner(clientDownload.getInputStream());
+                        encodedString = scanner.nextLine();
+                        mybytearray = Base64.decode(encodedString, Base64.NO_WRAP);
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(mybytearray, 0, mybytearray.length);
+
+                        fos = new FileOutputStream(photoFile);
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 0, fos);
+
+                        fos.write(mybytearray);
+                        fos.close();
+
+                        pw = new PrintWriter(clientDownload.getOutputStream(), true);
+                        pw.println("OK");
+                    }
+
+                }
+
+                clientDownload.close();
+                serverSocketDownload.close();
+
+                return "OK";
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } finally {
+                if (clientDownload != null) {
+                    if (clientDownload.isConnected()) {
+                        try {
+                            clientDownload.close();
+                            serverSocketDownload.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+            }
 
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(String string){
+            if(string != null){
+                Toast.makeText(getApplicationContext(), "Received photos from peer", Toast.LENGTH_SHORT).show();
+
+            } else {
+                Toast.makeText(getApplicationContext(), "Could not receive photos from peer", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     @SuppressLint("NewApi")
-    class UploadFilesToClientTask extends AsyncTask<Void, Void, Void > {
+    class UploadFilesToClientTask extends AsyncTask<Void, Void, String > {
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected String doInBackground(Void... voids) {
             try {
                 serverSocket = new ServerSocket(8888);
                 clientUpload = serverSocket.accept();
@@ -198,6 +363,8 @@ public class ServerFileService extends Service {
                 clientUpload.close();
                 serverSocket.close();
 
+                return "OK";
+
             } catch(IOException e){
                 e.printStackTrace();
 
@@ -216,6 +383,17 @@ public class ServerFileService extends Service {
 
             return null;
         }
+
+        @Override
+        protected void onPostExecute(String string){
+            if(string != null){
+                Toast.makeText(getApplicationContext(), "Exchanged my photos with peer", Toast.LENGTH_SHORT).show();
+
+            } else {
+                Toast.makeText(getApplicationContext(), "Could not send my photos to peer", Toast.LENGTH_SHORT).show();
+            }
+        }
+
     }
 
     private boolean alreadyShared(JSONArray linkArray, String userName){
