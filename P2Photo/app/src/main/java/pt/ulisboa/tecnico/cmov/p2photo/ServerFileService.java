@@ -129,7 +129,7 @@ public class ServerFileService extends Service {
                     JSONObject mainObject = new JSONObject(response);
                     JSONArray linkArray = mainObject.getJSONArray("clients");
 
-                    if (alreadyShared(linkArray, usernameHost)) {
+                    if (alreadyShared(linkArray, user)) {
                         ArrayList<String> photos = photosAvailable.get(album);
                         ArrayList<String> photosMissing = new ArrayList<String>();
 
@@ -350,7 +350,7 @@ public class ServerFileService extends Service {
                         while(scanner.hasNextLine()){
                             String string = scanner.nextLine();
                             if(string.equals("OK")){
-                                continue;
+                                break;
                             } else{
                                 // Do something
                             }
