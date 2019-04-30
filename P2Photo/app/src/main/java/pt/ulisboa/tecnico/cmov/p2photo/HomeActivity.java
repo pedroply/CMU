@@ -194,13 +194,13 @@ public class HomeActivity extends AppCompatActivity
                         File[] list = file.listFiles();
                         TreeMap<String,Bitmap> photos = new TreeMap<String, Bitmap>();
 
-                        for (int j = 0; i < list.length; i++) {
-                            if (list[i].isFile() && !list[i].getName().contains("index.txt")) {
+                        for (int j = 0; j < list.length; j++) {
+                            if (list[j].isFile() && !list[j].getName().contains("index.txt")) {
 
                                 BitmapFactory.Options options = new BitmapFactory.Options();
                                 options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                                Bitmap bitmap = BitmapFactory.decodeFile(list[i].getPath(), options);
-                                photos.put(list[i].getPath(), bitmap);
+                                Bitmap bitmap = BitmapFactory.decodeFile(list[j].getPath(), options);
+                                photos.put(list[j].getPath(), bitmap);
                             }
                         }
 

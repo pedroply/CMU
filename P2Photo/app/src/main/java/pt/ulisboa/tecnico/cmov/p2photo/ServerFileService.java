@@ -74,7 +74,7 @@ public class ServerFileService extends Service {
 
             try {
                 serverSocketDownload = new ServerSocket(8889);
-                clientDownload = serverSocket.accept();
+                clientDownload = serverSocketDownload.accept();
 
             } catch (IOException e) {
                 e.printStackTrace();
