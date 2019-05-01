@@ -37,7 +37,7 @@ import java.util.TreeMap;
 public class ServerFileService extends Service {
 
     private ServerSocket serverSocket, serverSocketDownload;
-    private Socket clientUpload, clientDownload;
+    private static Socket clientUpload, clientDownload;
     private GlobalClass global;
     private String loginToken, user;
 
@@ -60,8 +60,8 @@ public class ServerFileService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId){
         Toast.makeText(this, "Exchanging photos with peer...", Toast.LENGTH_SHORT).show();
 
-        //new UploadFilesToClientTask().execute();
-        new DownloadFilesFromClientTask().execute();
+        new UploadFilesToClientTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new DownloadFilesFromClientTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         return START_STICKY;
     }
@@ -71,15 +71,6 @@ public class ServerFileService extends Service {
 
         @Override
         protected String doInBackground(Void... voids) {
-
-            try {
-                serverSocketDownload = new ServerSocket(8889);
-                clientDownload = serverSocketDownload.accept();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
             TreeMap<String, ArrayList<String>> photosAvailable = new TreeMap<String, ArrayList<String>>();
             TreeMap<String, ArrayList<String>> photosToReceive = new TreeMap<String, ArrayList<String>>();
             String usernameHost = "";
@@ -181,12 +172,12 @@ public class ServerFileService extends Service {
                 String encoded = Base64.encodeToString(mybytearray, Base64.NO_WRAP);
                 pw.println(encoded);
 
-                for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()){
+                for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()) {
                     ArrayList<String> photoList = album.getValue();
 
-                    for(String photo : photoList){
+                    for (String photo : photoList) {
                         File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album.getKey() + "/" + photo);
-                        if(!photoFile.exists())
+                        if (!photoFile.exists())
                             photoFile.createNewFile();
 
                         scanner = new Scanner(clientDownload.getInputStream());
@@ -202,19 +193,20 @@ public class ServerFileService extends Service {
 
                         pw = new PrintWriter(clientDownload.getOutputStream(), true);
                         pw.println("OK");
+
+                        global.addPhotoToAlbum(album.getKey(), bitmap, getApplicationContext().getFilesDir() + "/" + album.getKey() + "/" + photo);
                     }
 
                 }
 
-                clientDownload.close();
-                serverSocketDownload.close();
-
             } catch (IOException e) {
                 e.printStackTrace();
+                return null;
             } catch (JSONException e) {
                 e.printStackTrace();
+                return null;
             } finally {
-                if (clientDownload != null) {
+                if (clientDownload != null && serverSocketDownload != null) {
                     if (!clientDownload.isClosed()) {
                         try {
                             clientDownload.close();
@@ -228,13 +220,13 @@ public class ServerFileService extends Service {
 
             }
 
-            return "OK";
+            return "Received photos from peer";
         }
 
         @Override
         protected void onPostExecute(String string){
             if(string != null){
-                Toast.makeText(getApplicationContext(), "Received photos from peer", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), string, Toast.LENGTH_SHORT).show();
 
             } else {
                 Toast.makeText(getApplicationContext(), "Could not receive photos from peer", Toast.LENGTH_SHORT).show();
@@ -247,14 +239,6 @@ public class ServerFileService extends Service {
 
         @Override
         protected String doInBackground(Void... voids) {
-            try {
-                serverSocket = new ServerSocket(8888);
-                clientUpload = serverSocket.accept();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
             // If photo already downloaded, then do not download again
             TreeMap<String, ArrayList<String>> photosToSend = new TreeMap<String, ArrayList<String>>();
 
@@ -359,15 +343,12 @@ public class ServerFileService extends Service {
 
                 }
 
-                clientUpload.close();
-                serverSocket.close();
-
-
             } catch(IOException e){
                 e.printStackTrace();
+                return null;
 
             } finally {
-                if(clientUpload != null){
+                if(clientUpload != null && serverSocket != null){
                     if(!clientUpload.isClosed()){
                         try {
                             clientUpload.close();
@@ -380,13 +361,13 @@ public class ServerFileService extends Service {
                 }
             }
 
-            return "OK";
+            return "Exchanged my photos with peer";
         }
 
         @Override
         protected void onPostExecute(String string){
             if(string != null){
-                Toast.makeText(getApplicationContext(), "Exchanged my photos with peer", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), string, Toast.LENGTH_SHORT).show();
 
             } else {
                 Toast.makeText(getApplicationContext(), "Could not send my photos to peer", Toast.LENGTH_SHORT).show();
@@ -425,4 +406,14 @@ public class ServerFileService extends Service {
         }
         return true;
     }
+
+    public static void setClientUploadSocket(Socket client){
+        clientUpload = client;
+    }
+
+    public static void setClientDownloadSocket(Socket client){
+        clientDownload = client;
+    }
+
+    //TODO: Set server sockets too
 }

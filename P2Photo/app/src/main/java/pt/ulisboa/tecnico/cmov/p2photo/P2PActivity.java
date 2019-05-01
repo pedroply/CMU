@@ -13,6 +13,7 @@ import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,7 +24,10 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,6 +42,9 @@ public class P2PActivity extends AppCompatActivity {
     private BroadcastReceiver receiver;
     private List<WifiP2pDevice> peers;
     private boolean isGroupOwner = false;
+
+    private ServerSocket serverSocket, serverSocketDownload;
+    private Socket clientUpload, clientDownload;
 
     private int PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 1001;
 
@@ -155,6 +162,13 @@ public class P2PActivity extends AppCompatActivity {
                 isGroupOwner = true;
                 TextView statusText = (TextView) findViewById(R.id.statusText);
                 statusText.setText("You are the Group Owner");
+                if(serverSocket == null) {
+                    new startUploadSocketAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                }
+
+                if(serverSocketDownload == null){
+                    new startDownloadSocketAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                }
 
             } else if (wifiP2pInfo.groupFormed) {
                 TextView statusText = (TextView) findViewById(R.id.statusText);
@@ -215,6 +229,30 @@ public class P2PActivity extends AppCompatActivity {
                 Button sendButton = (Button) findViewById(R.id.sendButton);
                 sendButton.setEnabled(false);
                 closeButton.setEnabled(false);
+
+                if(isGroupOwner){
+                    if (serverSocketDownload != null && clientDownload != null) {
+                        if (!serverSocketDownload.isClosed()) {
+                            try {
+                                clientDownload.close();
+                                serverSocketDownload.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    if (serverSocket != null && clientUpload != null) {
+                        if (!serverSocket.isClosed()) {
+                            try {
+                                clientUpload.close();
+                                serverSocket.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
             }
 
             @Override
@@ -232,6 +270,16 @@ public class P2PActivity extends AppCompatActivity {
 
     public void sendFiles(View v){
         if(isGroupOwner){
+            while(clientDownload == null || clientUpload == null){
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            ServerFileService.setClientDownloadSocket(clientDownload);
+            ServerFileService.setClientUploadSocket(clientUpload);
             Intent intent = new Intent(this, ServerFileService.class);
             startService(intent);
 
@@ -241,4 +289,42 @@ public class P2PActivity extends AppCompatActivity {
             startService(intent);
         }
     }
+
+    class startDownloadSocketAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                if(serverSocketDownload == null){
+                    serverSocketDownload = new ServerSocket(8889);
+                }
+                clientDownload = serverSocketDownload.accept();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+    }
+
+    class startUploadSocketAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                if(serverSocket == null){
+                    serverSocket = new ServerSocket(8888);
+                }
+                clientUpload = serverSocket.accept();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+    }
+
+
 }

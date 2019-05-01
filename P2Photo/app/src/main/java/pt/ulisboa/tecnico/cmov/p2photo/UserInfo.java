@@ -11,6 +11,7 @@ public class UserInfo {
     private String loginToken;
     private String userName;
     private TreeMap<String, TreeMap<String, Bitmap>> albums = new TreeMap<String, TreeMap<String, Bitmap>>();
+    private TreeMap<String,ArrayList<String>> albumsSharedWithMe = new TreeMap<String,ArrayList<String>>();
 
     public UserInfo(String user, String loginToken){
         userName = user;

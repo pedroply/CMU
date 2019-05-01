@@ -40,8 +40,8 @@ public class ClientFileService extends Service {
 
     private GlobalClass global;
     private String loginToken, user, host;
-    private Socket socket = new Socket();
-    private Socket uploadSocket = new Socket();
+    private Socket socket;
+    private Socket uploadSocket;
 
     private int uploadPort = 8889;
     private int port = 8888;
@@ -65,8 +65,8 @@ public class ClientFileService extends Service {
         host = intent.getStringExtra("host");
         Toast.makeText(this, "Exchanging photos with peer...", Toast.LENGTH_SHORT).show();
 
-        //new DownloadFilesFromServerTask().execute();
-        new UploadFilesToServerTask().execute();
+        new DownloadFilesFromServerTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new UploadFilesToServerTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         return START_STICKY;
     }
 
@@ -77,11 +77,13 @@ public class ClientFileService extends Service {
         @Override
         protected String doInBackground(Void... voids) {
             try {
+                socket = new Socket();
                 socket.bind(null);
                 socket.connect((new InetSocketAddress(host, port)));
 
             } catch (IOException e) {
                 e.printStackTrace();
+                return null;
             }
 
             TreeMap<String, ArrayList<String>> photosAvailable = new TreeMap<String, ArrayList<String>>();
@@ -206,11 +208,11 @@ public class ClientFileService extends Service {
 
                         pw = new PrintWriter(socket.getOutputStream(), true);
                         pw.println("OK");
+
+                        global.addPhotoToAlbum(album.getKey(), bitmap, getApplicationContext().getFilesDir() + "/" + album.getKey() + "/" + photo);
                     }
 
                 }
-
-                socket.close();
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -252,11 +254,13 @@ public class ClientFileService extends Service {
         @Override
         protected String doInBackground(Void... voids) {
             try {
+                uploadSocket = new Socket();
                 uploadSocket.bind(null);
                 uploadSocket.connect((new InetSocketAddress(host, uploadPort)));
 
             } catch (IOException e) {
                 e.printStackTrace();
+                return null;
             }
 
             TreeMap<String, ArrayList<String>> photosToSend = new TreeMap<String, ArrayList<String>>();
@@ -361,8 +365,6 @@ public class ClientFileService extends Service {
                     }
 
                 }
-
-                uploadSocket.close();
 
             } catch(IOException e){
                 e.printStackTrace();
