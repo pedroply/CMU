@@ -280,6 +280,9 @@ public class P2PActivity extends AppCompatActivity {
 
             ServerFileService.setClientDownloadSocket(clientDownload);
             ServerFileService.setClientUploadSocket(clientUpload);
+            ServerFileService.setServerDownloadSocket(serverSocketDownload);
+            ServerFileService.setServerUploadSocket(serverSocket);
+
             Intent intent = new Intent(this, ServerFileService.class);
             startService(intent);
 

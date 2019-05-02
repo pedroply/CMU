@@ -98,7 +98,13 @@ public class ClientFileService extends Service {
                 }
 
                 Scanner scanner = new Scanner(socket.getInputStream());
-                String encodedString = scanner.nextLine();
+                String encodedString;
+                if(scanner.hasNextLine()){
+                    encodedString = scanner.nextLine();
+                } else {
+                    return null;
+                }
+
                 byte[] mybytearray = Base64.decode(encodedString, Base64.NO_WRAP);
                 FileOutputStream fos = new FileOutputStream(queryFile);
                 fos.write(mybytearray);
@@ -129,13 +135,9 @@ public class ClientFileService extends Service {
 
                 // See shared folders with Host's user
                 for (String album : photosAvailable.keySet()) {
-                    String url = "http://" + WebInterface.IP + "/retriveAlbum?name=" + user + "&token=" + loginToken + "&album=" + album;
-                    String response = WebInterface.get(url);
+                    ArrayList<String> users = global.getSharedAlbumUsers(album);
 
-                    JSONObject mainObject = new JSONObject(response);
-                    JSONArray linkArray = mainObject.getJSONArray("clients");
-
-                    if (alreadyShared(linkArray, user)) {
+                    if (users.contains(usernameHost)) {
                         ArrayList<String> photos = photosAvailable.get(album);
                         ArrayList<String> photosMissing = new ArrayList<String>();
 
@@ -196,7 +198,12 @@ public class ClientFileService extends Service {
                             photoFile.createNewFile();
 
                         scanner = new Scanner(socket.getInputStream());
-                        encodedString = scanner.nextLine();
+                        if(scanner.hasNextLine()){
+                            encodedString = scanner.nextLine();
+                        } else {
+                            return null;
+                        }
+
                         mybytearray = Base64.decode(encodedString, Base64.NO_WRAP);
                         Bitmap bitmap = BitmapFactory.decodeByteArray(mybytearray, 0, mybytearray.length);
 
@@ -217,10 +224,7 @@ public class ClientFileService extends Service {
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return null;
-            } finally {
+            } /*finally {
                 if (socket != null) {
                     if (!socket.isClosed()) {
                         try {
@@ -232,7 +236,7 @@ public class ClientFileService extends Service {
                     }
                 }
 
-            }
+            }*/
 
             return "OK";
         }
@@ -309,7 +313,13 @@ public class ClientFileService extends Service {
                 }
 
                 Scanner scanner = new Scanner(uploadSocket.getInputStream());
-                String encodedString = scanner.nextLine();
+                String encodedString;
+                if(scanner.hasNextLine()){
+                    encodedString = scanner.nextLine();
+                } else {
+                    return null;
+                }
+
                 mybytearray = Base64.decode(encodedString, Base64.DEFAULT);
                 FileOutputStream fos = new FileOutputStream(resultsFile);
                 fos.write(mybytearray);
@@ -370,7 +380,7 @@ public class ClientFileService extends Service {
                 e.printStackTrace();
                 return null;
 
-            } finally {
+            } /*finally {
                 if(uploadSocket != null){
                     if(!uploadSocket.isClosed()){
                         try {
@@ -381,7 +391,7 @@ public class ClientFileService extends Service {
                         }
                     }
                 }
-            }
+            }*/
 
             return "OK";
         }

@@ -70,4 +70,20 @@ public class UserInfo {
         TreeMap<String, Bitmap> photos =  albums.get(albumName);
         return new ArrayList<String>(photos.keySet());
     }
+
+    public void addNewAlbumToShared(String albumName){
+        albumsSharedWithMe.put(albumName, new ArrayList<String>());
+    }
+
+    public void addUsersToSharedAlbum(String albumName, ArrayList<String> users){
+        albumsSharedWithMe.put(albumName, users);
+    }
+
+    public boolean albumAlreadyInShared(String albumName){
+        return albumsSharedWithMe.containsKey(albumName);
+    }
+
+    public ArrayList<String> getSharedAlbumUserList(String albumName){
+        return albumsSharedWithMe.get(albumName);
+    }
 }

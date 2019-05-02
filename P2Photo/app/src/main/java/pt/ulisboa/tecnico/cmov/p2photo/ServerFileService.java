@@ -36,7 +36,7 @@ import java.util.TreeMap;
 
 public class ServerFileService extends Service {
 
-    private ServerSocket serverSocket, serverSocketDownload;
+    private static ServerSocket serverSocket, serverSocketDownload;
     private static Socket clientUpload, clientDownload;
     private GlobalClass global;
     private String loginToken, user;
@@ -114,13 +114,9 @@ public class ServerFileService extends Service {
 
                 // See shared folders with Host's user
                 for (String album : photosAvailable.keySet()) {
-                    String url = "http://" + WebInterface.IP + "/retriveAlbum?name=" + user + "&token=" + loginToken + "&album=" + album;
-                    String response = WebInterface.get(url);
+                    ArrayList<String> users = global.getSharedAlbumUsers(album);
 
-                    JSONObject mainObject = new JSONObject(response);
-                    JSONArray linkArray = mainObject.getJSONArray("clients");
-
-                    if (alreadyShared(linkArray, user)) {
+                    if (users.contains(usernameHost)) {
                         ArrayList<String> photos = photosAvailable.get(album);
                         ArrayList<String> photosMissing = new ArrayList<String>();
 
@@ -181,7 +177,12 @@ public class ServerFileService extends Service {
                             photoFile.createNewFile();
 
                         scanner = new Scanner(clientDownload.getInputStream());
-                        encodedString = scanner.nextLine();
+                        if(scanner.hasNextLine()){
+                            encodedString = scanner.nextLine();
+                        } else {
+                            return null;
+                        }
+
                         mybytearray = Base64.decode(encodedString, Base64.NO_WRAP);
                         Bitmap bitmap = BitmapFactory.decodeByteArray(mybytearray, 0, mybytearray.length);
 
@@ -202,15 +203,11 @@ public class ServerFileService extends Service {
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return null;
-            } finally {
-                if (clientDownload != null && serverSocketDownload != null) {
+            } /*finally {
+                if (clientDownload != null) {
                     if (!clientDownload.isClosed()) {
                         try {
                             clientDownload.close();
-                            serverSocketDownload.close();
                         } catch (IOException e) {
                             e.printStackTrace();
                             return null;
@@ -218,7 +215,7 @@ public class ServerFileService extends Service {
                     }
                 }
 
-            }
+            }*/
 
             return "Received photos from peer";
         }
@@ -286,7 +283,13 @@ public class ServerFileService extends Service {
                 }
 
                 Scanner scanner = new Scanner(clientUpload.getInputStream());
-                String encodedString = scanner.nextLine();
+                String encodedString;
+                if(scanner.hasNextLine()){
+                    encodedString = scanner.nextLine();
+                } else {
+                    return null;
+                }
+
                 mybytearray = Base64.decode(encodedString, Base64.DEFAULT);
                 FileOutputStream fos = new FileOutputStream(resultsFile);
                 fos.write(mybytearray);
@@ -347,19 +350,18 @@ public class ServerFileService extends Service {
                 e.printStackTrace();
                 return null;
 
-            } finally {
-                if(clientUpload != null && serverSocket != null){
+            } /*finally {
+                if(clientUpload != null){
                     if(!clientUpload.isClosed()){
                         try {
                             clientUpload.close();
-                            serverSocket.close();
                         } catch (IOException e) {
                             e.printStackTrace();
                             return null;
                         }
                     }
                 }
-            }
+            }*/
 
             return "Exchanged my photos with peer";
         }
@@ -374,22 +376,6 @@ public class ServerFileService extends Service {
             }
         }
 
-    }
-
-    private boolean alreadyShared(JSONArray linkArray, String userName){
-        try{
-            for (int i = 0; i < linkArray.length(); i++) {
-                String client = linkArray.getString(i);
-                if (client.equals(userName)) {
-                    return true;
-                }
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return false;
     }
 
     public boolean copyFile(InputStream inputStream, OutputStream out) {
@@ -415,5 +401,11 @@ public class ServerFileService extends Service {
         clientDownload = client;
     }
 
-    //TODO: Set server sockets too
+    public static void setServerUploadSocket(ServerSocket upload) {
+        serverSocket = upload;
+    }
+
+    public static void setServerDownloadSocket(ServerSocket serverDownload){
+        serverSocketDownload = serverDownload;
+    }
 }

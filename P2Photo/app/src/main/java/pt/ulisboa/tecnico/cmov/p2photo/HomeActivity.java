@@ -208,6 +208,14 @@ public class HomeActivity extends AppCompatActivity
                         global.addPhotosToAlbum(albumName, photos);
 
                     }
+
+                    url = "http://" + WebInterface.IP + "/retriveAlbum?name=" + user + "&token=" + loginToken + "&album=" + albumName;
+                    response = WebInterface.get(url);
+                    JSONObject mainObjectJSON = new JSONObject(response);
+                    JSONArray linkArray = mainObjectJSON.getJSONArray("clients");
+
+                    global.addNewAlbumShared(albumName);
+                    global.addUsersSharedWithAlbum(albumName, linkArray);
                 }
 
             } catch (JSONException e) {

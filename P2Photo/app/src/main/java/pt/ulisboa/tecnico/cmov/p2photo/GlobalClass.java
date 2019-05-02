@@ -4,6 +4,9 @@ import android.app.ActivityManager;
 import android.app.Application;
 import android.graphics.Bitmap;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
@@ -114,5 +117,28 @@ public class GlobalClass extends Application {
 
     public void clearDownloads(){
         alreadyDownloaded.clear();
+    }
+
+    public void addNewAlbumShared(String album){
+        if(!user.albumAlreadyInShared(album)){
+            user.addNewAlbumToShared(album);
+        }
+    }
+
+    public void addUsersSharedWithAlbum(String album, JSONArray array) throws JSONException {
+        ArrayList<String> usersSharedWithMe = new ArrayList<String>();
+        for (int i = 0; i < array.length(); i++) {
+            String client = array.getString(i);
+            if(client.equals(user.getUserName())){
+                continue;
+            }
+            usersSharedWithMe.add(client);
+        }
+
+        user.addUsersToSharedAlbum(album, usersSharedWithMe);
+    }
+
+    public ArrayList<String> getSharedAlbumUsers(String album){
+        return user.getSharedAlbumUserList(album);
     }
 }
