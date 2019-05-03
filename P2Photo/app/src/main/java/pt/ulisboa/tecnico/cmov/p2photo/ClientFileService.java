@@ -76,7 +76,7 @@ public class ClientFileService extends Service {
             try {
                 socket = new Socket();
                 socket.bind(null);
-                socket.connect((new InetSocketAddress(host, global.downloadPort)));
+                socket.connect((new InetSocketAddress(host, global.uploadPort)));
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -160,7 +160,7 @@ public class ClientFileService extends Service {
             try {
                 socket = new Socket();
                 socket.bind(null);
-                socket.connect((new InetSocketAddress(host, global.uploadPort)));
+                socket.connect((new InetSocketAddress(host, global.downloadPort)));
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -258,6 +258,8 @@ public class ClientFileService extends Service {
     private void selectPhotosToReceive(TreeMap<String, ArrayList<String>> photosAvailable, String usernameHost, TreeMap<String,ArrayList<String>> photosToReceive){
         for (String album : photosAvailable.keySet()) {
             ArrayList<String> users = global.getSharedAlbumUsers(album);
+            if(users == null)
+                continue;
 
             if (users.contains(usernameHost)) {
                 ArrayList<String> photos = photosAvailable.get(album);

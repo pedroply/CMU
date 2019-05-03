@@ -224,6 +224,8 @@ public class ServerFileService extends Service {
     private void selectPhotosToReceive(TreeMap<String, ArrayList<String>> photosAvailable, String usernameHost, TreeMap<String,ArrayList<String>> photosToReceive){
         for (String album : photosAvailable.keySet()) {
             ArrayList<String> users = global.getSharedAlbumUsers(album);
+            if(users == null)
+                continue;
 
             if (users.contains(usernameHost)) {
                 ArrayList<String> photos = photosAvailable.get(album);
