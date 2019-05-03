@@ -172,11 +172,11 @@ public class GlobalClass extends Application {
     }
 
     public Socket getClientUploadSocket(){
-        return getClientUploadSocket();
+        return clientUploadSocket;
     }
 
     public Socket getClientDownloadSocket(){
-        return getClientDownloadSocket();
+        return clientDownloadSocket;
     }
 
     public Socket getClientUploadSocketService(){

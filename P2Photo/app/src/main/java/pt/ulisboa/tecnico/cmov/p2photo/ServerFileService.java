@@ -195,23 +195,26 @@ public class ServerFileService extends Service {
         String currentAlbum = "", usernameHost = "";
         Scanner scanner = new Scanner(clientSocket.getInputStream());
 
-        while (scanner.hasNextLine()) {
+        if(scanner.hasNextLine()) {
             String line = scanner.nextLine();
+            String[] parse = line.split(" ");
 
-            if (line.contains("User")) {
-                line = line.replace("User: ", "");
-                usernameHost = line.replace("\n", "");
+            for(String field : parse){
+                if (field.contains("User")) {
+                    field = field.replace("User: ", "");
+                    usernameHost = field.replace(" ", "");
 
-            } else if (line.contains("Album")) {
-                line = line.replace("Album: ", "");
-                currentAlbum = line.replace("\n", "");
-                photosAvailable.put(currentAlbum, new ArrayList<String>());
+                } else if (field.contains("Album")) {
+                    field = field.replace("Album: ", "");
+                    currentAlbum = field.replace(" ", "");
+                    photosAvailable.put(currentAlbum, new ArrayList<String>());
 
-            } else if (line.contains("Photo")) {
-                line = line.replace("Photo: ", "");
-                line = line.replace("\n", "");
-                ArrayList<String> photosList = photosAvailable.get(currentAlbum);
-                photosList.add(line);
+                } else if (field.contains("Photo")) {
+                    field = field.replace("Photo: ", "");
+                    field = field.replace(" ", "");
+                    ArrayList<String> photosList = photosAvailable.get(currentAlbum);
+                    photosList.add(field);
+                }
             }
         }
 
@@ -243,14 +246,14 @@ public class ServerFileService extends Service {
 
     private String listOfPhotosToString(TreeMap<String,ArrayList<String>> photosToReceive){
         String result = "";
-        result += "User: " + user + "\n";
+        result += "User: " + user + " ";
 
         for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()){
             ArrayList<String> photoList = album.getValue();
-            result += "Album: " + album.getKey() + "\n";
+            result += "Album: " + album.getKey() + " ";
 
             for(String photo : photoList){
-                result += "Photo: " + photo + "\n";
+                result += "Photo: " + photo + " ";
             }
 
         }
@@ -284,9 +287,8 @@ public class ServerFileService extends Service {
     }
 
     private void sendStringToSocket(String toSend, Socket clientSocket) throws IOException {
-        PrintWriter pw = new PrintWriter(clientSocket.getOutputStream(), false);
-        pw.print(toSend);
-        pw.flush();
+        PrintWriter pw = new PrintWriter(clientSocket.getOutputStream(), true);
+        pw.println(toSend);
     }
 
     private void sendPhotoToClient(String album, String photo, Socket clientSocket) throws IOException {

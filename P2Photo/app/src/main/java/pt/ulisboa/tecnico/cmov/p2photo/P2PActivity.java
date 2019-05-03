@@ -259,6 +259,7 @@ public class P2PActivity extends AppCompatActivity {
     public void sendFiles(View v){
         if(isGroupOwner){
             while(global.getClientDownloadSocket() == null || global.getClientUploadSocket() == null){
+            //while(global.getClientUploadSocket() == null){
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException e) {
@@ -269,13 +270,13 @@ public class P2PActivity extends AppCompatActivity {
             Intent intent = new Intent(this, ServerFileService.class);
             startService(intent);
 
-            finish();
-
         } else {
             Intent intent = new Intent(this, ClientFileService.class);
             intent.putExtra("host", p2pInfo.groupOwnerAddress.getHostAddress());
             startService(intent);
         }
+
+        finish();
     }
 
     class startDownloadSocketAsyncTask extends AsyncTask<Void, Void, Void> {
