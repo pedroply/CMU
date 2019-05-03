@@ -9,6 +9,10 @@ import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -18,6 +22,11 @@ public class GlobalClass extends Application {
     private Bitmap selectedPhoto, servicePhoto;
     private ArrayList<String> eventLog = new ArrayList<String>();
     private ArrayList<String> alreadyDownloaded = new ArrayList<String>();
+
+    private ServerSocket serverUploadSocket, serverDownloadSocket;
+    private Socket clientUploadSocket, clientDownloadSocket;
+
+    public static final int uploadPort = 8888, downloadPort = 8889;
 
     public void createUser(String userName, String loginToken){
         user = new UserInfo(userName, loginToken);
@@ -140,5 +149,91 @@ public class GlobalClass extends Application {
 
     public ArrayList<String> getSharedAlbumUsers(String album){
         return user.getSharedAlbumUserList(album);
+    }
+
+    public TreeMap<String, ArrayList<String>> getAlbumsWithPhotoNames(){
+        TreeMap<String, ArrayList<String>> albumsPhotosNames = new TreeMap<String, ArrayList<String>>();
+        ArrayList<String> albums = user.getAlbumList();
+
+        for(String album : albums){
+            albumsPhotosNames.put(album, getAlbumPhotoNameList(album));
+        }
+
+        return albumsPhotosNames;
+
+    }
+
+    public ServerSocket getServerUploadSocket(){
+        return serverUploadSocket;
+    }
+
+    public ServerSocket getServerDownloadSocket(){
+        return serverDownloadSocket;
+    }
+
+    public Socket getClientUploadSocket(){
+        return getClientUploadSocket();
+    }
+
+    public Socket getClientDownloadSocket(){
+        return getClientDownloadSocket();
+    }
+
+    public Socket getClientUploadSocketService(){
+        if(clientUploadSocket != null){
+            if(!clientUploadSocket.isClosed()){
+                return clientUploadSocket;
+            }
+        }
+        return null;
+    }
+
+    public Socket getClientDownloadSocketService(){
+        if(clientDownloadSocket != null){
+            if(!clientDownloadSocket.isClosed()){
+                return clientDownloadSocket;
+            }
+        }
+        return null;
+    }
+
+    public void waitForClientDownloadSocket() throws IOException {
+        serverDownloadSocket = new ServerSocket(downloadPort);
+        clientDownloadSocket = serverDownloadSocket.accept();
+    }
+
+    public void waitForClientUploadSocket() throws IOException {
+        serverUploadSocket = new ServerSocket(uploadPort);
+        clientUploadSocket = serverUploadSocket.accept();
+    }
+
+    public void closeDownloadSockets() throws IOException {
+        if(getClientDownloadSocketService() != null){
+            clientDownloadSocket.close();
+        }
+
+        if (serverDownloadSocket != null) {
+            if (!serverDownloadSocket.isClosed()) {
+                serverDownloadSocket.close();
+            }
+        }
+
+        clientDownloadSocket = null;
+        serverDownloadSocket = null;
+    }
+
+    public void closeUploadSockets() throws IOException {
+        if(getClientUploadSocketService() != null){
+            clientUploadSocket.close();
+        }
+
+        if (serverUploadSocket != null) {
+            if (!serverUploadSocket.isClosed()) {
+                serverUploadSocket.close();
+            }
+        }
+
+        clientUploadSocket = null;
+        serverUploadSocket = null;
     }
 }

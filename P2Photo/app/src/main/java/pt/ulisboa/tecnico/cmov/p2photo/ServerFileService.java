@@ -37,8 +37,6 @@ import java.util.TreeMap;
 
 public class ServerFileService extends Service {
 
-    private static ServerSocket serverSocket, serverSocketDownload;
-    private static Socket clientUpload, clientDownload;
     private GlobalClass global;
     private String loginToken, user;
 
@@ -77,8 +75,14 @@ public class ServerFileService extends Service {
             String usernameHost;
 
             try {
+                // Get client download Socket
+                Socket clientDownload = global.getClientDownloadSocketService();
+                if(clientDownload == null){
+                    return null;
+                }
+
                 // Get client's available photos on his local storage
-                usernameHost = extractParametersFromInputStream(photosAvailable);
+                usernameHost = extractParametersFromInputStream(photosAvailable, clientDownload);
 
                 // Select photos to receive from the client
                 selectPhotosToReceive(photosAvailable, usernameHost, photosToReceive);
@@ -87,9 +91,7 @@ public class ServerFileService extends Service {
                 String toSend = listOfPhotosToString(photosToReceive);
 
                 // Send parsed String to client
-                PrintWriter pw = new PrintWriter(clientDownload.getOutputStream(), false);
-                pw.print(toSend);
-                pw.flush();
+                sendStringToSocket(toSend, clientDownload);
 
 
                 for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()) {
@@ -97,12 +99,11 @@ public class ServerFileService extends Service {
 
                     for (String photo : photoList) {
                         // Write received bytes to new bitmap file
-                        Bitmap bitmap = writeBitmapToNewLocalFile(album.getKey(), photo);
+                        Bitmap bitmap = writeBitmapToNewLocalFile(album.getKey(), photo, clientDownload);
 
                         if(bitmap != null){
                             // Send to client "OK" to send new photo
-                            pw = new PrintWriter(clientDownload.getOutputStream(), true);
-                            pw.println("OK");
+                            sendStringToSocket("OK", clientDownload);
 
                             global.addPhotoToAlbum(album.getKey(), bitmap, getApplicationContext().getFilesDir() + "/" + album.getKey() + "/" + photo);
 
@@ -136,132 +137,44 @@ public class ServerFileService extends Service {
 
         @Override
         protected String doInBackground(Void... voids) {
-            // If photo already downloaded, then do not download again
             TreeMap<String, ArrayList<String>> photosToSend = new TreeMap<String, ArrayList<String>>();
 
             try{
-                // Build a query txt of all information on local files + user
-                String queryPath = getApplicationContext().getFilesDir() + "/query.txt";
-                File file = new File(queryPath);
-                if(!file.exists()){
-                    file.createNewFile();
-                }
-
-                try(FileOutputStream out = new FileOutputStream(queryPath,false)) {
-                    String write = "";
-                    write += "User: " + user + "\n";
-
-                    for(String album : global.getAlbumList()){
-                        write += "Album: " + album + "\n";
-
-                        for(String photo : global.getAlbumPhotoNameList(album)){
-                            write += "Photo: " + photo + "\n";
-                        }
-                    }
-
-                    byte[] data = write.getBytes();
-                    out.write(data);
-
-                } catch(IOException e){
-                    e.printStackTrace();
-                }
-
-                byte [] mybytearray = new byte [(int)file.length()];
-                FileInputStream fis = new FileInputStream(file);
-                BufferedInputStream bis = new BufferedInputStream(fis);
-                bis.read(mybytearray,0,mybytearray.length);
-
-                PrintWriter pw = new PrintWriter(clientUpload.getOutputStream(), true);
-                String encoded = Base64.encodeToString(mybytearray, Base64.NO_WRAP);
-                pw.println(encoded);
-
-                //Get results.txt from Client
-                String resultsPath = getApplicationContext().getFilesDir() + "/results.txt";
-                File resultsFile = new File(resultsPath);
-                if(!file.exists()){
-                    file.createNewFile();
-                }
-
-                Scanner scanner = new Scanner(clientUpload.getInputStream());
-                String encodedString;
-                if(scanner.hasNextLine()){
-                    encodedString = scanner.nextLine();
-                } else {
+                // Get client upload socket
+                Socket clientUpload = global.getClientUploadSocketService();
+                if(clientUpload == null){
                     return null;
                 }
 
-                mybytearray = Base64.decode(encodedString, Base64.DEFAULT);
-                FileOutputStream fos = new FileOutputStream(resultsFile);
-                fos.write(mybytearray);
-                fos.close();
+                // Send my available photos to client
+                String toSend = listOfPhotosToString(global.getAlbumsWithPhotoNames());
 
-                scanner = new Scanner(resultsFile);
-                String currentAlbum = "";
+                // Send information to client socket
+                sendStringToSocket(toSend, clientUpload);
 
-                while(scanner.hasNextLine()){
-                    String line = scanner.nextLine();
-                    if(line.contains("Album")){
-                        line = line.replace("Album: ", "");
-                        currentAlbum = line.replace("\n", "");
-                        photosToSend.put(currentAlbum, new ArrayList<String>());
-
-                    } else if(line.contains("Photo")){
-                        line = line.replace("Photo: ", "");
-                        line = line.replace("\n", "");
-                        ArrayList<String> photosList = photosToSend.get(currentAlbum);
-                        photosList.add(line);
-                    }
-
-                }
+                // Receive which photos to send from client
+                extractParametersFromInputStream(photosToSend, clientUpload);
 
                 for(Map.Entry<String, ArrayList<String>> album : photosToSend.entrySet()){
                     ArrayList<String> photos = album.getValue();
 
                     for(String photo : photos){
-                        BitmapFactory.Options options = new BitmapFactory.Options();
-                        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                        Bitmap bitmap = BitmapFactory.decodeFile(getApplicationContext().getFilesDir() + "/" + album.getKey() + "/" + photo, options);
+                        // Send photo bitmap bytes to client
+                        sendPhotoToClient(album.getKey(), photo, clientUpload);
 
-                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
-                        mybytearray = stream.toByteArray();
-
-                        pw = new PrintWriter(clientUpload.getOutputStream(), true);
-                        encoded = Base64.encodeToString(mybytearray, Base64.NO_WRAP);
-                        pw.println(encoded);
-
-                        InputStream is = clientUpload.getInputStream();
-                        scanner = new Scanner(is);
-
-                        while(scanner.hasNextLine()){
-                            String string = scanner.nextLine();
-                            if(string.equals("OK")){
-                                break;
-                            } else{
-                                // Do something
-                            }
+                        // Wait for client OK to send next photo
+                        Scanner scanner = new Scanner(clientUpload.getInputStream());
+                        if(!scanner.hasNextLine()){
+                            return null;
                         }
-
                     }
-
                 }
 
             } catch(IOException e){
                 e.printStackTrace();
                 return null;
 
-            } /*finally {
-                if(clientUpload != null){
-                    if(!clientUpload.isClosed()){
-                        try {
-                            clientUpload.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            return null;
-                        }
-                    }
-                }
-            }*/
+            }
 
             return "Exchanged my photos with peer";
         }
@@ -278,40 +191,9 @@ public class ServerFileService extends Service {
 
     }
 
-    public boolean copyFile(InputStream inputStream, OutputStream out) {
-        byte buf[] = new byte[1024];
-        int len;
-        try {
-            while ((len = inputStream.read(buf)) != -1) {
-                out.write(buf, 0, len);
-            }
-            out.close();
-            inputStream.close();
-        } catch (IOException e) {
-            return false;
-        }
-        return true;
-    }
-
-    public static void setClientUploadSocket(Socket client){
-        clientUpload = client;
-    }
-
-    public static void setClientDownloadSocket(Socket client){
-        clientDownload = client;
-    }
-
-    public static void setServerUploadSocket(ServerSocket upload) {
-        serverSocket = upload;
-    }
-
-    public static void setServerDownloadSocket(ServerSocket serverDownload){
-        serverSocketDownload = serverDownload;
-    }
-
-    private String extractParametersFromInputStream(TreeMap<String,ArrayList<String>> photosAvailable) throws IOException {
+    private String extractParametersFromInputStream(TreeMap<String,ArrayList<String>> photosAvailable, Socket clientSocket) throws IOException {
         String currentAlbum = "", usernameHost = "";
-        Scanner scanner = new Scanner(clientDownload.getInputStream());
+        Scanner scanner = new Scanner(clientSocket.getInputStream());
 
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
@@ -361,6 +243,7 @@ public class ServerFileService extends Service {
 
     private String listOfPhotosToString(TreeMap<String,ArrayList<String>> photosToReceive){
         String result = "";
+        result += "User: " + user + "\n";
 
         for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()){
             ArrayList<String> photoList = album.getValue();
@@ -375,12 +258,12 @@ public class ServerFileService extends Service {
         return result;
     }
 
-    private Bitmap writeBitmapToNewLocalFile(String album, String photo) throws IOException {
+    private Bitmap writeBitmapToNewLocalFile(String album, String photo, Socket clientSocket) throws IOException {
         File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album + "/" + photo);
         if (!photoFile.exists())
             photoFile.createNewFile();
 
-        Scanner scanner = new Scanner(clientDownload.getInputStream());
+        Scanner scanner = new Scanner(clientSocket.getInputStream());
         String stringBitmap;
 
         if(scanner.hasNextLine()){
@@ -398,5 +281,23 @@ public class ServerFileService extends Service {
         fos.close();
 
         return bitmap;
+    }
+
+    private void sendStringToSocket(String toSend, Socket clientSocket) throws IOException {
+        PrintWriter pw = new PrintWriter(clientSocket.getOutputStream(), false);
+        pw.print(toSend);
+        pw.flush();
+    }
+
+    private void sendPhotoToClient(String album, String photo, Socket clientSocket) throws IOException {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        Bitmap bitmap = BitmapFactory.decodeFile(getApplicationContext().getFilesDir() + "/" + album + "/" + photo, options);
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
+        byte[] mybytearray = stream.toByteArray();
+
+        sendStringToSocket(new String(mybytearray), clientSocket);
     }
 }

@@ -34,6 +34,7 @@ import java.util.List;
 
 public class P2PActivity extends AppCompatActivity {
 
+    private GlobalClass global;
     private IntentFilter intentFilter;
     private WifiP2pManager.Channel channel;
     private WifiManager wifiManager;
@@ -42,9 +43,6 @@ public class P2PActivity extends AppCompatActivity {
     private BroadcastReceiver receiver;
     private List<WifiP2pDevice> peers;
     private boolean isGroupOwner = false;
-
-    private ServerSocket serverSocket, serverSocketDownload;
-    private Socket clientUpload, clientDownload;
 
     private int PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 1001;
 
@@ -86,6 +84,8 @@ public class P2PActivity extends AppCompatActivity {
 
         TextView statusText = (TextView) findViewById(R.id.statusText);
         statusText.setText("Turn on your location");
+
+        global = (GlobalClass) getApplicationContext();
     }
 
     @Override
@@ -162,11 +162,12 @@ public class P2PActivity extends AppCompatActivity {
                 isGroupOwner = true;
                 TextView statusText = (TextView) findViewById(R.id.statusText);
                 statusText.setText("You are the Group Owner");
-                if(serverSocket == null) {
+
+                if(global.getServerUploadSocket() == null) {
                     new startUploadSocketAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
 
-                if(serverSocketDownload == null){
+                if(global.getServerDownloadSocket() == null){
                     new startDownloadSocketAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
 
@@ -231,27 +232,14 @@ public class P2PActivity extends AppCompatActivity {
                 closeButton.setEnabled(false);
 
                 if(isGroupOwner){
-                    if (serverSocketDownload != null && clientDownload != null) {
-                        if (!serverSocketDownload.isClosed()) {
-                            try {
-                                clientDownload.close();
-                                serverSocketDownload.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
+                    try{
+                        global.closeDownloadSockets();
+                        global.closeUploadSockets();
+                    } catch(IOException e){
+                        e.printStackTrace();
+                        statusText.setText("Could not close sockets");
                     }
 
-                    if (serverSocket != null && clientUpload != null) {
-                        if (!serverSocket.isClosed()) {
-                            try {
-                                clientUpload.close();
-                                serverSocket.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
                 }
             }
 
@@ -270,7 +258,7 @@ public class P2PActivity extends AppCompatActivity {
 
     public void sendFiles(View v){
         if(isGroupOwner){
-            while(clientDownload == null || clientUpload == null){
+            while(global.getClientDownloadSocket() == null || global.getClientUploadSocket() == null){
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException e) {
@@ -278,13 +266,10 @@ public class P2PActivity extends AppCompatActivity {
                 }
             }
 
-            ServerFileService.setClientDownloadSocket(clientDownload);
-            ServerFileService.setClientUploadSocket(clientUpload);
-            ServerFileService.setServerDownloadSocket(serverSocketDownload);
-            ServerFileService.setServerUploadSocket(serverSocket);
-
             Intent intent = new Intent(this, ServerFileService.class);
             startService(intent);
+
+            finish();
 
         } else {
             Intent intent = new Intent(this, ClientFileService.class);
@@ -298,8 +283,7 @@ public class P2PActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                serverSocketDownload = new ServerSocket(8889);
-                clientDownload = serverSocketDownload.accept();
+                global.waitForClientDownloadSocket();
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -314,8 +298,7 @@ public class P2PActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                serverSocket = new ServerSocket(8888);
-                clientUpload = serverSocket.accept();
+                global.waitForClientUploadSocket();
 
             } catch (IOException e) {
                 e.printStackTrace();
