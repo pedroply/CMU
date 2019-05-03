@@ -172,6 +172,8 @@ public class HomeActivity extends AppCompatActivity
 
             String url = "http://" + WebInterface.IP + "/retriveAllAlbuns?name=" + user + "&token=" + loginToken;
             String response = WebInterface.get(url);
+            if(response == null)
+                return null;
             Log.i(MainActivity.TAG, "Albuns: " + response);
 
             try {
@@ -230,6 +232,8 @@ public class HomeActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(ArrayList<String> list) {
+            if(list == null)
+                Toast.makeText(getApplicationContext(), "Internet Error", Toast.LENGTH_SHORT).show();
             setAlbumList(global.getAlbumList());
         }
     }

@@ -37,6 +37,7 @@ public class WebInterface {
         }
         catch (Exception e){
             e.printStackTrace();
+            return null;
         }
         return response.toString();
     }
@@ -62,6 +63,7 @@ public class WebInterface {
             in.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
+            return null;
         }
 
         return response.toString();
