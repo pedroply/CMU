@@ -236,9 +236,11 @@ public class ClientFileService extends Service {
             for(String field : parse){
                 if (field.contains("User")) {
                     field = field.replace("User:", "");
+                    usernameHost = field;
 
                 } else if (field.contains("Album")) {
                     field = field.replace("Album:", "");
+                    currentAlbum = field;
                     photosAvailable.put(currentAlbum, new ArrayList<String>());
 
                 } else if (field.contains("Photo")) {
