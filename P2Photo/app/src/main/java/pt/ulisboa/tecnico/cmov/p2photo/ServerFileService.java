@@ -116,6 +116,13 @@ public class ServerFileService extends Service {
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
+            } finally {
+                try {
+                    global.closeDownloadSockets();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
             }
 
             return "Received photos from peer";
@@ -173,7 +180,13 @@ public class ServerFileService extends Service {
             } catch(IOException e){
                 e.printStackTrace();
                 return null;
-
+            } finally {
+                try {
+                    global.closeUploadSockets();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
             }
 
             return "Exchanged my photos with peer";

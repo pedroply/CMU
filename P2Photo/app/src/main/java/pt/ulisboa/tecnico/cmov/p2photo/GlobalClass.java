@@ -236,4 +236,19 @@ public class GlobalClass extends Application {
         clientUploadSocket = null;
         serverUploadSocket = null;
     }
+
+    public boolean downloadSocketsAreClosed(){
+        return serverDownloadSocket.isClosed() && clientDownloadSocket.isClosed();
+    }
+
+    public boolean uploadSocketsAreClosed(){
+        return serverUploadSocket.isClosed() && clientUploadSocket.isClosed();
+    }
+
+    public void resetSockets(){
+        serverUploadSocket = null;
+        serverDownloadSocket = null;
+        clientUploadSocket = null;
+        clientDownloadSocket = null;
+    }
 }

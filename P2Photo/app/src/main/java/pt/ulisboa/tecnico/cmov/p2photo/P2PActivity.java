@@ -165,15 +165,20 @@ public class P2PActivity extends AppCompatActivity {
 
                 if(global.getServerUploadSocket() == null) {
                     new startUploadSocketAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                } else if(global.uploadSocketsAreClosed()){
+                    new startUploadSocketAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
 
                 if(global.getServerDownloadSocket() == null){
+                    new startDownloadSocketAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                } else if(global.downloadSocketsAreClosed()){
                     new startDownloadSocketAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
 
             } else if (wifiP2pInfo.groupFormed) {
                 TextView statusText = (TextView) findViewById(R.id.statusText);
                 statusText.setText("You are a Client");
+                global.resetSockets();
             }
 
             Button closeButton = (Button) findViewById(R.id.closeButton);
