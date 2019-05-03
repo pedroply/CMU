@@ -280,14 +280,14 @@ public class ClientFileService extends Service {
 
     private String listOfPhotosToString(TreeMap<String,ArrayList<String>> photosToReceive){
         String result = "";
-        result += "User: " + user + "\n";
+        result += "User: " + user + " ";
 
         for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()){
             ArrayList<String> photoList = album.getValue();
-            result += "Album: " + album.getKey() + "\n";
+            result += "Album: " + album.getKey() + " ";
 
             for(String photo : photoList){
-                result += "Photo: " + photo + "\n";
+                result += "Photo: " + photo + " ";
             }
 
         }
