@@ -258,6 +258,7 @@ public class P2PActivity extends AppCompatActivity {
 
     public void sendFiles(View v){
         if(isGroupOwner){
+            //TODO: add a timeout
             while(global.getClientDownloadSocket() == null || global.getClientUploadSocket() == null){
             //while(global.getClientUploadSocket() == null){
                 try {

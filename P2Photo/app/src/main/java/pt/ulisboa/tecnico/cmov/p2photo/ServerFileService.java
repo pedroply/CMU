@@ -276,7 +276,7 @@ public class ServerFileService extends Service {
             return null;
         }
 
-        byte[] mybytearray = stringBitmap.getBytes();
+        byte[] mybytearray = Base64.decode(stringBitmap, Base64.NO_WRAP);
         Bitmap bitmap = BitmapFactory.decodeByteArray(mybytearray, 0, mybytearray.length);
 
         FileOutputStream fos = new FileOutputStream(photoFile);
@@ -301,6 +301,8 @@ public class ServerFileService extends Service {
         bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
         byte[] mybytearray = stream.toByteArray();
 
-        sendStringToSocket(new String(mybytearray), clientSocket);
+        String encoded = Base64.encodeToString(mybytearray, Base64.NO_WRAP);
+
+        sendStringToSocket(encoded, clientSocket);
     }
 }
