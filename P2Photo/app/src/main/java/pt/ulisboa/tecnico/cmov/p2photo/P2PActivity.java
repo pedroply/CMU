@@ -298,9 +298,7 @@ public class P2PActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                if(serverSocketDownload == null){
-                    serverSocketDownload = new ServerSocket(8889);
-                }
+                serverSocketDownload = new ServerSocket(8889);
                 clientDownload = serverSocketDownload.accept();
 
             } catch (IOException e) {
@@ -316,9 +314,7 @@ public class P2PActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                if(serverSocket == null){
-                    serverSocket = new ServerSocket(8888);
-                }
+                serverSocket = new ServerSocket(8888);
                 clientUpload = serverSocket.accept();
 
             } catch (IOException e) {

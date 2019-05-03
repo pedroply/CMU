@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -73,149 +74,48 @@ public class ServerFileService extends Service {
         protected String doInBackground(Void... voids) {
             TreeMap<String, ArrayList<String>> photosAvailable = new TreeMap<String, ArrayList<String>>();
             TreeMap<String, ArrayList<String>> photosToReceive = new TreeMap<String, ArrayList<String>>();
-            String usernameHost = "";
+            String usernameHost;
 
             try {
-                // Get query.txt from server
-                File queryFile = new File(getApplicationContext().getFilesDir() + "/query.txt");
-                if (!queryFile.exists()) {
-                    queryFile.createNewFile();
-                }
+                // Get client's available photos on his local storage
+                usernameHost = extractParametersFromInputStream(photosAvailable);
 
-                Scanner scanner = new Scanner(clientDownload.getInputStream());
-                String encodedString = scanner.nextLine();
-                byte[] mybytearray = Base64.decode(encodedString, Base64.NO_WRAP);
-                FileOutputStream fos = new FileOutputStream(queryFile);
-                fos.write(mybytearray);
-                fos.close();
+                // Select photos to receive from the client
+                selectPhotosToReceive(photosAvailable, usernameHost, photosToReceive);
 
-                scanner = new Scanner(queryFile);
-                String currentAlbum = "";
+                // Parse albums and photos to receive from the client
+                String toSend = listOfPhotosToString(photosToReceive);
 
-                while (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
+                // Send parsed String to client
+                PrintWriter pw = new PrintWriter(clientDownload.getOutputStream(), false);
+                pw.print(toSend);
+                pw.flush();
 
-                    if (line.contains("User")) {
-                        line = line.replace("User: ", "");
-                        usernameHost = line.replace("\n", "");
-
-                    } else if (line.contains("Album")) {
-                        line = line.replace("Album: ", "");
-                        currentAlbum = line.replace("\n", "");
-                        photosAvailable.put(currentAlbum, new ArrayList<String>());
-
-                    } else if (line.contains("Photo")) {
-                        line = line.replace("Photo: ", "");
-                        line = line.replace("\n", "");
-                        ArrayList<String> photosList = photosAvailable.get(currentAlbum);
-                        photosList.add(line);
-                    }
-                }
-
-                // See shared folders with Host's user
-                for (String album : photosAvailable.keySet()) {
-                    ArrayList<String> users = global.getSharedAlbumUsers(album);
-
-                    if (users.contains(usernameHost)) {
-                        ArrayList<String> photos = photosAvailable.get(album);
-                        ArrayList<String> photosMissing = new ArrayList<String>();
-
-                        for(String photo : photos){
-                            File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album + "/" + photo);
-                            if(!photoFile.exists()){
-                                photosMissing.add(photo);
-                            }
-                        }
-
-                        if(photosMissing.size() > 0){
-                            photosToReceive.put(album, photosMissing);
-                        }
-                    }
-                }
-
-                String resultsPath = getApplicationContext().getFilesDir() + "/results.txt";
-                File file = new File(resultsPath);
-                if(!file.exists()){
-                    file.createNewFile();
-                }
-
-                try(FileOutputStream out = new FileOutputStream(resultsPath,false)) {
-                    String write = "";
-
-                    for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()){
-                        ArrayList<String> photoList = album.getValue();
-                        write += "Album: " + album.getKey() + "\n";
-
-                        for(String photo : photoList){
-                            write += "Photo: " + photo + "\n";
-                        }
-
-                    }
-
-                    byte[] data = write.getBytes();
-                    out.write(data);
-
-                } catch(IOException e){
-                    e.printStackTrace();
-                }
-
-                mybytearray = new byte [(int)file.length()];
-                FileInputStream fis = new FileInputStream(file);
-                BufferedInputStream bis = new BufferedInputStream(fis);
-                bis.read(mybytearray,0,mybytearray.length);
-
-                PrintWriter pw = new PrintWriter(clientDownload.getOutputStream(), true);
-                String encoded = Base64.encodeToString(mybytearray, Base64.NO_WRAP);
-                pw.println(encoded);
 
                 for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()) {
                     ArrayList<String> photoList = album.getValue();
 
                     for (String photo : photoList) {
-                        File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album.getKey() + "/" + photo);
-                        if (!photoFile.exists())
-                            photoFile.createNewFile();
+                        // Write received bytes to new bitmap file
+                        Bitmap bitmap = writeBitmapToNewLocalFile(album.getKey(), photo);
 
-                        scanner = new Scanner(clientDownload.getInputStream());
-                        if(scanner.hasNextLine()){
-                            encodedString = scanner.nextLine();
-                        } else {
+                        if(bitmap != null){
+                            // Send to client "OK" to send new photo
+                            pw = new PrintWriter(clientDownload.getOutputStream(), true);
+                            pw.println("OK");
+
+                            global.addPhotoToAlbum(album.getKey(), bitmap, getApplicationContext().getFilesDir() + "/" + album.getKey() + "/" + photo);
+
+                        } else{
                             return null;
                         }
-
-                        mybytearray = Base64.decode(encodedString, Base64.NO_WRAP);
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(mybytearray, 0, mybytearray.length);
-
-                        fos = new FileOutputStream(photoFile);
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 0, fos);
-
-                        fos.write(mybytearray);
-                        fos.close();
-
-                        pw = new PrintWriter(clientDownload.getOutputStream(), true);
-                        pw.println("OK");
-
-                        global.addPhotoToAlbum(album.getKey(), bitmap, getApplicationContext().getFilesDir() + "/" + album.getKey() + "/" + photo);
                     }
-
                 }
 
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
-            } /*finally {
-                if (clientDownload != null) {
-                    if (!clientDownload.isClosed()) {
-                        try {
-                            clientDownload.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            return null;
-                        }
-                    }
-                }
-
-            }*/
+            }
 
             return "Received photos from peer";
         }
@@ -407,5 +307,96 @@ public class ServerFileService extends Service {
 
     public static void setServerDownloadSocket(ServerSocket serverDownload){
         serverSocketDownload = serverDownload;
+    }
+
+    private String extractParametersFromInputStream(TreeMap<String,ArrayList<String>> photosAvailable) throws IOException {
+        String currentAlbum = "", usernameHost = "";
+        Scanner scanner = new Scanner(clientDownload.getInputStream());
+
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+
+            if (line.contains("User")) {
+                line = line.replace("User: ", "");
+                usernameHost = line.replace("\n", "");
+
+            } else if (line.contains("Album")) {
+                line = line.replace("Album: ", "");
+                currentAlbum = line.replace("\n", "");
+                photosAvailable.put(currentAlbum, new ArrayList<String>());
+
+            } else if (line.contains("Photo")) {
+                line = line.replace("Photo: ", "");
+                line = line.replace("\n", "");
+                ArrayList<String> photosList = photosAvailable.get(currentAlbum);
+                photosList.add(line);
+            }
+        }
+
+        return usernameHost;
+
+    }
+
+    private void selectPhotosToReceive(TreeMap<String, ArrayList<String>> photosAvailable, String usernameHost, TreeMap<String,ArrayList<String>> photosToReceive){
+        for (String album : photosAvailable.keySet()) {
+            ArrayList<String> users = global.getSharedAlbumUsers(album);
+
+            if (users.contains(usernameHost)) {
+                ArrayList<String> photos = photosAvailable.get(album);
+                ArrayList<String> photosMissing = new ArrayList<String>();
+
+                for(String photo : photos){
+                    File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album + "/" + photo);
+                    if(!photoFile.exists()){
+                        photosMissing.add(photo);
+                    }
+                }
+
+                if(photosMissing.size() > 0){
+                    photosToReceive.put(album, photosMissing);
+                }
+            }
+        }
+    }
+
+    private String listOfPhotosToString(TreeMap<String,ArrayList<String>> photosToReceive){
+        String result = "";
+
+        for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()){
+            ArrayList<String> photoList = album.getValue();
+            result += "Album: " + album.getKey() + "\n";
+
+            for(String photo : photoList){
+                result += "Photo: " + photo + "\n";
+            }
+
+        }
+
+        return result;
+    }
+
+    private Bitmap writeBitmapToNewLocalFile(String album, String photo) throws IOException {
+        File photoFile = new File(getApplicationContext().getFilesDir() + "/" + album + "/" + photo);
+        if (!photoFile.exists())
+            photoFile.createNewFile();
+
+        Scanner scanner = new Scanner(clientDownload.getInputStream());
+        String stringBitmap;
+
+        if(scanner.hasNextLine()){
+            stringBitmap = scanner.nextLine();
+        } else {
+            return null;
+        }
+
+        byte[] mybytearray = stringBitmap.getBytes();
+        Bitmap bitmap = BitmapFactory.decodeByteArray(mybytearray, 0, mybytearray.length);
+
+        FileOutputStream fos = new FileOutputStream(photoFile);
+        bitmap.compress(Bitmap.CompressFormat.PNG, 0, fos);
+        fos.write(mybytearray);
+        fos.close();
+
+        return bitmap;
     }
 }
