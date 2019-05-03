@@ -201,17 +201,14 @@ public class ServerFileService extends Service {
 
             for(String field : parse){
                 if (field.contains("User")) {
-                    field = field.replace("User: ", "");
-                    usernameHost = field.replace(" ", "");
+                    field = field.replace("User:", "");
 
                 } else if (field.contains("Album")) {
-                    field = field.replace("Album: ", "");
-                    currentAlbum = field.replace(" ", "");
+                    field = field.replace("Album:", "");
                     photosAvailable.put(currentAlbum, new ArrayList<String>());
 
                 } else if (field.contains("Photo")) {
-                    field = field.replace("Photo: ", "");
-                    field = field.replace(" ", "");
+                    field = field.replace("Photo:", "");
                     ArrayList<String> photosList = photosAvailable.get(currentAlbum);
                     photosList.add(field);
                 }
@@ -246,14 +243,14 @@ public class ServerFileService extends Service {
 
     private String listOfPhotosToString(TreeMap<String,ArrayList<String>> photosToReceive){
         String result = "";
-        result += "User: " + user + " ";
+        result += "User:" + user + " ";
 
         for(Map.Entry<String, ArrayList<String>> album : photosToReceive.entrySet()){
             ArrayList<String> photoList = album.getValue();
-            result += "Album: " + album.getKey() + " ";
+            result += "Album:" + album.getKey() + " ";
 
             for(String photo : photoList){
-                result += "Photo: " + photo + " ";
+                result += "Photo:" + photo + " ";
             }
 
         }
