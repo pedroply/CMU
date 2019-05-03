@@ -83,6 +83,9 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
                         albumsToShare.add(album);
                     }
 
+                    global.addNewAlbumShared(album);
+                    global.addUsersSharedWithAlbum(album, linkArray);
+
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
