@@ -12,7 +12,7 @@ import java.net.URL;
 
 public class WebInterface {
 
-    public static String IP = "192.168.1.90:8082";
+    public static String IP = "148.63.26.170:8082";
     public static String responseOK = "OK";
     public static String TAG = "WebInterface";
 
