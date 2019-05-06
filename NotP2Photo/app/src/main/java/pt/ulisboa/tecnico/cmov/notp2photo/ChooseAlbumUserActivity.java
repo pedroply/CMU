@@ -24,6 +24,7 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Array;
 import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
     private String pubKeyBase64;
     private HashMap<String, String> albumKeys = new HashMap<>();
     private KeyPair keyPair;
+    private static String TAG = "ChooseAlbumUserActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,8 +130,11 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
             String url = "http://" + WebInterface.IP + "/addClient2Album?name=" + user + "&token=" + loginToken + "&album=" + album[0] + "&client2Add=" + userName;
             //decript to get original
             byte[] encriptedWithClient2AddPubKey = null;
+
             try {
-                byte[] encodedKey = RSAGenerator.decrypt(keyPair.getPrivate(), Base64.decode(albumKeys.get(album), Base64.DEFAULT));
+                PrivateKey p = keyPair.getPrivate();
+                byte[] encodedkeyEncripted = Base64.decode(albumKeys.get(album[0]), Base64.DEFAULT);
+                byte[] encodedKey = RSAGenerator.decrypt(p, encodedkeyEncripted);
                 PublicKey clietn2AddPubKey = RSAGenerator.readPublicKeyBase64(pubKeyBase64);
                 encriptedWithClient2AddPubKey = RSAGenerator.encrypt(clietn2AddPubKey, encodedKey);
             } catch (Exception e) {

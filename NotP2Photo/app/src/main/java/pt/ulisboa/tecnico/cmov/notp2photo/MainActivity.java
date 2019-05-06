@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     public void register(View v) {
         // /register?name=joao&passwdHashBase64=123&pubKeyBase64=....
         EditText userTextInput = findViewById(R.id.userInputText);
-        String user = userTextInput.getText().toString();
+        user = userTextInput.getText().toString();
 
         EditText passTextInput = findViewById(R.id.passInputText);
         String pass = passTextInput.getText().toString();
