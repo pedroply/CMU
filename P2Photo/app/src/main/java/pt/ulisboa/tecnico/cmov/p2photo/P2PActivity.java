@@ -70,7 +70,7 @@ public class P2PActivity extends AppCompatActivity {
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
-        receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
+        //receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
         peers = new ArrayList<WifiP2pDevice>();
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
@@ -467,13 +467,13 @@ public class P2PActivity extends AppCompatActivity {
             }
 
             Intent intent = new Intent(this, ServerFileService.class);
-            ServerFileService.setActivity(this);
+            //ServerFileService.setActivity(this);
             startService(intent);
 
         } else {
             Intent intent = new Intent(this, ClientFileService.class);
             intent.putExtra("host", p2pInfo.groupOwnerAddress.getHostAddress());
-            ClientFileService.setActivity(this);
+            //ClientFileService.setActivity(this);
             startService(intent);
         }
 
