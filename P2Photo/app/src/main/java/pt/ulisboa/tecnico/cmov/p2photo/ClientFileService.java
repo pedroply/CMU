@@ -40,6 +40,9 @@ public class ClientFileService extends Service {
 
     private GlobalClass global;
     private String loginToken, user, host;
+    private static P2PActivity activity;
+    private boolean finishedDownload = false, finishedUpload = false;
+    private Object lock;
 
     @Nullable
     @Override
@@ -53,6 +56,10 @@ public class ClientFileService extends Service {
         loginToken = global.getUserLoginToken();
         user = global.getUserName();
 
+    }
+
+    public static void setActivity(P2PActivity p2p){
+        activity = p2p;
     }
 
     @Override
@@ -147,6 +154,14 @@ public class ClientFileService extends Service {
             } else {
                 Toast.makeText(getApplicationContext(), "Could not receive photos from peer", Toast.LENGTH_SHORT).show();
             }
+
+            synchronized (lock){
+                finishedDownload = true;
+
+                if(finishedDownload && finishedUpload){
+                    activity.closeConnection();
+                }
+            }
         }
     }
 
@@ -221,6 +236,14 @@ public class ClientFileService extends Service {
 
             } else {
                 Toast.makeText(getApplicationContext(), "Could not send my photos to peer", Toast.LENGTH_SHORT).show();
+            }
+
+            synchronized (lock){
+                finishedUpload = true;
+
+                if(finishedDownload && finishedUpload){
+                    activity.closeConnection();
+                }
             }
         }
     }

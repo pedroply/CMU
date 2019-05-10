@@ -168,28 +168,31 @@ public class P2PActivity extends AppCompatActivity {
     WifiP2pManager.DnsSdServiceResponseListener servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
         @Override
         public void onDnsSdServiceAvailable(String instanceName, String registrationType, final WifiP2pDevice srcDevice) {
-            if(instanceName.equals("P2Photo")){
-                WifiP2pConfig config = new WifiP2pConfig();
-                config.deviceAddress = srcDevice.deviceAddress;
+            if(!global.alreadyConnected(srcDevice.deviceName)){
+                if(instanceName.equals("P2Photo")){
+                    WifiP2pConfig config = new WifiP2pConfig();
+                    config.deviceAddress = srcDevice.deviceAddress;
 
-                String myName = myDevice.deviceName;
+                    String myName = myDevice.deviceName;
 
-                if(srcDevice.deviceName.compareTo(myName) < 0){
-                    manager.connect(channel, config, new WifiP2pManager.ActionListener() {
-                        @Override
-                        public void onSuccess() {
-                            TextView statusText = (TextView) findViewById(R.id.statusText);
-                            statusText.setText("Connected to " + srcDevice.deviceName);
-                        }
+                    if(srcDevice.deviceName.compareTo(myName) < 0){
+                        manager.connect(channel, config, new WifiP2pManager.ActionListener() {
+                            @Override
+                            public void onSuccess() {
+                                TextView statusText = (TextView) findViewById(R.id.statusText);
+                                statusText.setText("Connected to " + srcDevice.deviceName);
+                                global.addAlreadyConnectedPeer(srcDevice.deviceName);
+                            }
 
-                        @Override
-                        public void onFailure(int i) {
-                            TextView statusText = (TextView) findViewById(R.id.statusText);
-                            statusText.setText("Could not connect to " + srcDevice.deviceName);
-                        }
-                    });
+                            @Override
+                            public void onFailure(int i) {
+                                TextView statusText = (TextView) findViewById(R.id.statusText);
+                                statusText.setText("Could not connect to " + srcDevice.deviceName);
+                            }
+                        });
+                    }
+
                 }
-
             }
         }
     };
@@ -390,6 +393,43 @@ public class P2PActivity extends AppCompatActivity {
         });
     }
 
+    public void closeConnection(){
+        manager.removeGroup(channel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                TextView statusText = (TextView) findViewById(R.id.statusText);
+                statusText.setText("Disconnected from group");
+
+                Button closeButton = (Button) findViewById(R.id.closeButton);
+                Button sendButton = (Button) findViewById(R.id.sendButton);
+                sendButton.setEnabled(false);
+                closeButton.setEnabled(false);
+
+                if(isGroupOwner){
+                    try{
+                        global.closeDownloadSockets();
+                        global.closeUploadSockets();
+                    } catch(IOException e){
+                        e.printStackTrace();
+                        statusText.setText("Could not close sockets");
+                    }
+
+                }
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                TextView statusText = (TextView) findViewById(R.id.statusText);
+                statusText.setText("Could not disconnect from group");
+
+                Button closeButton = (Button) findViewById(R.id.closeButton);
+                Button sendButton = (Button) findViewById(R.id.sendButton);
+                sendButton.setEnabled(false);
+                closeButton.setEnabled(false);
+            }
+        });
+    }
+
     public void sendFiles(View v){
         if(isGroupOwner){
             //TODO: add a timeout
@@ -427,11 +467,13 @@ public class P2PActivity extends AppCompatActivity {
             }
 
             Intent intent = new Intent(this, ServerFileService.class);
+            ServerFileService.setActivity(this);
             startService(intent);
 
         } else {
             Intent intent = new Intent(this, ClientFileService.class);
             intent.putExtra("host", p2pInfo.groupOwnerAddress.getHostAddress());
+            ClientFileService.setActivity(this);
             startService(intent);
         }
 

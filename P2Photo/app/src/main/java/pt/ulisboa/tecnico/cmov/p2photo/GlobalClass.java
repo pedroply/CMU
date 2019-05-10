@@ -23,6 +23,8 @@ public class GlobalClass extends Application {
     private ArrayList<String> eventLog = new ArrayList<String>();
     private ArrayList<String> alreadyDownloaded = new ArrayList<String>();
 
+    private ArrayList<String> alreadyConnectedToPeers = new ArrayList<String>();
+
     private ServerSocket serverUploadSocket, serverDownloadSocket;
     private Socket clientUploadSocket, clientDownloadSocket;
 
@@ -126,6 +128,7 @@ public class GlobalClass extends Application {
 
     public void clearDownloads(){
         alreadyDownloaded.clear();
+        alreadyConnectedToPeers.clear();
     }
 
     public void addNewAlbumShared(String album){
@@ -250,5 +253,13 @@ public class GlobalClass extends Application {
         serverDownloadSocket = null;
         clientUploadSocket = null;
         clientDownloadSocket = null;
+    }
+
+    public void addAlreadyConnectedPeer(String peer){
+        alreadyConnectedToPeers.add(peer);
+    }
+
+    public boolean alreadyConnected(String peer){
+        return alreadyConnectedToPeers.contains(peer);
     }
 }
