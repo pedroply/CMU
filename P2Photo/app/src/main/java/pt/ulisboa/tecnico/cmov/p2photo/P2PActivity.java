@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.cmov.p2photo;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,16 +14,19 @@ import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -30,7 +34,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class P2PActivity extends AppCompatActivity {
 
@@ -46,6 +52,7 @@ public class P2PActivity extends AppCompatActivity {
 
     private int PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 1001;
 
+    @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +93,9 @@ public class P2PActivity extends AppCompatActivity {
         statusText.setText("Turn on your location");
 
         global = (GlobalClass) getApplicationContext();
+
+        startRegistration();
+        manager.setDnsSdResponseListeners(channel, servListener, txtListener);
     }
 
     @Override
@@ -107,6 +117,60 @@ public class P2PActivity extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(receiver);
     }
+
+    @SuppressLint("NewApi")
+    private void startRegistration(){
+        Map record = new HashMap();
+        record.put("available", "visible");
+        record.put("buddy", "Ola");
+
+        WifiP2pDnsSdServiceInfo serviceInfo = WifiP2pDnsSdServiceInfo.newInstance("P2Photo", "_presence._tcp", record);
+
+        manager.addLocalService(channel, serviceInfo, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(getApplicationContext(), "Registered Service", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                Toast.makeText(getApplicationContext(), "Could not register service", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @SuppressLint("NewApi")
+    WifiP2pManager.DnsSdServiceResponseListener servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
+        @Override
+        public void onDnsSdServiceAvailable(String instanceName, String registrationType, final WifiP2pDevice srcDevice) {
+            if(instanceName.equals("P2Photo")){
+                WifiP2pConfig config = new WifiP2pConfig();
+                config.deviceAddress = srcDevice.deviceAddress;
+
+                manager.connect(channel, config, new WifiP2pManager.ActionListener() {
+                    @Override
+                    public void onSuccess() {
+                        TextView statusText = (TextView) findViewById(R.id.statusText);
+                        statusText.setText("Connected to " + srcDevice.deviceName);
+                    }
+
+                    @Override
+                    public void onFailure(int i) {
+                        TextView statusText = (TextView) findViewById(R.id.statusText);
+                        statusText.setText("Could not connect to " + srcDevice.deviceName);
+                    }
+                });
+            }
+        }
+    };
+
+    @SuppressLint("NewApi")
+    WifiP2pManager.DnsSdTxtRecordListener txtListener = new WifiP2pManager.DnsSdTxtRecordListener() {
+        @Override
+        public void onDnsSdTxtRecordAvailable(String fullDomain, Map record, WifiP2pDevice device) {
+            Log.d(MainActivity.TAG, record.toString());
+        }
+    };
 
     WifiP2pManager.PeerListListener peerListListener = new WifiP2pManager.PeerListListener() {
         @Override
