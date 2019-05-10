@@ -100,7 +100,6 @@ public class HomeActivity extends AppCompatActivity
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
-
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
@@ -157,7 +156,6 @@ public class HomeActivity extends AppCompatActivity
     private void startRegistration(){
         Map record = new HashMap();
         record.put("available", "visible");
-        record.put("buddy", "Ola");
 
         WifiP2pDnsSdServiceInfo serviceInfo = WifiP2pDnsSdServiceInfo.newInstance("P2Photo", "_presence._tcp", record);
 
@@ -189,15 +187,13 @@ public class HomeActivity extends AppCompatActivity
                         manager.connect(channel, config, new WifiP2pManager.ActionListener() {
                             @Override
                             public void onSuccess() {
-                                TextView statusText = (TextView) findViewById(R.id.statusText);
-                                statusText.setText("Connected to " + srcDevice.deviceName);
                                 global.addAlreadyConnectedPeer(srcDevice.deviceName);
+                                Toast.makeText(getApplicationContext(), "Connected to " + srcDevice.deviceName, Toast.LENGTH_SHORT).show();
                             }
 
                             @Override
                             public void onFailure(int i) {
-                                TextView statusText = (TextView) findViewById(R.id.statusText);
-                                statusText.setText("Could not connect to " + srcDevice.deviceName);
+                                Toast.makeText(getApplicationContext(), "Could not connect to " + srcDevice.deviceName, Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -221,8 +217,7 @@ public class HomeActivity extends AppCompatActivity
 
             if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
                 isGroupOwner = true;
-                TextView statusText = (TextView) findViewById(R.id.statusText);
-                statusText.setText("You are the Group Owner");
+                Toast.makeText(getApplicationContext(), "You are the group owner", Toast.LENGTH_SHORT).show();
 
                 if(global.getServerUploadSocket() == null) {
                     new HomeActivity.startUploadSocketAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -237,18 +232,11 @@ public class HomeActivity extends AppCompatActivity
                 }
 
             } else if (wifiP2pInfo.groupFormed) {
-                TextView statusText = (TextView) findViewById(R.id.statusText);
-                statusText.setText("You are a Client");
+                Toast.makeText(getApplicationContext(), "You are the client", Toast.LENGTH_SHORT).show();
                 global.resetSockets();
             }
 
-            Button closeButton = (Button) findViewById(R.id.closeButton);
-            Button sendButton = (Button) findViewById(R.id.sendButton);
-            closeButton.setEnabled(true);
-            sendButton.setEnabled(true);
-
             p2pInfo = wifiP2pInfo;
-
             sendFiles();
         }
     };
@@ -258,15 +246,12 @@ public class HomeActivity extends AppCompatActivity
         manager.discoverServices(channel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                TextView statusText = (TextView) findViewById(R.id.statusText);
-                statusText.setText("Discovery Started");
+                Toast.makeText(getApplicationContext(), "Discovery started", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(int reason) {
-                TextView statusText = (TextView) findViewById(R.id.statusText);
-                statusText.setText("Could not start discovery" + reason);
-
+                Toast.makeText(getApplicationContext(), "Could not start discovery", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -275,13 +260,7 @@ public class HomeActivity extends AppCompatActivity
         manager.removeGroup(channel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                TextView statusText = (TextView) findViewById(R.id.statusText);
-                statusText.setText("Disconnected from group");
-
-                Button closeButton = (Button) findViewById(R.id.closeButton);
-                Button sendButton = (Button) findViewById(R.id.sendButton);
-                sendButton.setEnabled(false);
-                closeButton.setEnabled(false);
+                Toast.makeText(getApplicationContext(), "Closed Connection", Toast.LENGTH_SHORT).show();
 
                 if(isGroupOwner){
                     try{
@@ -289,21 +268,13 @@ public class HomeActivity extends AppCompatActivity
                         global.closeUploadSockets();
                     } catch(IOException e){
                         e.printStackTrace();
-                        statusText.setText("Could not close sockets");
                     }
-
                 }
             }
 
             @Override
             public void onFailure(int reason) {
-                TextView statusText = (TextView) findViewById(R.id.statusText);
-                statusText.setText("Could not disconnect from group");
-
-                Button closeButton = (Button) findViewById(R.id.closeButton);
-                Button sendButton = (Button) findViewById(R.id.sendButton);
-                sendButton.setEnabled(false);
-                closeButton.setEnabled(false);
+                Toast.makeText(getApplicationContext(), "Connection already closed", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -394,11 +365,7 @@ public class HomeActivity extends AppCompatActivity
             Intent intent = new Intent(this, LogActivity.class);
             startActivity(intent);
 
-        } else if(id == R.id.nav_findPeers) {
-            Intent intent = new Intent(this, P2PActivity.class);
-            startActivity(intent);
-
-        }
+        } 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
