@@ -302,7 +302,6 @@ public class HomeActivity extends AppCompatActivity
             startService(intent);
         }
 
-        finish();
     }
 
     public static void setMyDevice(WifiP2pDevice device){
@@ -365,7 +364,7 @@ public class HomeActivity extends AppCompatActivity
             Intent intent = new Intent(this, LogActivity.class);
             startActivity(intent);
 
-        } 
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
