@@ -15,6 +15,7 @@ import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
@@ -96,6 +97,7 @@ public class P2PActivity extends AppCompatActivity {
 
         startRegistration();
         manager.setDnsSdResponseListeners(channel, servListener, txtListener);
+        addServiceRequest();
     }
 
     @Override
@@ -116,6 +118,22 @@ public class P2PActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         unregisterReceiver(receiver);
+    }
+
+    @SuppressLint("NewApi")
+    private void addServiceRequest(){
+        WifiP2pDnsSdServiceRequest serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
+        manager.addServiceRequest(channel, serviceRequest, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(getApplicationContext(), "Created service request", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                Toast.makeText(getApplicationContext(), "Could not create service request", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @SuppressLint("NewApi")
@@ -297,7 +315,8 @@ public class P2PActivity extends AppCompatActivity {
             @Override
             public void onFailure(int reason) {
                 TextView statusText = (TextView) findViewById(R.id.statusText);
-                statusText.setText("Could not start discovery");
+                statusText.setText("Could not start discovery" + reason);
+
             }
         });
     }
