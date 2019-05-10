@@ -49,6 +49,7 @@ public class P2PActivity extends AppCompatActivity {
     private WifiP2pManager manager;
     private BroadcastReceiver receiver;
     private List<WifiP2pDevice> peers;
+    private static WifiP2pDevice myDevice;
     private boolean isGroupOwner = false;
 
     private int PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 1001;
@@ -98,6 +99,10 @@ public class P2PActivity extends AppCompatActivity {
         startRegistration();
         manager.setDnsSdResponseListeners(channel, servListener, txtListener);
         addServiceRequest();
+    }
+
+    public static void setMyDevice(WifiP2pDevice device){
+        myDevice = device;
     }
 
     @Override
@@ -165,7 +170,8 @@ public class P2PActivity extends AppCompatActivity {
                 WifiP2pConfig config = new WifiP2pConfig();
                 config.deviceAddress = srcDevice.deviceAddress;
 
-                String myName = Build.MODEL;
+                String myName = myDevice.deviceName;
+                
                 if(srcDevice.deviceName.compareTo(myName) < 0){
                     manager.connect(channel, config, new WifiP2pManager.ActionListener() {
                         @Override
