@@ -39,7 +39,7 @@ public class ServerFileService extends Service {
 
     private GlobalClass global;
     private String loginToken, user;
-    private static P2PActivity activity;
+    private static HomeActivity activity;
     private boolean finishedDownload = false, finishedUpload = false;
     private Object lock = new Object();
 
@@ -58,7 +58,7 @@ public class ServerFileService extends Service {
 
     }
 
-    public static void setActivity(P2PActivity p2p){
+    public static void setActivity(HomeActivity p2p){
         activity = p2p;
     }
 

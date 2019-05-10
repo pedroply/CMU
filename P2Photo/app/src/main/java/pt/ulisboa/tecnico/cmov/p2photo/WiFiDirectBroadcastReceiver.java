@@ -10,10 +10,10 @@ import android.net.wifi.p2p.WifiP2pManager;
 public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
     private WifiP2pManager manager;
     private WifiP2pManager.Channel channel;
-    private P2PActivity activity;
+    private HomeActivity activity;
     private WifiP2pManager.PeerListListener myPeerListListener;
 
-    public WiFiDirectBroadcastReceiver(WifiP2pManager manager, WifiP2pManager.Channel channel, P2PActivity activity) {
+    public WiFiDirectBroadcastReceiver(WifiP2pManager manager, WifiP2pManager.Channel channel, HomeActivity activity) {
         super();
         this.manager = manager;
         this.channel = channel;
@@ -50,7 +50,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             }
 
         } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
-            P2PActivity.setMyDevice((WifiP2pDevice) intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE));
+            HomeActivity.setMyDevice((WifiP2pDevice) intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE));
         }
     }
 
