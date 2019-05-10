@@ -99,6 +99,8 @@ public class P2PActivity extends AppCompatActivity {
         startRegistration();
         manager.setDnsSdResponseListeners(channel, servListener, txtListener);
         addServiceRequest();
+
+        discoverPeers();
     }
 
     public static void setMyDevice(WifiP2pDevice device){
@@ -171,7 +173,7 @@ public class P2PActivity extends AppCompatActivity {
                 config.deviceAddress = srcDevice.deviceAddress;
 
                 String myName = myDevice.deviceName;
-                
+
                 if(srcDevice.deviceName.compareTo(myName) < 0){
                     manager.connect(channel, config, new WifiP2pManager.ActionListener() {
                         @Override
@@ -279,6 +281,8 @@ public class P2PActivity extends AppCompatActivity {
             sendButton.setEnabled(true);
 
             p2pInfo = wifiP2pInfo;
+
+            sendFiles();
         }
     };
 
@@ -315,6 +319,24 @@ public class P2PActivity extends AppCompatActivity {
             }
         });*/
 
+        manager.discoverServices(channel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                TextView statusText = (TextView) findViewById(R.id.statusText);
+                statusText.setText("Discovery Started");
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                TextView statusText = (TextView) findViewById(R.id.statusText);
+                statusText.setText("Could not start discovery" + reason);
+
+            }
+        });
+    }
+
+    @SuppressLint("NewApi")
+    public void discoverPeers() {
         manager.discoverServices(channel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
@@ -373,6 +395,30 @@ public class P2PActivity extends AppCompatActivity {
             //TODO: add a timeout
             while(global.getClientDownloadSocket() == null || global.getClientUploadSocket() == null){
             //while(global.getClientUploadSocket() == null){
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            Intent intent = new Intent(this, ServerFileService.class);
+            startService(intent);
+
+        } else {
+            Intent intent = new Intent(this, ClientFileService.class);
+            intent.putExtra("host", p2pInfo.groupOwnerAddress.getHostAddress());
+            startService(intent);
+        }
+
+        finish();
+    }
+
+    public void sendFiles(){
+        if(isGroupOwner){
+            //TODO: add a timeout
+            while(global.getClientDownloadSocket() == null || global.getClientUploadSocket() == null){
+                //while(global.getClientUploadSocket() == null){
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException e) {
