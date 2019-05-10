@@ -270,9 +270,9 @@ public class P2PActivity extends AppCompatActivity {
         }
     }
 
-
+    @SuppressLint("NewApi")
     public void discoverPeers(View v) {
-        manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
+        /*manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
 
             @Override
             public void onSuccess() {
@@ -282,6 +282,20 @@ public class P2PActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(int reasonCode) {
+                TextView statusText = (TextView) findViewById(R.id.statusText);
+                statusText.setText("Could not start discovery");
+            }
+        });*/
+
+        manager.discoverServices(channel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                TextView statusText = (TextView) findViewById(R.id.statusText);
+                statusText.setText("Discovery Started");
+            }
+
+            @Override
+            public void onFailure(int reason) {
                 TextView statusText = (TextView) findViewById(R.id.statusText);
                 statusText.setText("Could not start discovery");
             }
