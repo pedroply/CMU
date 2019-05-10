@@ -165,19 +165,23 @@ public class P2PActivity extends AppCompatActivity {
                 WifiP2pConfig config = new WifiP2pConfig();
                 config.deviceAddress = srcDevice.deviceAddress;
 
-                manager.connect(channel, config, new WifiP2pManager.ActionListener() {
-                    @Override
-                    public void onSuccess() {
-                        TextView statusText = (TextView) findViewById(R.id.statusText);
-                        statusText.setText("Connected to " + srcDevice.deviceName);
-                    }
+                String myName = Build.MODEL;
+                if(srcDevice.deviceName.compareTo(myName) < 0){
+                    manager.connect(channel, config, new WifiP2pManager.ActionListener() {
+                        @Override
+                        public void onSuccess() {
+                            TextView statusText = (TextView) findViewById(R.id.statusText);
+                            statusText.setText("Connected to " + srcDevice.deviceName);
+                        }
 
-                    @Override
-                    public void onFailure(int i) {
-                        TextView statusText = (TextView) findViewById(R.id.statusText);
-                        statusText.setText("Could not connect to " + srcDevice.deviceName);
-                    }
-                });
+                        @Override
+                        public void onFailure(int i) {
+                            TextView statusText = (TextView) findViewById(R.id.statusText);
+                            statusText.setText("Could not connect to " + srcDevice.deviceName);
+                        }
+                    });
+                }
+
             }
         }
     };
