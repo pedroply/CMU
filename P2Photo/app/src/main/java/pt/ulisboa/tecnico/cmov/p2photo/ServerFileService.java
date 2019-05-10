@@ -41,7 +41,7 @@ public class ServerFileService extends Service {
     private String loginToken, user;
     private static P2PActivity activity;
     private boolean finishedDownload = false, finishedUpload = false;
-    private Object lock;
+    private Object lock = new Object();
 
     @Nullable
     @Override
