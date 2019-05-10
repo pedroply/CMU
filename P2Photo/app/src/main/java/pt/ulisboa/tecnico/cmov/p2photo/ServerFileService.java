@@ -149,6 +149,7 @@ public class ServerFileService extends Service {
 
                 if(finishedDownload && finishedUpload){
                     activity.closeConnection();
+                    activity.discoverPeers();
                 }
             }
 
@@ -222,6 +223,7 @@ public class ServerFileService extends Service {
 
                 if(finishedDownload && finishedUpload){
                     activity.closeConnection();
+                    activity.discoverPeers();
                 }
             }
         }

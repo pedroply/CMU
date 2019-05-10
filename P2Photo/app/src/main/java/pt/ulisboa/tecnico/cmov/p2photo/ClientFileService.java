@@ -160,6 +160,7 @@ public class ClientFileService extends Service {
 
                 if(finishedDownload && finishedUpload){
                     activity.closeConnection();
+                    activity.discoverPeers();
                 }
             }
         }
@@ -243,6 +244,7 @@ public class ClientFileService extends Service {
 
                 if(finishedDownload && finishedUpload){
                     activity.closeConnection();
+                    activity.discoverPeers();
                 }
             }
         }
