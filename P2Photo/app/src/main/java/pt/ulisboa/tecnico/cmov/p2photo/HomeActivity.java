@@ -19,6 +19,7 @@ import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -52,6 +53,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeMap;
 
 public class HomeActivity extends AppCompatActivity
@@ -115,7 +118,7 @@ public class HomeActivity extends AppCompatActivity
         manager.setDnsSdResponseListeners(channel, servListener, txtListener);
         addServiceRequest();
 
-        new discoverAsyncTask().execute();
+        setRepeatingAsyncTask();
     }
 
     @Override
@@ -376,7 +379,6 @@ public class HomeActivity extends AppCompatActivity
         global.clearDownloads();
         ListView listView = (ListView) findViewById(R.id.albumList);
         listView.setAdapter(null);
-        discoverPeers();
         new albumLoader().execute();
     }
 
@@ -533,20 +535,24 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
-    class discoverAsyncTask extends AsyncTask<Void, Void, Void>{
+    private void setRepeatingAsyncTask() {
 
-        @Override
-        protected Void doInBackground(Void... voids){
-            while(true){
-                discoverPeers();
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    return null;
-                }
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        discoverPeers();
+                    }
+                });
             }
-        }
+        };
+
+        timer.schedule(task, 0, 60*1000);  // interval of one minute
+
     }
 
 }
