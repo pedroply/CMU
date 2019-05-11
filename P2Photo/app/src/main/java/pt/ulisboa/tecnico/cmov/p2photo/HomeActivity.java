@@ -282,7 +282,7 @@ public class HomeActivity extends AppCompatActivity
 
             @Override
             public void onFailure(int reason) {
-                Toast.makeText(getApplicationContext(), "Could not start discovery", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Could not start discovery " + reason, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -574,6 +574,7 @@ public class HomeActivity extends AppCompatActivity
                 handler.post(new Runnable() {
                     public void run() {
                         serviceRequest();
+                        Thread.sleep(100);
                         discoverPeers();
                     }
                 });
