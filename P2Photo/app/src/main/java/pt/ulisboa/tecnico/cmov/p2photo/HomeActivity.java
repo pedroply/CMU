@@ -166,6 +166,17 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onSuccess() {
                 Toast.makeText(getApplicationContext(), "Created service request", Toast.LENGTH_SHORT).show();
+                manager.discoverServices(channel, new WifiP2pManager.ActionListener() {
+                    @Override
+                    public void onSuccess() {
+                        Toast.makeText(getApplicationContext(), "Discovery started", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(int reason) {
+                        Toast.makeText(getApplicationContext(), "Could not start discovery " + reason, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
             @Override
@@ -271,21 +282,6 @@ public class HomeActivity extends AppCompatActivity
             sendFiles();
         }
     };
-
-    @SuppressLint("NewApi")
-    public void discoverPeers() {
-        manager.discoverServices(channel, new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-                Toast.makeText(getApplicationContext(), "Discovery started", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFailure(int reason) {
-                Toast.makeText(getApplicationContext(), "Could not start discovery " + reason, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 
     public void closeConnection(){
         manager.removeGroup(channel, new WifiP2pManager.ActionListener() {
@@ -574,8 +570,11 @@ public class HomeActivity extends AppCompatActivity
                 handler.post(new Runnable() {
                     public void run() {
                         serviceRequest();
-                        Thread.sleep(100);
-                        discoverPeers();
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
             }
