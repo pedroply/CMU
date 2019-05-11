@@ -179,29 +179,26 @@ public class HomeActivity extends AppCompatActivity
     WifiP2pManager.DnsSdServiceResponseListener servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
         @Override
         public void onDnsSdServiceAvailable(String instanceName, String registrationType, final WifiP2pDevice srcDevice) {
-            if(!global.alreadyConnected(srcDevice.deviceName)){
-                if(instanceName.equals("P2Photo")){
-                    WifiP2pConfig config = new WifiP2pConfig();
-                    config.deviceAddress = srcDevice.deviceAddress;
+            if(instanceName.equals("P2Photo")){
+                WifiP2pConfig config = new WifiP2pConfig();
+                config.deviceAddress = srcDevice.deviceAddress;
 
-                    String myName = myDevice.deviceName;
+                String myName = myDevice.deviceName;
 
-                    if(srcDevice.deviceName.compareTo(myName) < 0){
-                        manager.connect(channel, config, new WifiP2pManager.ActionListener() {
-                            @Override
-                            public void onSuccess() {
-                                global.addAlreadyConnectedPeer(srcDevice.deviceName);
-                                Toast.makeText(getApplicationContext(), "Connected to " + srcDevice.deviceName, Toast.LENGTH_SHORT).show();
-                            }
+                if(srcDevice.deviceName.compareTo(myName) < 0){
+                    manager.connect(channel, config, new WifiP2pManager.ActionListener() {
+                        @Override
+                        public void onSuccess() {
+                            Toast.makeText(getApplicationContext(), "Connected to " + srcDevice.deviceName, Toast.LENGTH_SHORT).show();
+                        }
 
-                            @Override
-                            public void onFailure(int i) {
-                                Toast.makeText(getApplicationContext(), "Could not connect to " + srcDevice.deviceName, Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-
+                        @Override
+                        public void onFailure(int i) {
+                            Toast.makeText(getApplicationContext(), "Could not connect to " + srcDevice.deviceName, Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
+
             }
         }
     };
