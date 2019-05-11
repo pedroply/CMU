@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,11 +33,18 @@ public class LogActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(Void... voids) {
             String url = "http://" + WebInterface.IP + "/getLog";
-            return WebInterface.get(url);
+            String response = WebInterface.get(url);
+            if(response == null)
+                return null;
+            return response;
         }
 
         @Override
         protected void onPostExecute(String response) {
+            if(response == null) {
+                Toast.makeText(getApplicationContext(), "Internet Error", Toast.LENGTH_SHORT).show();
+                return;
+            }
             List<Map<String, String>> logList = new ArrayList<Map<String, String>>();
             try {
                 JSONObject mainObject = new JSONObject(response);

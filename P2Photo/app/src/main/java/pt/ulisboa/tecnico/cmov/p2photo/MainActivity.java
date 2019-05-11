@@ -69,12 +69,17 @@ public class MainActivity extends AppCompatActivity {
         protected String doInBackground(String... urls) {
 
             String response = WebInterface.get(urls[0]);
+            if(response == null)
+                return null;
             return response.toString();
         }
 
         protected void onPostExecute(String response) {
-            // TODO: check this.exception
-            // TODO: do something with the feed
+            if(response == null) {
+                Toast.makeText(getApplicationContext(), "Internet Error", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             System.out.println("On main: " + response);
             try {
                 JSONObject mainObject = new JSONObject(response);
@@ -108,12 +113,18 @@ public class MainActivity extends AppCompatActivity {
         protected String doInBackground(String... urls) {
 
             String response = WebInterface.get(urls[0]);
+            if(response == null)
+                return null;
             Log.i(TAG, "Response: " + response.toString());
             System.out.println(response.toString());
             return response.toString();
         }
 
         protected void onPostExecute(String response) {
+            if(response == null) {
+                Toast.makeText(getApplicationContext(), "Internet Error", Toast.LENGTH_SHORT).show();
+                return;
+            }
             // TODO: check this.exception
             // TODO: do something with the feed
             System.out.println("On main: " + response);

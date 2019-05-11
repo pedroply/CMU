@@ -468,6 +468,8 @@ public class HomeActivity extends AppCompatActivity
 
                     url = "http://" + WebInterface.IP + "/retriveAlbum?name=" + user + "&token=" + loginToken + "&album=" + albumName;
                     response = WebInterface.get(url);
+                    if(response == null)
+                        return null;
                     JSONObject mainObjectJSON = new JSONObject(response);
                     JSONArray linkArray = mainObjectJSON.getJSONArray("clients");
 

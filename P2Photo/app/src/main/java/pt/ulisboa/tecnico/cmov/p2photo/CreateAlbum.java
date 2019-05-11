@@ -48,7 +48,6 @@ public class CreateAlbum extends AppCompatActivity {
     public void createAlbum(View v){
         EditText albumNameText = findViewById(R.id.editAlbumName);
         String albumName = albumNameText.getText().toString();
-        global.addNewAlbum(albumName);
 
         Toast.makeText(this, "Creating Album...", Toast.LENGTH_SHORT).show();
         new CreateAlbumTask().execute(albumName);
@@ -59,6 +58,14 @@ public class CreateAlbum extends AppCompatActivity {
         protected String doInBackground(String... path) {
 
             try {
+                // TODO: DO SOMETHING WITH RESPONSES
+                String url = "http://" + WebInterface.IP + "/createAlbum?name="+user+"&token="+token+"&album="+path[0];
+                String response = WebInterface.get(url);
+                if(response == null)
+                    return null;
+
+                global.addNewAlbum(path[0]);
+
                 // Create folder locally
                 File album = new File( context.getFilesDir() + "/" + path[0]);
                 album.mkdir();
@@ -66,9 +73,6 @@ public class CreateAlbum extends AppCompatActivity {
                 File indexFile = new File(context.getFilesDir() + "/" + path[0] + "/" + "index.txt");
                 indexFile.createNewFile();
 
-                // TODO: DO SOMETHING WITH RESPONSES
-                String url = "http://" + WebInterface.IP + "/createAlbum?name="+user+"&token="+token+"&album="+path[0];
-                WebInterface.get(url);
 
             } catch (IOException e) {
                 e.printStackTrace();

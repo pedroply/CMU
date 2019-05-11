@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,6 +47,8 @@ public class UserListActivity extends AppCompatActivity {
         protected List<String> doInBackground(String... urls) {
             List<String> userList = new ArrayList<>();
             String serverResponse = WebInterface.get(urls[0]);
+            if(serverResponse == null)
+                return null;
             try {
                 JSONArray mainObject = new JSONArray(serverResponse);
                 for(int i = 0; i < mainObject.length(); i++){
@@ -63,6 +66,10 @@ public class UserListActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(List<String> list) {
+            if(list == null) {
+                Toast.makeText(getApplicationContext(), "Internet Error", Toast.LENGTH_SHORT).show();
+                return;
+            }
             ArrayAdapter adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.activity_user_list_view, list);
 
             final ListView listView = (ListView) findViewById(R.id.userList);

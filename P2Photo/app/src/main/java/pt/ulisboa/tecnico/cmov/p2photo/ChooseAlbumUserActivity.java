@@ -75,6 +75,8 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
                 for (String album : albums) {
                     String url = "http://" + WebInterface.IP + "/retriveAlbum?name=" + user + "&token=" + loginToken + "&album=" + album;
                     String response = WebInterface.get(url);
+                    if(response == null)
+                        return null;
 
                     JSONObject mainObject = new JSONObject(response);
                     JSONArray linkArray = mainObject.getJSONArray("clients");
@@ -96,6 +98,10 @@ public class ChooseAlbumUserActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(ArrayList<String> albums){
+            if(albums == null) {
+                Toast.makeText(getApplicationContext(), "Internet Error", Toast.LENGTH_SHORT).show();
+                return;
+            }
             if(albums.isEmpty()){
                 Toast.makeText(context, "No albums left to share", Toast.LENGTH_SHORT).show();
             }
