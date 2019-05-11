@@ -69,8 +69,6 @@ public class MainActivity extends AppCompatActivity {
         protected String doInBackground(String... urls) {
 
             String response = WebInterface.get(urls[0]);
-            Log.i(TAG, "Response: " + response.toString());
-            System.out.println(response.toString());
             return response.toString();
         }
 

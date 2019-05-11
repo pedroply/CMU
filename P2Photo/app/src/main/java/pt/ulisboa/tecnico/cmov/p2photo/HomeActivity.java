@@ -570,11 +570,6 @@ public class HomeActivity extends AppCompatActivity
                 handler.post(new Runnable() {
                     public void run() {
                         serviceRequest();
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
                     }
                 });
             }
