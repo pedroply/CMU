@@ -16,6 +16,7 @@ import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
+import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -73,6 +74,7 @@ public class HomeActivity extends AppCompatActivity
     private static WifiP2pDevice myDevice;
     private GlobalClass global;
     private boolean isGroupOwner = false;
+    private WifiP2pServiceRequest request = null;
 
     private int PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 1001;
 
@@ -116,8 +118,6 @@ public class HomeActivity extends AppCompatActivity
 
         startRegistration();
         manager.setDnsSdResponseListeners(channel, servListener, txtListener);
-        addServiceRequest();
-
         setRepeatingAsyncTask();
     }
 
@@ -140,8 +140,28 @@ public class HomeActivity extends AppCompatActivity
     }
 
     @SuppressLint("NewApi")
+    private void serviceRequest(){
+        if(request != null){
+            manager.removeServiceRequest(channel, request, new WifiP2pManager.ActionListener() {
+                @Override
+                public void onSuccess() {
+                    addServiceRequest();
+                }
+
+                @Override
+                public void onFailure(int reason) {
+                    Toast.makeText(getApplicationContext(), "Could not remove service request", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else  {
+            addServiceRequest();
+        }
+    }
+
+    @SuppressLint("NewApi")
     private void addServiceRequest(){
         WifiP2pDnsSdServiceRequest serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
+        request = serviceRequest;
         manager.addServiceRequest(channel, serviceRequest, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
@@ -157,22 +177,33 @@ public class HomeActivity extends AppCompatActivity
 
     @SuppressLint("NewApi")
     private void startRegistration(){
-        Map record = new HashMap();
-        record.put("available", "visible");
-
-        WifiP2pDnsSdServiceInfo serviceInfo = WifiP2pDnsSdServiceInfo.newInstance("P2Photo", "_presence._tcp", record);
-
-        manager.addLocalService(channel, serviceInfo, new WifiP2pManager.ActionListener() {
+        manager.clearLocalServices(channel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                Toast.makeText(getApplicationContext(), "Registered Service", Toast.LENGTH_SHORT).show();
+                Map record = new HashMap();
+                record.put("available", "visible");
+
+                WifiP2pDnsSdServiceInfo serviceInfo = WifiP2pDnsSdServiceInfo.newInstance("P2Photo", "_presence._tcp", record);
+
+                manager.addLocalService(channel, serviceInfo, new WifiP2pManager.ActionListener() {
+                    @Override
+                    public void onSuccess() {
+                        Toast.makeText(getApplicationContext(), "Registered Service", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(int reason) {
+                        Toast.makeText(getApplicationContext(), "Could not register service", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
             @Override
             public void onFailure(int reason) {
-                Toast.makeText(getApplicationContext(), "Could not register service", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Could not clear local services", Toast.LENGTH_SHORT).show();
             }
         });
+
     }
 
     @SuppressLint("NewApi")
@@ -542,6 +573,7 @@ public class HomeActivity extends AppCompatActivity
             public void run() {
                 handler.post(new Runnable() {
                     public void run() {
+                        serviceRequest();
                         discoverPeers();
                     }
                 });
