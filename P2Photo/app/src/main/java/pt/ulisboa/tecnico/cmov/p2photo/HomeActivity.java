@@ -115,7 +115,7 @@ public class HomeActivity extends AppCompatActivity
         manager.setDnsSdResponseListeners(channel, servListener, txtListener);
         addServiceRequest();
 
-        discoverPeers();
+        new discoverAsyncTask().execute();
     }
 
     @Override
@@ -376,6 +376,7 @@ public class HomeActivity extends AppCompatActivity
         global.clearDownloads();
         ListView listView = (ListView) findViewById(R.id.albumList);
         listView.setAdapter(null);
+        discoverPeers();
         new albumLoader().execute();
     }
 
@@ -529,6 +530,22 @@ public class HomeActivity extends AppCompatActivity
             }
 
             return null;
+        }
+    }
+
+    class discoverAsyncTask extends AsyncTask<Void, Void, Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids){
+            while(true){
+                discoverPeers();
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
         }
     }
 
