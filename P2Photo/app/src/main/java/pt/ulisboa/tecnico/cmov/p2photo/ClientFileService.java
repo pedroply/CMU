@@ -160,6 +160,8 @@ public class ClientFileService extends Service {
 
                 if(finishedDownload && finishedUpload){
                     activity.closeConnection();
+                    finishedDownload = false;
+                    finishedUpload = false;
                 }
             }
         }
@@ -243,6 +245,8 @@ public class ClientFileService extends Service {
 
                 if(finishedDownload && finishedUpload){
                     activity.closeConnection();
+                    finishedDownload = false;
+                    finishedUpload = false;
                 }
             }
         }
