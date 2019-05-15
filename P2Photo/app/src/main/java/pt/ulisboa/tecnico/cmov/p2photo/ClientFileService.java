@@ -125,7 +125,7 @@ public class ClientFileService extends Service {
 
                 }
 
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 return null;
 
@@ -211,7 +211,7 @@ public class ClientFileService extends Service {
                         }
                     }
                 }
-            } catch(IOException e){
+            } catch(Exception e){
                 e.printStackTrace();
                 return null;
 

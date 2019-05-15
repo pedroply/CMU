@@ -120,7 +120,7 @@ public class ServerFileService extends Service {
                     }
                 }
 
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             } finally {
@@ -195,7 +195,7 @@ public class ServerFileService extends Service {
                     }
                 }
 
-            } catch(IOException e){
+            } catch(Exception e){
                 e.printStackTrace();
                 return null;
             } finally {
