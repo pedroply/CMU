@@ -13,29 +13,21 @@ import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.sharing.SharedLinkMetadata;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
 
 public class DownloadPhotosService extends Service {
 
     private GlobalClass global;
-    private DbxClientV2 client;
     private String token, loginToken, user, album;
-    private ArrayList<String> bitmaps = new ArrayList<String>();
     private static ArrayList<String> downloadingAlbums = new ArrayList<String>();
 
     @Override
@@ -69,7 +61,7 @@ public class DownloadPhotosService extends Service {
         protected Bitmap[] doInBackground(Void... voids) {
             ArrayList<Bitmap> photoBitMap = new ArrayList<Bitmap>();
             DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
-            client = new DbxClientV2(config, token);
+            DbxClientV2 client = new DbxClientV2(config, token);
 
             String url = "http://" + WebInterface.IP + "/retriveAlbum?name=" + user + "&token=" + loginToken + "&album=" + album;
             String response = WebInterface.get(url);
@@ -96,7 +88,6 @@ public class DownloadPhotosService extends Service {
                     // Get the bitmaps of each photo
                     for (String link : photoLinks) {
                         if(!global.containsPhoto(album, link)){
-                            bitmaps.add(link);
                             URL photoURL = new URL(link);
 
                             Bitmap bitmap = BitmapFactory.decodeStream(photoURL.openStream());
@@ -121,8 +112,7 @@ public class DownloadPhotosService extends Service {
         @Override
         protected void onPostExecute(final Bitmap[] bm) {
             if(bm != null){
-                Toast toast = Toast.makeText(getApplicationContext(), "Downloaded photos for album " + album, Toast.LENGTH_SHORT);
-                toast.show();
+                Toast.makeText(getApplicationContext(), "Downloaded photos for album " + album, Toast.LENGTH_SHORT).show();
             }
             
         }

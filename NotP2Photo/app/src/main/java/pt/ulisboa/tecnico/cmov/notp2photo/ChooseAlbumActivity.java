@@ -24,46 +24,15 @@ import java.util.List;
 
 public class ChooseAlbumActivity extends AppCompatActivity {
 
-    DbxClientV2 client;
-    String accessToken, loginToken, user;
-    private GlobalClass global;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_album);
 
-        global = (GlobalClass) getApplicationContext();
-        accessToken = global.getUserAccessToken();
+        GlobalClass global = (GlobalClass) getApplicationContext();
 
         setListView(global.getAlbumList());
     }
-
-    /*private class AlbumLoaderTask extends AsyncTask<Void, Void, ArrayList<String>> {
-
-        @Override
-        protected ArrayList<String> doInBackground(Void... voids) {
-            ArrayList<String> albumList = new ArrayList<>();
-            DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
-            client = new DbxClientV2(config, accessToken);
-
-            try {
-                List<Metadata> folders = client.files().listFolder("/P2Photo").getEntries();
-                for (Metadata md : folders) {
-                    albumList.add(md.getName());
-                }
-            } catch (DbxException e) {
-                e.printStackTrace();
-            }
-
-            return albumList;
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<String> list) {
-
-        }
-    }*/
 
     private void setListView(ArrayList<String> list){
         ArrayAdapter adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.activity_home_album_view, list);

@@ -1,12 +1,7 @@
 package pt.ulisboa.tecnico.cmov.notp2photo;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -42,7 +37,6 @@ public class WebInterface {
     }
 
     public static String post(String url, String body){
-        OutputStream out = null;
         StringBuffer response = new StringBuffer();
         try {
             URL obj = new URL(url);

@@ -19,7 +19,6 @@ import java.io.InputStream;
 public class UploadFolderService extends Service {
 
     private String accessToken, token, user;
-    private DbxClientV2 client;
     private GlobalClass global;
 
     @Override
@@ -55,13 +54,12 @@ public class UploadFolderService extends Service {
         protected String doInBackground(String... path) {
             DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
             Log.i(MainActivity.TAG, accessToken);
-            client = new DbxClientV2(config, accessToken);
+            DbxClientV2 client = new DbxClientV2(config, accessToken);
 
             try {
                 // Create folder in dropbox
                 client.files().createFolder("/P2Photo/" + path[0]);
 
-                // TODO: DO SOMETHING WITH RESPONSES
                 String url = "http://" + WebInterface.IP + "/createAlbum?name="+user+"&token="+token+"&album="+path[0];
                 Log.d(MainActivity.TAG, "URL: " + url);
                 WebInterface.get(url);
@@ -87,11 +85,9 @@ public class UploadFolderService extends Service {
         @Override
         protected void onPostExecute(String response) {
             if(response != null){
-                Toast toast = Toast.makeText(getApplicationContext(), "New album created!", Toast.LENGTH_SHORT);
-                toast.show();
+                Toast.makeText(getApplicationContext(), "New album created!", Toast.LENGTH_SHORT).show();
             } else {
-                Toast toast = Toast.makeText(getApplicationContext(), "Could not create album", Toast.LENGTH_SHORT);
-                toast.show();
+                Toast.makeText(getApplicationContext(), "Could not create album", Toast.LENGTH_SHORT).show();
             }
         }
     }

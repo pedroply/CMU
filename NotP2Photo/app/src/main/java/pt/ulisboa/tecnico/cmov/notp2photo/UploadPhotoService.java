@@ -24,10 +24,8 @@ import java.io.InputStream;
 public class UploadPhotoService extends Service {
 
     private GlobalClass global;
-    DbxClientV2 client;
-    String accessToken;
-    String album, photoName, loginToken, user;
-    Bitmap photo;
+    private String accessToken, album, photoName, loginToken, user;
+    private Bitmap photo;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -64,7 +62,7 @@ public class UploadPhotoService extends Service {
         protected String doInBackground(String... album){
             DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
             Log.i(MainActivity.TAG, accessToken);
-            client = new DbxClientV2(config, accessToken);
+            DbxClientV2 client = new DbxClientV2(config, accessToken);
 
             Bitmap photoToKeep = Bitmap.createBitmap(photo);
 
@@ -124,11 +122,9 @@ public class UploadPhotoService extends Service {
         @Override
         protected void onPostExecute(String string){
             if(string == null){
-                Toast toast = Toast.makeText(getApplicationContext(), "Upload not okay", Toast.LENGTH_SHORT);
-                toast.show();
+                Toast.makeText(getApplicationContext(), "Upload not okay", Toast.LENGTH_SHORT).show();
             } else {
-                Toast toast = Toast.makeText(getApplicationContext(), "Uploaded " + string + " to album " + album, Toast.LENGTH_SHORT);
-                toast.show();
+                Toast.makeText(getApplicationContext(), "Uploaded " + string + " to album " + album, Toast.LENGTH_SHORT).show();
             }
         }
 

@@ -1,18 +1,14 @@
 package pt.ulisboa.tecnico.cmov.notp2photo;
 
-import android.app.ActivityManager;
 import android.app.Application;
 import android.graphics.Bitmap;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.TreeMap;
 
 public class GlobalClass extends Application {
 
     private UserInfo user;
     private Bitmap selectedPhoto, servicePhoto;
-    private ArrayList<String> eventLog = new ArrayList<String>();
 
     public void createUser(String userName, String loginToken){
         user = new UserInfo(userName, loginToken);
@@ -54,14 +50,6 @@ public class GlobalClass extends Application {
         user.setAccessToken(accessToken);
     }
 
-    public boolean albumPhotosIsEmpty(String album){
-        return user.albumPhotosIsEmpty(album);
-    }
-
-    public void addPhotosToAlbum(String album, TreeMap<String, Bitmap> photos){
-        user.addPhotosToAlbum(album, photos);
-    }
-
     public ArrayList<Bitmap> getAlbumPhotoList(String album){
         return user.getPhotosList(album);
     }
@@ -89,23 +77,5 @@ public class GlobalClass extends Application {
     public boolean containsPhoto(String album, String link){
      return user.containsPhoto(album, link);
     }
-
-    public void addEvent(String event){
-        eventLog.add(event);
-    }
-
-    public ArrayList<String> getLogEvent(){
-        return eventLog;
-    }
-
-    /*public boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }*/
 
 }

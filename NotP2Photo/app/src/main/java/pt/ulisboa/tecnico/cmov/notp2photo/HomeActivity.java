@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -18,7 +16,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -28,16 +25,13 @@ import com.dropbox.core.android.Auth;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.sharing.SharedLinkMetadata;
-import com.dropbox.core.v2.users.FullAccount;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,13 +39,8 @@ public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     final static String APP_KEY = "jm1yrjpxz13l8ng";
-    final static String APP_SECRET = "0mrpn6kv1wkclev";
-
     private Context context = this;
-    DbxClientV2 client;
-    String token;
-    String loginToken;
-    String user;
+    private String token, loginToken, user;
     private GlobalClass global;
 
     @Override
@@ -171,10 +160,9 @@ public class HomeActivity extends AppCompatActivity
 
         @Override
         protected ArrayList<String> doInBackground(Void... voids) {
-            // TODO: Maybe do this to ChooseAlbum and ChooseAlbumUser activities, in case the invited user is online and does not see this first
             ArrayList<String> albumList = new ArrayList<>();
             DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
-            client = new DbxClientV2(config, token);
+            DbxClientV2 client = new DbxClientV2(config, token);
 
             String url = "http://" + WebInterface.IP + "/retriveAllAlbuns?name=" + user + "&token=" + loginToken;
             String response = WebInterface.get(url);
