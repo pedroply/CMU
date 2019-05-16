@@ -3,7 +3,6 @@ package pt.ulisboa.tecnico.cmov.p2photo;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
@@ -18,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 public class LogActivity extends AppCompatActivity {
-
-    private GlobalClass global;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

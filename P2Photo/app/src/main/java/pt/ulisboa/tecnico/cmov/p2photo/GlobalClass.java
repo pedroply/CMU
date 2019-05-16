@@ -1,16 +1,13 @@
 package pt.ulisboa.tecnico.cmov.p2photo;
 
-import android.app.ActivityManager;
 import android.app.Application;
 import android.graphics.Bitmap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -20,10 +17,7 @@ public class GlobalClass extends Application {
 
     private UserInfo user;
     private Bitmap selectedPhoto, servicePhoto;
-    private ArrayList<String> eventLog = new ArrayList<String>();
     private ArrayList<String> alreadyDownloaded = new ArrayList<String>();
-
-    private ArrayList<String> alreadyConnectedToPeers = new ArrayList<String>();
 
     private ServerSocket serverUploadSocket, serverDownloadSocket;
     private Socket clientUploadSocket, clientDownloadSocket;
@@ -60,10 +54,6 @@ public class GlobalClass extends Application {
 
     public ArrayList<String> getAlbumList(){
         return user.getAlbumList();
-    }
-
-    public boolean albumPhotosIsEmpty(String album){
-        return user.albumPhotosIsEmpty(album);
     }
 
     public void addPhotosToAlbum(String album, TreeMap<String, Bitmap> photos){
@@ -110,14 +100,6 @@ public class GlobalClass extends Application {
         return user.containsPhoto(album, link);
     }
 
-    public void addEvent(String event){
-        eventLog.add(event);
-    }
-
-    public ArrayList<String> getLogEvent(){
-        return eventLog;
-    }
-
     public void addDownload(String album){
         alreadyDownloaded.add(album);
     }
@@ -128,7 +110,6 @@ public class GlobalClass extends Application {
 
     public void clearDownloads(){
         alreadyDownloaded.clear();
-        alreadyConnectedToPeers.clear();
     }
 
     public void addNewAlbumShared(String album){
@@ -253,13 +234,5 @@ public class GlobalClass extends Application {
         serverDownloadSocket = null;
         clientUploadSocket = null;
         clientDownloadSocket = null;
-    }
-
-    public void addAlreadyConnectedPeer(String peer){
-        alreadyConnectedToPeers.add(peer);
-    }
-
-    public boolean alreadyConnected(String peer){
-        return alreadyConnectedToPeers.contains(peer);
     }
 }

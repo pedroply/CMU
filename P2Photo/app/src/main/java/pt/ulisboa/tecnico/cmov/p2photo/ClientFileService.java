@@ -2,33 +2,20 @@ package pt.ulisboa.tecnico.cmov.p2photo;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Base64;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -65,7 +52,7 @@ public class ClientFileService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
         host = intent.getStringExtra("host");
-        Toast.makeText(this, "Exchanging photos with peer...", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(this, "Exchanging photos with peer...", Toast.LENGTH_SHORT).show();
 
         new DownloadFilesFromServerTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         new UploadFilesToServerTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

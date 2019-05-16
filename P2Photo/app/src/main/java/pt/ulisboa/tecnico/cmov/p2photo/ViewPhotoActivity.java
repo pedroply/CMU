@@ -1,14 +1,8 @@
 package pt.ulisboa.tecnico.cmov.p2photo;
 
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
-
-import java.net.URL;
 
 public class ViewPhotoActivity extends AppCompatActivity {
     private ImageView imageView;

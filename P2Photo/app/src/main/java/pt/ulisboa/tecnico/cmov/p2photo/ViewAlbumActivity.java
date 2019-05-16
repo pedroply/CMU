@@ -8,27 +8,13 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -58,8 +44,7 @@ public class ViewAlbumActivity extends AppCompatActivity {
         if(!global.isDownloaded(album)){
             global.addDownload(album);
 
-            Toast toast = Toast.makeText(getApplicationContext(), "Getting photos from album " + album + "...", Toast.LENGTH_SHORT);
-            toast.show();
+            // Toast.makeText(getApplicationContext(), "Getting photos from album " + album + "...", Toast.LENGTH_SHORT).show();
 
             new ImageDownloader().execute();
         }
@@ -94,8 +79,6 @@ public class ViewAlbumActivity extends AppCompatActivity {
         protected Bitmap[] doInBackground(Void... voids) {
             ArrayList<Bitmap> photoBitMap = new ArrayList<Bitmap>();
 
-            //TODO: Several user catalogs
-
             String catalogPath = context.getFilesDir() + "/" + album + "/index.txt";
             try(FileInputStream fis = new FileInputStream(catalogPath)){
                 Scanner scanner = new Scanner(fis);
@@ -125,8 +108,7 @@ public class ViewAlbumActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(final Bitmap[] bm) {
             if(bm != null){
-                Toast toast = Toast.makeText(getApplicationContext(), "Downloaded photos for album " + album, Toast.LENGTH_SHORT);
-                toast.show();
+                // Toast.makeText(getApplicationContext(), "Downloaded photos for album " + album, Toast.LENGTH_SHORT).show();
                 setGridView(bm);
             }
 

@@ -2,19 +2,16 @@ package pt.ulisboa.tecnico.cmov.p2photo;
 
 import android.graphics.Bitmap;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.TreeMap;
 
 public class UserInfo {
-    private String loginToken;
-    private String userName;
+    private String loginToken, userName;
     private TreeMap<String, TreeMap<String, Bitmap>> albums = new TreeMap<String, TreeMap<String, Bitmap>>();
     private TreeMap<String,ArrayList<String>> albumsSharedWithMe = new TreeMap<String,ArrayList<String>>();
 
     public UserInfo(String user, String loginToken){
-        userName = user;
+        this.userName = user;
         this.loginToken = loginToken;
     }
 
@@ -36,11 +33,6 @@ public class UserInfo {
 
     public synchronized ArrayList<String> getAlbumList(){
         return new ArrayList<String>(albums.keySet());
-    }
-
-    public synchronized boolean albumPhotosIsEmpty(String albumName){
-        TreeMap<String,Bitmap> photos = albums.get(albumName);
-        return photos.isEmpty();
     }
 
     public synchronized void addPhotosToAlbum(String albumName, TreeMap<String, Bitmap> photos){

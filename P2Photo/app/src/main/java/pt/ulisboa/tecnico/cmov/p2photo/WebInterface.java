@@ -1,12 +1,7 @@
 package pt.ulisboa.tecnico.cmov.p2photo;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -41,32 +36,4 @@ public class WebInterface {
         }
         return response.toString();
     }
-
-    public static String post(String url, String body){
-        OutputStream out = null;
-        StringBuffer response = new StringBuffer();
-        try {
-            URL obj = new URL(url);
-            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-            con.setRequestMethod("POST");
-            con.addRequestProperty("Content-Type", "application/" + "POST");
-            con.setRequestProperty("Content-Length", Integer.toString(body.length()));
-            con.getOutputStream().write(body.getBytes("UTF8"));
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String inputLine;
-
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return null;
-        }
-
-        return response.toString();
-    }
-
 }

@@ -13,10 +13,6 @@
             android:icon="@drawable/ic_menu_camera"
             android:title="Add Photo to Album" />
         <item
-            android:id="@+id/nav_findPeers"
-            android:icon="@drawable/ic_menu_share"
-            android:title="Find Peers" />
-        <item
             android:id="@+id/nav_findusers"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="Add User to Album" />

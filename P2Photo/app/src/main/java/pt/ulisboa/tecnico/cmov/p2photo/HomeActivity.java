@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pInfo;
@@ -21,8 +20,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -35,24 +32,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -62,15 +52,13 @@ public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private Context context = this;
-    String loginToken;
-    String user;
+    private String loginToken;
+    private String user;
     private IntentFilter intentFilter;
     private WifiP2pManager.Channel channel;
-    private WifiManager wifiManager;
     private WifiP2pInfo p2pInfo;
     private WifiP2pManager manager;
     private BroadcastReceiver receiver;
-    private List<WifiP2pDevice> peers;
     private static WifiP2pDevice myDevice;
     private GlobalClass global;
     private boolean isGroupOwner = false;
@@ -105,11 +93,9 @@ public class HomeActivity extends AppCompatActivity
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
-        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
         receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
-        peers = new ArrayList<WifiP2pDevice>();
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, this.PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
@@ -150,7 +136,7 @@ public class HomeActivity extends AppCompatActivity
 
                 @Override
                 public void onFailure(int reason) {
-                    Toast.makeText(getApplicationContext(), "Could not remove service request", Toast.LENGTH_SHORT).show();
+                    // Toast.makeText(getApplicationContext(), "Could not remove service request", Toast.LENGTH_SHORT).show();
                 }
             });
         } else  {
@@ -165,23 +151,23 @@ public class HomeActivity extends AppCompatActivity
         manager.addServiceRequest(channel, serviceRequest, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                Toast.makeText(getApplicationContext(), "Created service request", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getApplicationContext(), "Created service request", Toast.LENGTH_SHORT).show();
                 manager.discoverServices(channel, new WifiP2pManager.ActionListener() {
                     @Override
                     public void onSuccess() {
-                        Toast.makeText(getApplicationContext(), "Discovery started", Toast.LENGTH_SHORT).show();
+                        // Toast.makeText(getApplicationContext(), "Discovery started", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onFailure(int reason) {
-                        Toast.makeText(getApplicationContext(), "Could not start discovery " + reason, Toast.LENGTH_SHORT).show();
+                        // Toast.makeText(getApplicationContext(), "Could not start discovery " + reason, Toast.LENGTH_SHORT).show();
                     }
                 });
             }
 
             @Override
             public void onFailure(int reason) {
-                Toast.makeText(getApplicationContext(), "Could not create service request", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getApplicationContext(), "Could not create service request", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -199,19 +185,19 @@ public class HomeActivity extends AppCompatActivity
                 manager.addLocalService(channel, serviceInfo, new WifiP2pManager.ActionListener() {
                     @Override
                     public void onSuccess() {
-                        Toast.makeText(getApplicationContext(), "Registered Service", Toast.LENGTH_SHORT).show();
+                        // Toast.makeText(getApplicationContext(), "Registered Service", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onFailure(int reason) {
-                        Toast.makeText(getApplicationContext(), "Could not register service", Toast.LENGTH_SHORT).show();
+                        // Toast.makeText(getApplicationContext(), "Could not register service", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
 
             @Override
             public void onFailure(int reason) {
-                Toast.makeText(getApplicationContext(), "Could not clear local services", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getApplicationContext(), "Could not clear local services", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -259,7 +245,7 @@ public class HomeActivity extends AppCompatActivity
 
             if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
                 isGroupOwner = true;
-                Toast.makeText(getApplicationContext(), "You are the group owner", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getApplicationContext(), "You are the group owner", Toast.LENGTH_SHORT).show();
 
                 if(global.getServerUploadSocket() == null) {
                     new HomeActivity.startUploadSocketAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -274,7 +260,7 @@ public class HomeActivity extends AppCompatActivity
                 }
 
             } else if (wifiP2pInfo.groupFormed) {
-                Toast.makeText(getApplicationContext(), "You are the client", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getApplicationContext(), "You are the client", Toast.LENGTH_SHORT).show();
                 global.resetSockets();
             }
 
@@ -287,7 +273,7 @@ public class HomeActivity extends AppCompatActivity
         manager.removeGroup(channel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                Toast.makeText(getApplicationContext(), "Closed Connection", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getApplicationContext(), "Closed Connection", Toast.LENGTH_SHORT).show();
 
                 if(isGroupOwner){
                     try{
@@ -301,16 +287,14 @@ public class HomeActivity extends AppCompatActivity
 
             @Override
             public void onFailure(int reason) {
-                Toast.makeText(getApplicationContext(), "Connection already closed", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getApplicationContext(), "Connection already closed", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     public void sendFiles(){
         if(isGroupOwner){
-            //TODO: add a timeout
             while(global.getClientDownloadSocket() == null || global.getClientUploadSocket() == null){
-                //while(global.getClientUploadSocket() == null){
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException e) {
@@ -335,6 +319,7 @@ public class HomeActivity extends AppCompatActivity
         myDevice = device;
     }
 
+    /* NAVIGATION VIEW */
 
     @Override
     public void onBackPressed() {

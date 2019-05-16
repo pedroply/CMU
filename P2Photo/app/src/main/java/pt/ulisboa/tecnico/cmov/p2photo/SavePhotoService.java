@@ -6,15 +6,11 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class SavePhotoService extends Service {
 
@@ -36,7 +32,7 @@ public class SavePhotoService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
-        Toast.makeText(this, "Saving photo...", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(this, "Saving photo...", Toast.LENGTH_SHORT).show();
         album = intent.getStringExtra("album");
         photoName = intent.getStringExtra("photoName");
         photo = global.getServicePhoto();

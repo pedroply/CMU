@@ -1,39 +1,27 @@
 package pt.ulisboa.tecnico.cmov.p2photo;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 public class AddPhotoActivity extends AppCompatActivity {
 
     int REQUEST_GET_SINGLE_FILE;
     String album, photoName, loginToken, user;
-    Bitmap photo;
+    private Bitmap photo;
     private Button uploadButton;
-    private Context context = this;
     private GlobalClass global;
 
     @Override
