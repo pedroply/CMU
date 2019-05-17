@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">P2Photo</string>
+    <string name="app_name">SecP2Photo</string>
     <string name="title_activity_home">Your Albums</string>
     <string name="title_user_list">User List</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
